@@ -1,0 +1,470 @@
+#' Plot length distribution of transcript regions.
+#'
+#' Plot length distribution of transcript regions from list of
+#' GRangesList transcript features.
+#'
+#' @param txFeatures List of \code{GRangesList} transcript features.
+#' @param asLog Plot length distribution on a log scale. Default is \code{TRUE}.
+#' @param printMetrics Print median and mad. If \code{FALSE}, then print mean and sd.
+#' Default is \code{TRUE}.
+#' @param filter Only plot transcript regions specified in filter.
+#' For example, \code{filter = c("3'UTR", "5'UTR")} plots length distributions
+#' of the 3'/5'UTRs only.
+#' @param outliers Show outliers in boxplot. Default is \code{FALSE}.
+#' @param ... Additional parameters passed to x-axis.
+#'
+#' @keywords
+#'
+#' @examples
+#' 
+#' @export
+PlotTxLengthDistribution <- function(txFeatures,
+                                     asLog = TRUE,
+                                     printMetrics = "median",
+                                     filter = NULL,
+                                     outliers = FALSE,
+                                     ...) {
+    # Plot length distribution of transcript features.
+    #
+    # Args:
+    #   txFeatures: List of GRangesList transcript features.
+    #   asLog: Plot length distribution on log scale. Default is TRUE.
+    #   printMetrics: Output median and mad of length (TRUE),
+    #          or mean and sd (FALSE). Default is TRUE.
+    #   filter: Only plot transcript regions specified in filter.
+    #   outliers: Show outliers in boxplot. Default is FALSE.
+    #   ...: Additional parameters passed to x-axis.
+    #
+    # Returns:
+    #   NULL
+    par(mfrow = c(1, 1));
+    len <- lapply(txFeatures, function(x) sum(width(x)));
+    cdsIdx <- grep("CDS", names(txFeatures), ignore.case = TRUE);
+    if (length(cdsIdx) > 0) {
+        metaData <- slot(txFeatures[[cdsIdx]], "metadata")$genomeInfo;
+        refOrganism <- metaData[[grep("Organism", names(metaData))]];
+        refGenome <- metaData[[grep("Genome", names(metaData))]];
+        refSource <- metaData[[grep("Data source", names(metaData))]];
+        len[["CDS_exon"]] <- IRanges::unlist(width(txFeatures[[cdsIdx]]));
+    } else {
+        cat("No CDS entry in %s. Could not infer organism meta information",
+            deparse(substitute(txFeatures)));
+    }
+    intronIdx <- grep("(Intron|Intronic)",
+                      names(txFeatures),
+                      ignore.case = TRUE);
+    if (length(intronIdx) > 0) {
+        len[[intronIdx]] <- IRanges::unlist(width(txFeatures[[intronIdx]]));
+    }
+    if (!is.null(filter)) {
+        len <- len[which(names(len) %in% filter)];
+    }
+    labels <- sprintf("%s\nmedian = %i nt\nmad = %i nt",
+                      names(len),
+                      round(sapply(len, stats::median)),
+                      round(sapply(len, stats::mad)));
+    if (printMetrics == "mean") {
+        labels <- sprintf("%s\nmean = %i nt\nsd = %i nt",
+                          names(len),
+                          round(sapply(len, mean)),
+                          round(sapply(len, stats::sd)));
+    } else if (printMetrics == "none") {
+        labels <- sprintf("%s", names(len));
+    }
+    ylab <- "Length [nt]";
+    if (asLog) {
+        len <- lapply(len,log10);
+        ylab <- "log10 Length";
+    }
+    par(font.main = 1);
+    boxplot(len, names = rep("", length(len)),
+            xaxt = "n", ylab = ylab,
+            main = sprintf("%s (version = %s, source = %s)",
+                refOrganism,
+                refGenome,
+                refSource),
+            font.main = 1,
+            outline = outliers);
+    axis(1, at = 1:length(len),
+         labels = labels,
+         padj = 1, cex.axis = 0.7, ...);
+}
+
+
+#' Plot spatial distribution of loci from txLoc object.
+#'
+#' Plot spatial distribution of loci from txLoc object within transcript
+#' regions.
+#'
+#' @param locus A \code{txLoc} object.
+#' @param filter Only plot loci in transcript regions specified in filter.
+#' @param nbreaks Number of spatial bins. Default is 100.
+#' @param absolute Plot spatial distribution in absolute coordinates.
+#' Default is \code{FALSE}.
+#' @param binWidth Spatial bin width. Overrides \code{nbreaks} if not
+#' \code{NULL}.
+#' @param posMax If \code{absolute == TRUE}, show spatial distribution
+#' within a window given by \code{posMax} from the 5'/3' position of
+#' the transcript feature. Default is 1000 nt.
+#' @param doBootstrap Calculate 95% CI based on empirical bootstrap of
+#' sites within transcript region. Default is \code{TRUE}.
+#' @param ... Additional parameters passed to plot.
+#'
+#' @keywords
+#'
+#' @examples
+#' bedFile <- system.file("extdata",
+#'                        "miCLIP_m6A_Linder2015_hg38.bed",
+#'                        package = "RNAModR");
+#' sites <- ReadBED(bedFile);
+#' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
+#' PlotSpatialDistribution(posSites);
+#' PlotSpatialDistribution(posSites,
+#'                         absolute = TRUE,
+#'                         filter = c("5'UTR", "CDS", "3'UTR"),
+#'                         ylim = c(0, 200));
+#' 
+#' @export
+PlotSpatialDistribution <- function(locus,
+                                    filter = NULL,
+                                    nbreaks = 100,
+                                    absolute = FALSE,
+                                    binWidth = NULL,
+                                    posMax = 1000,
+                                    doBootstrap = TRUE,
+                                    ...) {
+    # Plot the spatial distribution of features across different
+    # transcript regions.
+    #
+    # Args:
+    #   locus: List of dataframes with mapped features across different
+    #          transcript regions.
+    #   filter: Only plot loci in transcript regions specified in filter.
+    #   nbreaks: Number of spatial bins.
+    #   absolute: Plot as a function of absolute coordinates.
+    #             Default is FALSE.
+    #   binWidth: Spatial bin width. Overrides nbreaks if not NULL.
+    #   posMax: If absolute == TRUE, plot up distribution up to
+    #                   this distance. Default is 1000 nt.
+    #   doBootstrap: Calculate bootstrap CI (only if absolute == FALSE).
+    #                Default is TRUE.
+    #   ...: Additional parameters passed to plot.
+    #
+    # Returns:
+    #   NULL
+    CheckClass(locus, "txLoc");
+    id <- slot(locus, "id");
+    refGenome <- slot(locus, "refGenome");
+    locus <- slot(locus, "loci");
+    if (!is.null(filter)) {
+        locus <- locus[which(names(locus) %in% filter)];
+    }
+    if (!absolute) {
+        if (length(locus) < 4) {
+            par(mfrow = c(1, length(locus)));
+        } else {
+            par(mfrow = c(ceiling(length(locus) / 2), 2));
+        }
+        breaks <- seq(0.0, 1.0, length.out = nbreaks);
+        bw <- 1.0 / nbreaks;
+#        if (!is.null(binWidth)) {
+#            breaks <- seq(0.0, 1.0, by = binWidth);
+#            bw <- binWidth;
+#        }
+        bwString <- sprintf("bw = %3.2f", bw);
+    } else {
+        par(mfrow = c(length(locus), 2));
+        breaks <- seq(1, posMax, length.out = nbreaks);
+        bw <- round((posMax - 1) / nbreaks);
+#        if (!is.null(binWidth)) {
+#            breaks <- seq(1, posMax, by = binWidth);
+#            bw <- binWidth;
+#        }
+        bwString <- sprintf("bw = %i nt", bw);
+    }
+    for (i in 1:length(locus)) {
+        # Store site positions
+        #  (1) relative to 5'start, and
+        #  (2) relative to 3'end.
+        pos <- list("5p" = locus[[i]]$TXSTART,
+                    "3p" = locus[[i]]$REGION_TXWIDTH - locus[[i]]$TXSTART + 1);
+        if (!absolute) {
+            pos <- lapply(pos, function(x) x / locus[[i]]$REGION_TXWIDTH);
+            if (grepl("(5'UTR|UTR5|5pUTR|Promoter)", names(locus)[i],
+                      ignore.case = TRUE)) {
+                pos <- pos["3p"];
+                xrange <- list(c(1.0, 0.0));
+                xlab <- list("Relative position (relative to 3' end)");
+            } else {
+                pos <- pos["5p"];
+                xrange <- list(c(0.0, 1.0));
+                xlab <- list("Relative position (relative to 5' start)");
+            }
+        } else {
+            pos <- lapply(pos, function(x) x[x <= posMax]);
+            xrange <- list(c(1, posMax), c(posMax, 1));
+            xlab <- list("Absolute position (relative to 5' start) [nt]",
+                         "Absolute position (relative to 3' end) [nt]");
+        }
+        for (j in 1:length(pos)) {
+            h0 <- hist(pos[[j]], breaks = breaks, plot = FALSE);
+            plot(h0$mids, h0$counts,
+                 type = "s",
+                 lwd = 2,
+                 xlab = xlab[[j]],
+                 ylab = "Abundance",
+                 xlim = xrange[[j]],
+                 main = sprintf("%s in %s\nN = %i",
+                     id,
+                     names(locus)[i],
+                     length(pos[[j]])),
+                 font.main = 1,
+                 ...);
+            if (doBootstrap) {
+                CIFromBS <- EstimateCIFromBS(pos[[j]],
+                                             breaks = breaks,
+                                             nBS = 5000);
+                x1 <- c(CIFromBS$x[1],
+                        rep(CIFromBS$x[-1], each = 2),
+                        CIFromBS$x[length(CIFromBS$x)]);
+                CI <- cbind(c(x1,
+                              rev(x1)),
+                            c(rep(CIFromBS$y.low, each = 2),
+                              rev(rep(CIFromBS$y.high, each = 2))));
+                polygon(CI[, 1], CI[, 2], col = rgb(1, 0, 0, 0.2),
+                        lwd = 1, border = NA, lty = 1);
+                # Loess smoothing of boostrap CI
+                lines(lowess(CIFromBS$x, CIFromBS$y.low, f = 1/5),
+                      col = "red", lty = 2, lwd = 1);
+                lines(lowess(CIFromBS$x, CIFromBS$y.high, f = 1/5),
+                      col = "red", lty = 2, lwd = 1);
+                legend("topleft",
+                       c(sprintf("Abundance (%s)", bwString),
+                         "95%CI (empirical bootstrap)",
+                         "Lowess-smoothed 95%CI"),
+                       lwd = c(2, 5, 1),
+                       col = c("black", rgb(1, 0, 0, 0.2), "red"),
+                       lty = c(1, 1, 2),
+                       bty = "n");
+            }
+        }
+    }
+}
+
+
+#' Generic function to perform enrichment analysis and plot results.
+#'
+#' Generic function to perform enrichment analysis and plot results.
+#' Enrichment/depletion is evaluated using (multiple) Fisher's exact test(s).
+#' Multiple hypothesis testing correction is applied following the method of
+#' Bejamini and Hochberg.
+#' Note: This function should not be invoked directly by the user.
+#'
+#' @param mat The data matrix.
+#' @param title An identifier for \code{mat}.
+#' @param x.las Orientation of x-axis labels. Default is 1.
+#' @param x.cex Scaling factor for x-axis labels. Default is 1.
+#' @param x.padj Vertical adjustment of x-axis labels. Default is 1.
+#' @param plotType Plot style. Default is "l".
+#' @param reverseXaxis Reverse the order of values from \code{mat}.
+#' @param withExtendedAxisLabel Print extended axis label.
+#'
+#' @return A list of \code{fisher.test} return objects and \code{mat}
+#'
+#' @keywords
+#'
+#' @examples
+#' 
+PlotGenericEnrichment <- function(mat, title = "",
+                                  x.las = 1, x.cex = 1, x.padj = 1,
+                                  plotType = "l",
+                                  reverseXaxis = FALSE,
+                                  withExtendedAxisLabel = 0) {
+    # Generic function to perform enrichment analysis and plot results.
+    #
+    # Args:
+    #   mat: The data matrix.
+    #   title: Plot title.
+    #   x.las: Orientation of x-axis labels. Default is 1.
+    #   x.cex: Scaling factor for x-axis labels. Default is 1.
+    #   x.padj: Vertical adjustment of x-axis labels. Default is 1.
+    #   plotType: Plot style. Default is "l".
+    #   reverseXaxis: Reverse the order of values from mat.
+    #   withExtendedAxisLabel: Print extended axis label.
+    #
+    # Returns:
+    #   A list of fisher.test return objects.
+    log10pval.limit <- -12;
+    ft <- list();
+    for (i in 1:ncol(mat)) {
+        redMat <- cbind(mat[, i], rowSums(mat[, -i]));
+        ft[[i]]<-fisher.test(redMat);
+    }
+    names(ft) <- colnames(mat);
+    OR <- sapply(ft, function(x) x$estimate);
+    OR[is.infinite(OR)] <- 1;
+    OR <- log10(OR);
+    names(OR) <- colnames(mat);
+    pval <- p.adjust(sapply(ft, function(x) x$p.value), method="BH");
+    names(pval) <- colnames(mat);
+    pval[is.na(pval)] <- 1;
+    pval <- log10(pval);
+    pval.uncapped <- pval;
+    pval[pval < log10pval.limit] <- log10pval.limit;
+    CI <- sapply(ft, function(x) x$conf.int);
+    CI[CI == 0] <- 1.e-12;
+    CI[is.infinite(CI)] <- 1e12;
+    CI <- log10(CI);
+    if (reverseXaxis) {
+        OR <- rev(OR);
+        pval <- rev(pval);
+        CI[1, ] <- rev(CI[1, ]);
+        CI[2, ] <- rev(CI[2, ]);
+    }
+    #ymin <- floor(min(-abs(pval), -2.0));
+    #ymax <- round(max(max(OR), 2.0));
+    ymin <- log10pval.limit;
+    ymax <- 1;
+    # Plot log10(p-value)'s
+    par(mar = c(7, 4, 4, 4) + 0.1);
+    mp <- barplot(pval, ylim = c(ymin, ymax),
+                  col = rgb(0.2, 0.2, 1, 0.1),
+                  axes = FALSE, names = "",
+                  border = NA,
+                  main = title, font.main = 1);
+    abline(h = -2, col = "blue", lty = 3, lwd = 2);
+    if (withExtendedAxisLabel > 0) {
+        if (withExtendedAxisLabel == 1) {
+            labels = sprintf("%s\nOR=%4.3f,p=%4.3e",
+                names(OR), 10^OR, 10^pval.uncapped);
+        } else {
+            labels = sprintf("%s\nNpos=%s\nNneg=%s\nOR=%4.3f\np=%4.3e",
+                names(OR), paste(mat[1, ]), paste(mat[2, ]), 10^OR, 10^pval.uncapped);
+        }
+    } else {
+        labels = names(OR);
+    }
+    x <- mp;
+    axis(1, at = x,
+         labels = labels,
+         las = x.las, padj = x.padj, cex.axis = x.cex);
+    axis(4, at = seq(ymin, ymax));
+    mtext("log10(p-value)", side = 4, line = 2.5);
+    # Draw significance labels
+    sig <- pval;
+    sig[pval <= -4] <- "****";
+    sig[pval <= -3 & pval > -4] <- "***";
+    sig[pval <= -2 & pval > -3] <- "**";
+    sig[pval <= -1.30103 & pval > -2] <- "*";
+    sig[pval > -1.30103] <- "ns";
+    text(x, y = 0.5, labels = sig, srt = 90, col = "blue");
+    legend("bottomleft",
+           c("Odds-ratio (OR)",
+             "95% CI OR",
+             "p-value"),
+           lwd = c(2, 5, 5),
+           col = c("red", rgb(1, 0, 0, 0.2), rgb(0.2, 0.2, 1, 0.1)),
+           lty = c(1, 1, 1),
+           bty = "n");
+    # Plot odds-ratios
+    par(new = TRUE);
+    plot(x, OR, col = rgb(1, 0.2, 0.2, 1),
+         lwd = 2, type = plotType,
+         ylim = c(-1.0, 1.0),
+         axes = FALSE, xlab = "", ylab = "");
+    CI <- cbind(c(x, rev(x)),
+                c(CI[1 ,], rev(CI[2, ])));
+    polygon(CI[,1], CI[,2], col = rgb(1, 0, 0, 0.2),
+            lwd = 1, border = NA, lty = 1);
+    axis(2, at = seq(-1.0, 1.0));
+    mtext("log10(OR)", side = 2, line = 2.5);
+    abline(h = 0.0, col = "red", lty = 3, lwd = 2);
+    return(list(ft = ft,
+                mat = mat));
+}
+
+
+#' Perform spatial enrichment analysis and plot results.
+#'
+#' Perform spatial enrichment analysis and plot results.
+#' Enrichment/depletion is evaluated using (multiple) Fisher's exact test(s).
+#' Multiple hypothesis testing correction is applied following the method of
+#' Bejamini and Hochberg.
+#'
+#' @param locPos A txLoc object. These should be the positive control sites.
+#' @param locNeg A txLoc object. These should be the negative control sites.
+#' @param filter Only plot loci in transcript regions specified in filter.
+#' @param binWidth Spatial bin width. Default is 20 nt.
+#' @param posMax Evaluate enrichment within a window given by \code{posMax}.
+#' Default is 1000 nt.
+#'
+#' @keywords
+#'
+#' @examples
+#' bedFile <- system.file("extdata",
+#'                        "miCLIP_m6A_Linder2015_hg38.bed",
+#'                        package = "RNAModR");
+#' sites <- ReadBED(bedFile);
+#' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
+#' negSites <- GenerateSNMNull(posSites, method = "permutation");
+#' PlotSpatialEnrichment(posSites, negSites,
+#'                       filter = c("5'UTR", "CDS", "3'UTR"));
+#'
+#' @export
+PlotSpatialEnrichment <- function(locPos,
+                                  locNeg,
+                                  filter = NULL,
+                                  binWidth = 20,
+                                  posMax = 1000) {
+    # Perform spatial enrichment analysis and plot results.
+    #
+    # Args:
+    #   locPos: A txLoc object of the positive control sites.
+    #   locNeg: A txLoc object of the negative control sites.
+    #   filter: Only plot loci in transcript regions specified in filter.
+    #   binWidth: Spatial bin width. Default is 20 nt.
+    #   posMax: Evaluate enrichment within a window given by posMax.
+    #           Default is 1kb.
+    #   
+    CheckClassTxLocConsistency(locPos, locNeg);
+    idPos <- slot(locPos, "id");
+    idNeg <- slot(locNeg, "id");
+    refGenome <- slot(locPos, "refGenome");
+    locPos <- slot(locPos, "loci");
+    locNeg <- slot(locNeg, "loci");
+    if (!is.null(filter)) {
+        locPos <- locPos[which(names(locPos) %in% filter)];
+        locNeg <- locNeg[which(names(locNeg) %in% filter)];
+    }
+    par(mfrow = c(length(locPos), 2));
+    breaks <- seq(1, posMax, by = binWidth);
+    for (i in 1:length(locPos)) {
+        posPos <- list("5p" = locPos[[i]]$TXSTART,
+                       "3p" = locPos[[i]]$REGION_TXWIDTH - locPos[[i]]$TXSTART + 1);
+        posNeg <- list("5p" = locNeg[[i]]$TXSTART,
+                       "3p" = locNeg[[i]]$REGION_TXWIDTH - locNeg[[i]]$TXSTART + 1);
+        posPos <- lapply(posPos, function(x) x[x <= posMax]);
+        posNeg <- lapply(posNeg, function(x) x[x <= posMax]);
+        revAxis <- list(FALSE, TRUE);
+        xlab <- list("Absolute position (relative to 5' start) [nt]",
+                     "Absolute position (relative to 3' end) [nt]");
+        for (j in 1:length(posPos)) {
+            ctsPos <- table(cut(posPos[[j]], breaks = breaks));
+            ctsNeg <- table(cut(posNeg[[j]], breaks = breaks));
+            ctsMat <- as.matrix(rbind(ctsPos, ctsNeg));
+            rownames(ctsMat) <- c(idPos, idNeg);
+            title <- sprintf("%s\nN(%s) = %i, N(%s) = %i\n%s (bw = %i nt)",
+                             names(locPos)[i],
+                             idPos,
+                             sum(ctsPos),
+                             idNeg,
+                             sum(ctsNeg),
+                             xlab[[j]],
+                             binWidth);
+            tmp <- PlotGenericEnrichment(ctsMat,
+                                         title = title,
+                                         x.las = 2, x.cex = 0.8, x.padj = 0.8,
+                                         reverseXaxis = revAxis[[j]]);
+        }
+    }
+}
