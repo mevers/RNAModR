@@ -27,8 +27,4 @@ of the 3'/5'UTRs only.}
 Plot length distribution of transcript regions from list of
 GRangesList transcript features.
 }
-\examples{
-
-}
-\keyword{}
 

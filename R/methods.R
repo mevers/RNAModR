@@ -4,32 +4,34 @@
 #' should not be invoked by the end-user directly. It is called
 #' from within \code{SmartMap}.
 #'
-#' @param locus GRanges object of genomic features.
-#' @param txFeatures List of GRangesList transcript features.
-#' @param txSequences List of DNAStringSet sequences.
+#' @param locus A \code{GRanges} object; list of genomic features to
+#' be mapped.
+#' @param txBySec List of GRangesList transcript features.
+#' @param seqBySec List of DNAStringSet sequences.
 #' @param geneXID Dataframe of cross-referencing gene IDs.
 #' @param ignore.strand Ignore strand when mapping genome coordinates to
 #' transcript coordinates. Default is FALSE.
 #' @param noFactors No (character) factors in output. Default is TRUE.
+#' @param showPb A logical scalar; if \code{TRUE} show a progress bar.
 #'
 #' @return A list of dataframes with mapped features in transcript region.
 #'
-#' @keywords 
-#'
-#' @examples
-#'
+#' @keywords internal
+#' 
+#' @export
 SmartMap.ToTx <- function(locus,
-                          txFeatures,
-                          txSequences,
+                          txBySec,
+                          seqBySec,
                           geneXID,
                           ignore.strand = FALSE,
-                          noFactors = TRUE) {
+                          noFactors = TRUE,
+                          showPb = FALSE) {
     # Map positions from locus to transcript regions.
     #
     # Args:
     #   locus: Loci of genomic features to be mapped as GRanges object.
-    #   txFeatures: List of GRangesList transcript features.
-    #   txSequences: List of DNAStringSet sequences.
+    #   txBySec: List of GRangesList transcript features.
+    #   seqBySec: List of DNAStringSet sequences.
     #   geneXID: Dataframe of cross-referencing gene IDs.
     #   ignore.strand: Ignore strand information during mapping.
     #                  Default is FALSE.
@@ -38,31 +40,41 @@ SmartMap.ToTx <- function(locus,
     # Returns:
     #   List of dataframes with mapped transcript coordinates for all
     #   features in locus.
-    if (!identical(names(txFeatures), names(txSequences))) {
-        stop("Regions in transcript features and sequences do not match.");
-    }
+#    if (!identical(names(txBySec), names(seqBySec))) {
+#        stop("Regions in transcript features and sequences do not match.");
+#    }
     locusInTx.list <- list();
-    for (i in 1:length(txFeatures)) {
-        gr <- mapToTranscripts(locus, txFeatures[[i]], ignore.strand = ignore.strand);
+    if (showPb == TRUE)
+        pb <- txtProgressBar(max = length(txBySec), style = 3, width = 60);
+    for (i in 1:length(txBySec)) {
+        if (showPb) setTxtProgressBar(pb, i);
+        gr <- mapToTranscripts(locus, txBySec[[i]], ignore.strand = ignore.strand);
         locusInTx <- GenomicRanges::as.data.frame(gr)[, 1:4];
         colnames(locusInTx) <- c("REFSEQ", "TXSTART", "TXEND", "TXWIDTH");
         dataFromQuery <- GenomicRanges::as.data.frame(locus[mcols(gr)[, 1]]);
         colnames(dataFromQuery) <- c("CHR", "START", "STOP", "WIDTH",
                                      "STRAND", "SCORE", "ID");
         dataFromRef <- GenomicRanges::as.data.frame(
-            range(txFeatures[[i]][mcols(gr)[, 2]]))[, -1];
-        dataFromRef <- cbind(rep(names(txFeatures)[i], nrow(dataFromRef)),
+            range(txBySec[[i]][mcols(gr)[, 2]]))[, -1];
+        idxSeq <- which(names(txBySec)[i] == names(seqBySec));
+        if (length(idxSeq) > 0) {
+            dataSeq <- as.character(seqBySec[[idxSeq]][match(
+                dataFromRef[, 1],
+                names(seqBySec[[idxSeq]]))]);
+        } else {
+            dataSeq <- rep("", nrow(dataFromRef));
+        }
+        dataFromRef <- cbind(rep(names(txBySec)[i], nrow(dataFromRef)),
                              dataFromRef[, 1],
                              geneXID[match(dataFromRef[, 1] ,geneXID[, 1]), ][, -1],
                              dataFromRef[, 2:ncol(dataFromRef)],
-                             sum(width(txFeatures[[i]][mcols(gr)[, 2]])),
-                             as.character(seqByFeat[[i]][match(dataFromRef[, 1],
-                                                               names(seqByFeat[[i]]))]));
+                             sum(width(txBySec[[i]][mcols(gr)[, 2]])),
+                             dataSeq);
         colnames(dataFromRef) <- c("GENE_REGION", "GENE_REFSEQ", "GENE_ENTREZ",
                                    "GENE_SYMBOL", "GENE_ENSEMBL", "GENE_UNIGENE",
-                                   "GENE_NAME", "GENE_GO", "GENE_CHR",
-                                   "GENE_START", "GENE_STOP", "GENE_WIDTH",
-                                   "GENE_STRAND", "REGION_TXWIDTH", "REGION_SEQ");
+                                   "GENE_NAME", "GENE_CHR", "GENE_START",
+                                   "GENE_STOP", "GENE_WIDTH", "GENE_STRAND",
+                                   "REGION_TXWIDTH", "REGION_SEQ");
         locusInTx <- cbind(locusInTx,
                            dataFromQuery,
                            dataFromRef);
@@ -72,7 +84,8 @@ SmartMap.ToTx <- function(locus,
         }
         locusInTx.list[[length(locusInTx.list) + 1]] <- locusInTx;
     }
-    names(locusInTx.list) <- names(txFeatures);
+    if (showPb) close(pb);
+    names(locusInTx.list) <- names(txBySec);
     return(locusInTx.list);
 }
 
@@ -92,7 +105,6 @@ SmartMap.ToTx <- function(locus,
 #' the transcriptome based on assembly version \code{refGenome}.
 #' 
 #' @examples
-#'
 #' bedFile <- system.file("extdata",
 #'                        "miCLIP_m6A_Linder2015_hg38.bed",
 #'                        package = "RNAModR");
@@ -116,11 +128,28 @@ SmartMap <- function(gr,
     #   txLoc object.
     #
     # Load reference transcriptome
-    refData <- sprintf("tx_%s", refGenome);
-    try(data(list = refData));
+    refTx <- sprintf("tx_%s.RData", refGenome);
+    if (!file.exists(refTx)) {
+        ss <- sprintf("Reference transcriptome for %s not found.", refGenome);
+        ss <- sprintf("%s\nRunning BuildTx(...) might fix that.", ss);
+        stop(ss);
+    }
+    load(refTx);
+    requiredObj <- c("geneXID", "seqBySec", "txBySec");
+    if (!all(requiredObj %in% ls())) {
+        ss <- sprintf("Mandatory transcript objects not found.");
+        ss <- sprintf("%s\nNeed all of the following: %s",
+                      ss, paste0(requiredObj, collapse = ", "));
+        ss <- sprintf("%s\nRunning BuildTx(...) might fix that.", ss);
+        stop(ss);
+    }
+    geneXID <- get("geneXID");
+    seqBySec <- get("seqBySec");
+    txBySec <- get("txBySec");
     # Map coordinates to transcript
-    locusInTx.list <- SmartMap.ToTx(gr, featByTx, seqByFeat, geneXID, 
-                               ignore.strand = ignore.strand);
+    locusInTx.list <- SmartMap.ToTx(gr, txBySec, seqBySec, geneXID, 
+                                    ignore.strand = ignore.strand,
+                                    showPb = TRUE);
     if (is.null(id)) {
         id = "";
     }
@@ -154,7 +183,6 @@ SmartMap <- function(gr,
 #' available for null sites.
 #' 
 #' @examples
-#' 
 #' bedFile <- system.file("extdata",
 #'                        "miCLIP_m6A_Linder2015_hg38.bed",
 #'                        package = "RNAModR");
@@ -186,12 +214,12 @@ GenerateSNMNull <- function(locus,
     #    null sites.
     CheckClass(locus, "txLoc");
     locusInTx.list <- list();
-    refGenome <- slot(locus, "refGenome");
+    refGenome <- GetRef(locus);
     if (is.null(id)) {
-        id <- slot(locus, "id");
+        id <- GetId(locus);
         id <- sprintf("null_%s", id);
     }
-    locus <- slot(locus, "loci");
+    locus <- GetLoci(locus);
     for (i in 1:length(locus)) {
         if (method == "nuclAbundance") {
             seqData <- locus[[i]][!duplicated(locus[[i]][, 1]),
@@ -232,4 +260,5 @@ GenerateSNMNull <- function(locus,
                version = as.character(Sys.Date()));
     return(obj);
 }
+
 

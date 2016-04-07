@@ -25,7 +25,6 @@ the transcriptome based on assembly version \code{refGenome}.
 Map genome coordinates to transcript coordinates.
 }
 \examples{
-
 bedFile <- system.file("extdata",
                        "miCLIP_m6A_Linder2015_hg38.bed",
                        package = "RNAModR");

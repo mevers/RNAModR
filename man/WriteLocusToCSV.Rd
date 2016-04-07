@@ -18,8 +18,4 @@ WriteLocusToCSV(locus, file = NULL, withSeq = FALSE, withGC = FALSE)
 \description{
 Write a txLoc object to a/multiple comma-separated-values file(s).
 }
-\examples{
-
-}
-\keyword{CSV}
 

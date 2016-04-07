@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.R
 \name{PlotSpatialDistribution}
 \alias{PlotSpatialDistribution}
-\title{Plot spatial distribution of loci from txLoc object.}
+\title{Plot spatial distribution of loci from \code{txLoc} object.}
 \usage{
 PlotSpatialDistribution(locus, filter = NULL, nbreaks = 100,
   absolute = FALSE, binWidth = NULL, posMax = 1000, doBootstrap = TRUE,
@@ -31,8 +31,8 @@ sites within transcript region. Default is \code{TRUE}.}
 \item{...}{Additional parameters passed to plot.}
 }
 \description{
-Plot spatial distribution of loci from txLoc object within transcript
-regions.
+Plot spatial distribution of loci from \code{txLoc} object within every
+transcript section.
 }
 \examples{
 bedFile <- system.file("extdata",
@@ -47,5 +47,4 @@ PlotSpatialDistribution(posSites,
                         ylim = c(0, 200));
 
 }
-\keyword{}
 

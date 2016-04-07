@@ -7,10 +7,7 @@
 #'
 #' @return a GRanges object of features from the BED input file.
 #'
-#' @keywords BED
-#'
 #' @examples
-#'
 #' bedFile <- system.file("extdata",
 #'                        "miCLIP_m6A_Linder2015_hg38.bed",
 #'                        package = "RNAModR");
@@ -57,10 +54,6 @@ ReadBED <- function(file) {
 #'
 #' @param txFeatures List of GRangesList.
 #'
-#' @keywords BED
-#'
-#' @examples
-#'
 #' @export
 WriteFeatToBED <- function(txFeatures) {
     # Write list of GRangesList transcript features to BED file.
@@ -85,10 +78,6 @@ WriteFeatToBED <- function(txFeatures) {
 #' @param formatChr Set output format of chromosome column. Default is
 #' "noChrName".
 #'
-#' @keywords BED
-#'
-#' @examples
-#'
 #' @export
 WriteLocusToBED <- function(locus,
                             file = NULL,
@@ -105,7 +94,8 @@ WriteLocusToBED <- function(locus,
     # Returns:
     #    NULL
     CheckClass(locus, "txLoc");
-    locus <- slot(locus, "loci");
+    id <- GetId(locus);
+    locus <- GetLoci(locus);
     BED <- vector();
     for (i in 1:length(locus)) {
         feat <- locus[[i]][, c("CHR", "START", "STOP", "ID", "SCORE", "STRAND")];
@@ -121,7 +111,12 @@ WriteLocusToBED <- function(locus,
     }
     BED <- BED[order(BED[, 1], BED[, 2]), ];
     if (is.null(file)) {
-        file <- "sites.bed";
+        if (nchar(id) > 0) {
+            file <- sprintf("sites_%s.bed", id);
+        } else {
+            file <- "sites.bed";
+            
+        }
     }
     write.table(BED, file = file,
                 sep = "\t", quote = FALSE,
@@ -137,10 +132,6 @@ WriteLocusToBED <- function(locus,
 #' @param file Filename of output CSV file. If NULL then file = "sites.csv".
 #' @param withSeq If TRUE then include full sequence. Default is FALSE.
 #' @param withGC If TRUE then include GC content. Default is FALSE.
-#'
-#' @keywords CSV
-#'
-#' @examples
 #'
 #' @export
 WriteLocusToCSV <- function(locus,
@@ -159,7 +150,7 @@ WriteLocusToCSV <- function(locus,
     # Returns:
     #   NULL
     CheckClass(locus, "txLoc");
-    locus <- slot(locus, "loci");
+    locus <- GetLoci(locus);
     CSV <- vector();
     selCol <- c("GENE_REGION", "GENE_REFSEQ", "GENE_ENTREZ",
                 "GENE_SYMBOL", "GENE_ENSEMBL", "GENE_UNIGENE",

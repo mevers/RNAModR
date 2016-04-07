@@ -13,10 +13,6 @@
 #' @param outliers Show outliers in boxplot. Default is \code{FALSE}.
 #' @param ... Additional parameters passed to x-axis.
 #'
-#' @keywords
-#'
-#' @examples
-#' 
 #' @export
 PlotTxLengthDistribution <- function(txFeatures,
                                      asLog = TRUE,
@@ -91,10 +87,45 @@ PlotTxLengthDistribution <- function(txFeatures,
 }
 
 
-#' Plot spatial distribution of loci from txLoc object.
+#' Plot piechart of the number of loci in every transcript section.
 #'
-#' Plot spatial distribution of loci from txLoc object within transcript
-#' regions.
+#' Plot piechart of the number of loci in every transcript section.
+#'
+#' @param locus A \code{txLoc} object.
+#'
+#' @examples
+#' bedFile <- system.file("extdata",
+#'                        "miCLIP_m6A_Linder2015_hg38.bed",
+#'                        package = "RNAModR");
+#' sites <- ReadBED(bedFile);
+#' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
+#' PlotPieNumberOfLoci(posSites);
+#'
+#' @export
+PlotPieNumberOfLoci <- function(locus) {
+    # Plot piechart of the mumber of loci in every transcript section.
+    #
+    # Args:
+    #   locus: A txLoc object.
+    #
+    # Returns:
+    #   NULL
+    id <- GetId(locus);
+    N <- GetNumberOfLoci(locus);
+    labels <- names(GetLoci(locus));
+    percentage <- N / sum(N) * 100.0;
+    labels <- sprintf("%s %2.1f%% (%i)", labels, percentage, N);
+    pie(N, labels = labels, col = rainbow(length(labels)),
+        main = sprintf("Distribution of %i %s sites across transcript sections",
+            sum(N), id),
+        font.main = 1);
+}
+
+
+#' Plot spatial distribution of loci from \code{txLoc} object.
+#'
+#' Plot spatial distribution of loci from \code{txLoc} object within every
+#' transcript section.
 #'
 #' @param locus A \code{txLoc} object.
 #' @param filter Only plot loci in transcript regions specified in filter.
@@ -109,8 +140,6 @@ PlotTxLengthDistribution <- function(txFeatures,
 #' @param doBootstrap Calculate 95% CI based on empirical bootstrap of
 #' sites within transcript region. Default is \code{TRUE}.
 #' @param ... Additional parameters passed to plot.
-#'
-#' @keywords
 #'
 #' @examples
 #' bedFile <- system.file("extdata",
@@ -153,9 +182,9 @@ PlotSpatialDistribution <- function(locus,
     # Returns:
     #   NULL
     CheckClass(locus, "txLoc");
-    id <- slot(locus, "id");
-    refGenome <- slot(locus, "refGenome");
-    locus <- slot(locus, "loci");
+    id <- GetId(locus);
+    refGenome <- GetRef(locus);
+    locus <- GetLoci(locus);
     if (!is.null(filter)) {
         locus <- locus[which(names(locus) %in% filter)];
     }
@@ -270,16 +299,11 @@ PlotSpatialDistribution <- function(locus,
 #' @param withExtendedAxisLabel Print extended axis label.
 #'
 #' @return A list of \code{fisher.test} return objects and \code{mat}
-#'
-#' @keywords
-#'
-#' @examples
-#' 
-PlotGenericEnrichment <- function(mat, title = "",
-                                  x.las = 1, x.cex = 1, x.padj = 1,
-                                  plotType = "l",
-                                  reverseXaxis = FALSE,
-                                  withExtendedAxisLabel = 0) {
+PlotEnrichment.Generic <- function(mat, title = "",
+                                   x.las = 1, x.cex = 1, x.padj = 1,
+                                   plotType = "l",
+                                   reverseXaxis = FALSE,
+                                   withExtendedAxisLabel = 0) {
     # Generic function to perform enrichment analysis and plot results.
     #
     # Args:
@@ -327,7 +351,14 @@ PlotGenericEnrichment <- function(mat, title = "",
     ymax <- 1;
     # Plot log10(p-value)'s
     par(mar = c(7, 4, 4, 4) + 0.1);
-    mp <- barplot(pval, ylim = c(ymin, ymax),
+    xrange <- 1.2 * length(pval);
+    xmin <- -0.04 * xrange;
+    xmin <- 0.2;
+    xmax <- xrange + 0.04 * xrange;
+    xmax <- 0.96 * xmax;
+    mp <- barplot(pval,
+                  xlim = c(xmin, xmax),
+                  ylim = c(ymin, ymax),
                   col = rgb(0.2, 0.2, 1, 0.1),
                   axes = FALSE, names = "",
                   border = NA,
@@ -338,8 +369,11 @@ PlotGenericEnrichment <- function(mat, title = "",
             labels = sprintf("%s\nOR=%4.3f,p=%4.3e",
                 names(OR), 10^OR, 10^pval.uncapped);
         } else {
-            labels = sprintf("%s\nNpos=%s\nNneg=%s\nOR=%4.3f\np=%4.3e",
-                names(OR), paste(mat[1, ]), paste(mat[2, ]), 10^OR, 10^pval.uncapped);
+            labels = sprintf("%s\nN(%s)=%i\nN(%s)=%i\nOR=%4.3f\np=%4.3e",
+                names(OR),
+                rownames(mat)[1], mat[1, ],
+                rownames(mat)[2], mat[2, ],
+                10^OR, 10^pval.uncapped);
         }
     } else {
         labels = names(OR);
@@ -370,6 +404,7 @@ PlotGenericEnrichment <- function(mat, title = "",
     par(new = TRUE);
     plot(x, OR, col = rgb(1, 0.2, 0.2, 1),
          lwd = 2, type = plotType,
+         xlim = c(xmin, xmax),
          ylim = c(-1.0, 1.0),
          axes = FALSE, xlab = "", ylab = "");
     CI <- cbind(c(x, rev(x)),
@@ -384,6 +419,66 @@ PlotGenericEnrichment <- function(mat, title = "",
 }
 
 
+#' Perform transcript section enrichment analysis and plot results.
+#'
+#' Perform transcript section enrichment analysis and plot results.
+#' Enrichment/depletion is evaluated using (multiple) Fisher's exact test(s).
+#' Multiple hypothesis testing correction is applied following the method of
+#' Bejamini and Hochberg.
+#'
+#' @param locPos A \code{txLoc} object. These should be the positive control sites.
+#' @param locNeg A \code{txLoc} object. These should be the negative control sites.
+#' @param filter Only plot loci in transcript regions specified in filter.  Default is NULL.
+#' @param withExtendedAxisLabel Plot extended axis labels. Default is 2. See ??? for details.
+#'
+#' @examples
+#' bedFile <- system.file("extdata",
+#'                        "miCLIP_m6A_Linder2015_hg38.bed",
+#'                        package = "RNAModR");
+#' sites <- ReadBED(bedFile);
+#' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
+#' negSites <- GenerateSNMNull(posSites, method = "nuclAbundance");
+#' PlotSectionEnrichment(posSites, negSites,
+#'                       filter = c("5'UTR", "CDS", "3'UTR"));
+#'
+#' @export
+PlotSectionEnrichment <- function(locPos,
+                                  locNeg,
+                                  filter = NULL,
+                                  withExtendedAxisLabel = 2) {
+    # Perform transcript section enrichment analysis and plot results.
+    #
+    # Args:
+    #   locPos: A txLoc object of the positive control sites.
+    #   locNeg: A txLoc object of the negative control sites.
+    #   filter: Only plot loci in transcript regions specified in filter.
+    #
+    # Returns:
+    #   NULL
+    CheckClassTxLocConsistency(locPos, locNeg);
+    idPos <- GetId(locPos);
+    idNeg <- GetId(locNeg);
+    refGenome <- GetRef(locPos);
+    locPos <- GetLoci(locPos);
+    locNeg <- GetLoci(locNeg);
+    if (!is.null(filter)) {
+        locPos <- locPos[which(names(locPos) %in% filter)];
+        locNeg <- locNeg[which(names(locNeg) %in% filter)];
+    }
+    ctsPos <- sapply(locPos, nrow);
+    ctsNeg <- sapply(locNeg, nrow);
+    ctsMat <- rbind(ctsPos, ctsNeg);
+    rownames(ctsMat) <- c(idPos, idNeg);
+    title <- sprintf("N(%s) = %i, N(%s) = %i",
+                     idPos, sum(ctsPos),
+                     idNeg, sum(ctsNeg));
+    par(mfrow = c(1,1));
+    ret <- PlotEnrichment.Generic(ctsMat,
+                                  title = title,
+                                  x.las = 1, x.cex = 0.8, x.padj = 0.8,
+                                  withExtendedAxisLabel = withExtendedAxisLabel);
+}
+
 #' Perform spatial enrichment analysis and plot results.
 #'
 #' Perform spatial enrichment analysis and plot results.
@@ -391,14 +486,12 @@ PlotGenericEnrichment <- function(mat, title = "",
 #' Multiple hypothesis testing correction is applied following the method of
 #' Bejamini and Hochberg.
 #'
-#' @param locPos A txLoc object. These should be the positive control sites.
-#' @param locNeg A txLoc object. These should be the negative control sites.
+#' @param locPos A \code{txLoc} object. These should be the positive control sites.
+#' @param locNeg A \code{txLoc} object. These should be the negative control sites.
 #' @param filter Only plot loci in transcript regions specified in filter.
 #' @param binWidth Spatial bin width. Default is 20 nt.
 #' @param posMax Evaluate enrichment within a window given by \code{posMax}.
 #' Default is 1000 nt.
-#'
-#' @keywords
 #'
 #' @examples
 #' bedFile <- system.file("extdata",
@@ -425,19 +518,21 @@ PlotSpatialEnrichment <- function(locPos,
     #   binWidth: Spatial bin width. Default is 20 nt.
     #   posMax: Evaluate enrichment within a window given by posMax.
     #           Default is 1kb.
-    #   
+    #
+    # Returns:
+    #   NULL
     CheckClassTxLocConsistency(locPos, locNeg);
-    idPos <- slot(locPos, "id");
-    idNeg <- slot(locNeg, "id");
-    refGenome <- slot(locPos, "refGenome");
-    locPos <- slot(locPos, "loci");
-    locNeg <- slot(locNeg, "loci");
+    idPos <- GetId(locPos);
+    idNeg <- GetId(locNeg);
+    refGenome <- GetRef(locPos);
+    locPos <- GetLoci(locPos);
+    locNeg <- GetLoci(locNeg);
     if (!is.null(filter)) {
         locPos <- locPos[which(names(locPos) %in% filter)];
         locNeg <- locNeg[which(names(locNeg) %in% filter)];
     }
     par(mfrow = c(length(locPos), 2));
-    breaks <- seq(1, posMax, by = binWidth);
+    breaks <- seq(0, posMax, by = binWidth);
     for (i in 1:length(locPos)) {
         posPos <- list("5p" = locPos[[i]]$TXSTART,
                        "3p" = locPos[[i]]$REGION_TXWIDTH - locPos[[i]]$TXSTART + 1);
@@ -461,10 +556,136 @@ PlotSpatialEnrichment <- function(locPos,
                              sum(ctsNeg),
                              xlab[[j]],
                              binWidth);
-            tmp <- PlotGenericEnrichment(ctsMat,
-                                         title = title,
-                                         x.las = 2, x.cex = 0.8, x.padj = 0.8,
-                                         reverseXaxis = revAxis[[j]]);
+            tmp <- PlotEnrichment.Generic(ctsMat,
+                                          title = title,
+                                          x.las = 2, x.cex = 0.8, x.padj = 0.8,
+                                          reverseXaxis = revAxis[[j]]);
+        }
+    }
+}
+
+
+#' Plot ratio of two spatial distributions.
+#'
+#' Plot ratio of two spatial distributions.
+#'
+#' @param locPos A \code{txLoc} object. These should be the positive control sites.
+#' @param locNeg A \code{txLoc} object. These should be the negative control sites.
+#' @param filter Only plot loci in transcript regions specified in filter.
+#' @param binWidth Spatial bin width. Overrides \code{nbreaks} if not
+#' \code{NULL}.
+#' @param posMax If \code{absolute == TRUE}, show spatial distribution
+#' within a window given by \code{posMax} from the 5'/3' position of
+#' the transcript feature. Default is 1000 nt.
+#'
+#' @examples
+#' bedFile <- system.file("extdata",
+#'                        "miCLIP_m6A_Linder2015_hg38.bed",
+#'                        package = "RNAModR");
+#' sites <- ReadBED(bedFile);
+#' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
+#' negSites <- GenerateSNMNull(posSites, method = "permutation");
+#' PlotSpatialRatio(posSites, negSites, c("3'UTR", "CDS", "5'UTR"));
+#' 
+#' @export
+PlotSpatialRatio <- function(locPos, locNeg,
+                             filter = NULL,
+                             binWidth = 20,
+                             posMax = 1000) {
+    # Plot the per-bin ratio of spatial distributions from locPos
+    # and locNeg.
+    #
+    # Args:
+    #   locPos: A txLoc object of the positive control sites.
+    #   locNeg: A txLoc object of the negative control sites.
+    #   filter: Only plot loci in transcript regions specified in filter.
+    #   binWidth: Spatial bin width. Overrides nbreaks if not NULL.
+    #   posMax: If absolute == TRUE, plot up distribution up to
+    #                   this distance. Default is 1000 nt.
+    #
+    # Returns:
+    #   NULL
+    CheckClassTxLocConsistency(locPos, locNeg);
+    idPos <- GetId(locPos);
+    idNeg <- GetId(locNeg);
+    refGenome <- GetRef(locPos);
+    if (abs(log10(sum(GetNumberOfLoci(locPos)) /
+                  sum(GetNumberOfLoci(locNeg)))) > 0.1) {
+        stop("Number of positive and negative sites are too different.");
+    }
+    locPos <- GetLoci(locPos);
+    locNeg <- GetLoci(locNeg);
+    if (!is.null(filter)) {
+        locPos <- locPos[which(names(locPos) %in% filter)];
+        locNeg <- locNeg[which(names(locNeg) %in% filter)];
+    }
+    par(mfrow = c(length(locPos), 2));
+    breaks <- seq(0, posMax, by = binWidth);
+    mid <- breaks[-1] - binWidth / 2;
+    bwString <- sprintf("bw = %i nt", binWidth);
+    for (i in 1:length(locPos)) {
+        posPos <- list("5p" = locPos[[i]]$TXSTART,
+                       "3p" = locPos[[i]]$REGION_TXWIDTH - locPos[[i]]$TXSTART + 1);
+        posNeg <- list("5p" = locNeg[[i]]$TXSTART,
+                       "3p" = locNeg[[i]]$REGION_TXWIDTH - locNeg[[i]]$TXSTART + 1);
+        posPos <- lapply(posPos, function(x) x[x <= posMax]);
+        posNeg <- lapply(posNeg, function(x) x[x <= posMax]);
+        xlim <- list(c(mid[1], mid[length(mid)]), c(mid[length(mid)], mid[1]));
+        revAxis <- list(FALSE, TRUE);
+        xlab <- list("Absolute position (relative to 5' start) [nt]",
+                     "Absolute position (relative to 3' end) [nt]");
+        for (j in 1:length(posPos)) {
+            ctsPos <- table(cut(posPos[[j]], breaks = breaks));
+            ctsNeg <- table(cut(posNeg[[j]], breaks = breaks));
+            CIFromBS.Pos <- EstimateCIFromBS(posPos[[j]],
+                                         breaks = breaks,
+                                         nBS = 5000);
+            CIFromBS.Neg <- EstimateCIFromBS(posNeg[[j]],
+                                            breaks = breaks,
+                                            nBS = 5000);
+            r <- ctsPos / ctsNeg;
+            r <- log10(r);
+            r[is.na(r)] <- 1;
+            r[is.infinite(r)] <- 1;
+            plot(mid, as.numeric(r), type = "s",
+                 xlab = xlab[[j]],
+                 ylab = "log10(Ratio)",
+                 xlim = xlim[[j]],
+                 ylim = c(-2, 2),
+                 main = sprintf("Ratio of occurances in %s\nN(%s)=%i w.r.t. N(%s)=%i",
+                     names(locPos)[i],
+                     idPos,sum(ctsPos),
+                     idNeg, sum(ctsNeg)),
+                 font.main = 1);
+            abline(h = 0, col = "black", lty = 3);
+            # Plot boostrap-based standard errors of ratio
+            sePos <- abs(CIFromBS.Pos$y.high - CIFromBS.Pos$y.low) / (2 * 1.96);
+            seNeg <- abs(CIFromBS.Neg$y.high - CIFromBS.Neg$y.low) / (2 * 1.96);
+            dr <- 1.0 / log(10) * sqrt((sePos / ctsPos) ^ 2 + (seNeg / ctsNeg) ^ 2);
+            dr[is.na(dr)] <- 1;
+            dr[is.infinite(dr)] <- 1;
+            x1 <- c(mid[1],
+                    rep(mid[-1], each = 2),
+                    mid[length(mid)]);
+            CI <- cbind(c(x1,
+                          rev(x1)),
+                        c(rep(r - dr, each = 2),
+                          rev(rep(r + dr, each = 2))));
+            polygon(CI[, 1], CI[, 2], col = rgb(1, 0, 0, 0.2),
+                    lwd = 1, border = NA, lty = 1);
+            # Loess smoothing of standard errors
+            lines(lowess(mid, r + dr, f = 1/5),
+                  col = "red", lty = 2, lwd = 1);
+            lines(lowess(mid, r - dr, f = 1/5),
+                  col = "red", lty = 2, lwd = 1);
+            legend("topleft",
+                   c(sprintf("Ratio of number of sites (%s)", bwString),
+                     "Boostrap-based standard error",
+                     "Lowess-smoothed standard error"),
+                   lwd = c(2, 5, 1),
+                   col = c("black", rgb(1, 0, 0, 0.2), "red"),
+                   lty = c(1, 1, 2),
+                   bty = "n");
         }
     }
 }

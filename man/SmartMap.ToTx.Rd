@@ -4,15 +4,16 @@
 \alias{SmartMap.ToTx}
 \title{Map genome coordinates to transcript coordinates.}
 \usage{
-SmartMap.ToTx(locus, txFeatures, txSequences, geneXID, ignore.strand = FALSE,
-  noFactors = TRUE)
+SmartMap.ToTx(locus, txBySec, seqBySec, geneXID, ignore.strand = FALSE,
+  noFactors = TRUE, showPb = FALSE)
 }
 \arguments{
-\item{locus}{GRanges object of genomic features.}
+\item{locus}{A \code{GRanges} object; list of genomic features to
+be mapped.}
 
-\item{txFeatures}{List of GRangesList transcript features.}
+\item{txBySec}{List of GRangesList transcript features.}
 
-\item{txSequences}{List of DNAStringSet sequences.}
+\item{seqBySec}{List of DNAStringSet sequences.}
 
 \item{geneXID}{Dataframe of cross-referencing gene IDs.}
 
@@ -20,6 +21,8 @@ SmartMap.ToTx(locus, txFeatures, txSequences, geneXID, ignore.strand = FALSE,
 transcript coordinates. Default is FALSE.}
 
 \item{noFactors}{No (character) factors in output. Default is TRUE.}
+
+\item{showPb}{A logical scalar; if \code{TRUE} show a progress bar.}
 }
 \value{
 A list of dataframes with mapped features in transcript region.
@@ -29,8 +32,5 @@ Map genome coordinates to transcript coordinates. This function
 should not be invoked by the end-user directly. It is called
 from within \code{SmartMap}.
 }
-\examples{
-
-}
-\keyword{}
+\keyword{internal}
 

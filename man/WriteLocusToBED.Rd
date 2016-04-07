@@ -17,8 +17,4 @@ WriteLocusToBED(locus, file = NULL, formatChr = "noChrName")
 \description{
 Write a txLoc object to a/multiple BED file(s).
 }
-\examples{
-
-}
-\keyword{BED}
 

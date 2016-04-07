@@ -13,8 +13,4 @@ WriteFeatToBED(txFeatures)
 Write a list of GRangesList transcript features to a BED file.
 One file per transcript region.
 }
-\examples{
-
-}
-\keyword{BED}
 

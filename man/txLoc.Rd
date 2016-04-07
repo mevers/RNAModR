@@ -2,14 +2,38 @@
 % Please edit documentation in R/classes.R
 \docType{class}
 \name{txLoc-class}
+\alias{GetId}
+\alias{GetId,txLoc-method}
+\alias{GetLoci}
+\alias{GetLoci,txLoc-method}
 \alias{GetNumberOfLoci}
 \alias{GetNumberOfLoci,txLoc-method}
+\alias{GetRef}
+\alias{GetRef,txLoc-method}
+\alias{GetVersion}
+\alias{GetVersion,txLoc-method}
 \alias{head,txLoc-method}
 \alias{info}
 \alias{info,txLoc-method}
 \alias{txLoc-class}
 \title{txLoc object definition}
 \usage{
+GetLoci(x)
+
+\S4method{GetLoci}{txLoc}(x)
+
+GetId(x)
+
+\S4method{GetId}{txLoc}(x)
+
+GetRef(x)
+
+\S4method{GetRef}{txLoc}(x)
+
+GetVersion(x)
+
+\S4method{GetVersion}{txLoc}(x)
+
 info(x)
 
 \S4method{info}{txLoc}(x)
@@ -32,13 +56,55 @@ GetNumberOfLoci(x)
 \item{x}{A \code{txLoc} object.}
 
 \item{x}{A \code{txLoc} object.}
+
+\item{x}{A \code{txLoc} object.}
+
+\item{x}{A \code{txLoc} object.}
+
+\item{x}{A \code{txLoc} object.}
+
+\item{x}{A \code{txLoc} object.}
+
+\item{x}{A \code{txLoc} object.}
+
+\item{x}{A \code{txLoc} object.}
+
+\item{x}{A \code{txLoc} object.}
+
+\item{x}{A \code{txLoc} object.}
 }
 \value{
+A list of dataframes with loci for
+every transcript section.
+
+A string.
+
+A string.
+
+A string.
+
 A named integer vector with the number of sites per
 transcript section.
 }
 \description{
 txLoc object definition
+
+Generic method "GetLoci" for S4 object txLoc.
+
+Get the loci of a \code{txLoc} object
+as a list of dataframes.
+
+Generic method "GetId" for S4 object txLoc.
+
+Get the id string of a \code{txLoc} object.
+
+Generic method "GetRef" for S4 object txLoc.
+
+Get the reference genome string of a \code{txLoc} object.
+
+Generic method "GetVersion" for S4 object txLoc.
+
+Get the version string of a \code{txLoc} object.
 
 Generic method "info" for S4 object txLoc.
 
@@ -56,12 +122,12 @@ transcript section.
 \describe{
 \item{\code{loci}}{A list of loci within a transcript section.}
 
-\item{\code{id}}{Identifier for sites in \code{txLoc} object.}
+\item{\code{id}}{String. Identifier for sites in \code{txLoc} object.}
 
-\item{\code{refGenome}}{Reference genome upon which the transcriptome
+\item{\code{refGenome}}{String. Reference genome upon which the transcriptome
 and site positions are based.}
 
-\item{\code{version}}{Timestamp for version tracking.}
+\item{\code{version}}{String. Timestamp for version tracking.}
 }}
 \examples{
 bedFile <- system.file("extdata",

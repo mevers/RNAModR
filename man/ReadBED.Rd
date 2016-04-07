@@ -17,12 +17,10 @@ Open and read a BED file,  and store the annotation
 features in a GRanges object.
 }
 \examples{
-
 bedFile <- system.file("extdata",
                        "miCLIP_m6A_Linder2015_hg38.bed",
                        package = "RNAModR");
 sites <- ReadBED(bedFile);
 
 }
-\keyword{BED}
 

@@ -1,12 +1,16 @@
+###########################################################################
+########################### CLASS DEFINITION ##############################
+###########################################################################
+
 #' txLoc object definition
 #' 
 #' @rdname txLoc
 #'
 #' @slot loci A list of loci within a transcript section.
-#' @slot id Identifier for sites in \code{txLoc} object.
-#' @slot refGenome Reference genome upon which the transcriptome
+#' @slot id String. Identifier for sites in \code{txLoc} object.
+#' @slot refGenome String. Reference genome upon which the transcriptome
 #' and site positions are based.
-#' @slot version Timestamp for version tracking.
+#' @slot version String. Timestamp for version tracking.
 #' 
 #' @export
 setClass("txLoc",
@@ -21,6 +25,143 @@ setClass("txLoc",
              version = ""),
          );
 
+###########################################################################
+#################### GENERAL CLASS SLOT ACCESSORS #########################
+###########################################################################
+
+#' Generic method "GetLoci" for S4 object txLoc.
+#' 
+#' @rdname txLoc
+#'
+#' @param x A \code{txLoc} object.
+#' 
+#' @export
+setGeneric(name = "GetLoci",
+           def = function(x) {
+               standardGeneric("GetLoci");
+           });
+
+
+#' Method "GetLoci" for S4 object txLoc.
+#'
+#' Get the loci of a \code{txLoc} object
+#' as a list of dataframes.
+#'
+#' @rdname txLoc
+#'
+#' @param x A \code{txLoc} object.
+#'
+#' @return A list of dataframes with loci for
+#' every transcript section.
+#'
+#' @export
+setMethod("GetLoci",
+          signature = "txLoc",
+          definition = function(x) {
+              loc <- slot(x, "loci");
+              return(loc);
+          });
+
+
+#' Generic method "GetId" for S4 object txLoc.
+#' 
+#' @rdname txLoc
+#'
+#' @param x A \code{txLoc} object.
+#' 
+#' @export
+setGeneric(name = "GetId",
+           def = function(x) {
+               standardGeneric("GetId");
+           });
+
+
+#' Method "GetId" for S4 object txLoc.
+#'
+#' Get the id string of a \code{txLoc} object.
+#'
+#' @rdname txLoc
+#'
+#' @param x A \code{txLoc} object.
+#'
+#' @return A string.
+#'
+#' @export
+setMethod("GetId",
+          signature = "txLoc",
+          definition = function(x) {
+              id <- slot(x, "id");
+              return(id);
+          });
+
+
+#' Generic method "GetRef" for S4 object txLoc.
+#' 
+#' @rdname txLoc
+#'
+#' @param x A \code{txLoc} object.
+#' 
+#' @export
+setGeneric(name = "GetRef",
+           def = function(x) {
+               standardGeneric("GetRef");
+           });
+
+
+#' Method "GetRef" for S4 object txLoc.
+#'
+#' Get the reference genome string of a \code{txLoc} object.
+#'
+#' @rdname txLoc
+#'
+#' @param x A \code{txLoc} object.
+#'
+#' @return A string.
+#'
+#' @export
+setMethod("GetRef",
+          signature = "txLoc",
+          definition = function(x) {
+              ref <- slot(x, "refGenome");
+              return(ref);
+          });
+
+
+#' Generic method "GetVersion" for S4 object txLoc.
+#' 
+#' @rdname txLoc
+#'
+#' @param x A \code{txLoc} object.
+#' 
+#' @export
+setGeneric(name = "GetVersion",
+           def = function(x) {
+               standardGeneric("GetVersion");
+           });
+
+
+#' Method "GetVersion" for S4 object txLoc.
+#'
+#' Get the version string of a \code{txLoc} object.
+#'
+#' @rdname txLoc
+#'
+#' @param x A \code{txLoc} object.
+#'
+#' @return A string.
+#'
+#' @export
+setMethod("GetVersion",
+          signature = "txLoc",
+          definition = function(x) {
+              version <- slot(x, "version");
+              return(version);
+          });
+
+
+###########################################################################
+###################### SPECIFIC CLASS ACCESSORS ###########################
+###########################################################################
 
 #' Generic method "info" for S4 object txLoc.
 #' 
@@ -35,7 +176,7 @@ setGeneric(name = "info",
            });
 
 
-#' Method "print" for S4 object txLoc.
+#' Method "info" for S4 object txLoc.
 #'
 #' Print general information of a \code{txLoc} object.
 #'
@@ -84,7 +225,7 @@ setMethod("info",
 #' @export
 setMethod("head",
           signature = "txLoc",
-          definition = function(x, n = 6L) {
+          definition = function(x, n = 6L, ...) {
               loc <- slot(x, "loci");
               nSec <- length(loc);
               for (i in 1:nSec) {
@@ -132,3 +273,5 @@ setMethod("GetNumberOfLoci",
               loc <- slot(x, "loci");
               return(sapply(loc, nrow));
           });
+
+
