@@ -193,7 +193,7 @@ SmartMap <- function(gr,
 #' @export
 GenerateSNMNull <- function(locus,
                             id = NULL,
-                            method = "nuclAbundance",
+                            method = c("nuclAbundance", "permutation"),
                             nucleotide = "C")  {
     # Generate null distribuion of SNM's across different transcript regions.
     #
@@ -213,11 +213,11 @@ GenerateSNMNull <- function(locus,
     #    A txLoc object. Note that genome coordinates are not available for
     #    null sites.
     CheckClass(locus, "txLoc");
+    method <- match.arg(method);
     locusInTx.list <- list();
     refGenome <- GetRef(locus);
     if (is.null(id)) {
-        id <- GetId(locus);
-        id <- sprintf("null_%s", id);
+        id <- sprintf("null_%s", GetId(locus));
     }
     locus <- GetLoci(locus);
     for (i in 1:length(locus)) {
