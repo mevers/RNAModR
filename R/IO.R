@@ -1,12 +1,12 @@
 #' Read BED-formatted file.
 #'
-#' Open and read a BED file,  and store the annotation
-#' features in a GRanges object.
+#' Open and read a BED file, and store the annotation
+#' features in a \code{GRanges} object.
 #'
-#' @param file Input BED file.
+#' @param file A character string; specifies the input BED file.
 #'
-#' @return a GRanges object of features from the BED input file.
-#'
+#' @return A \code{GRanges} object.
+#' 
 #' @examples
 #' bedFile <- system.file("extdata",
 #'                        "miCLIP_m6A_Linder2015_hg38.bed",
@@ -41,8 +41,8 @@ ReadBED <- function(file) {
             file));
     }
     colnames(bed) <- c("chr", "start", "end", "id", "score", "strand");
-    gr <- with(bed,
-               GRanges(chr, IRanges(start + 1, end), strand, score, id = id));
+    gr <- GRanges(bed$chr, IRanges(bed$start+1,bed$end), bed$strand,
+                  score = bed$score, id = bed$id);
     return(gr);
 }
 

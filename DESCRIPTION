@@ -8,6 +8,7 @@ Description: Transcriptome-wide analysis of RNA modifications.
 Imports: AnnotationDbi, GenomeInfoDb, RSQLite
 Depends: GenomicRanges, GenomicFeatures, IRanges, 
 	 rtracklayer
+Suggests: testthat
 License: LGPL (>= 3)
 LazyData: false
 RoxygenNote: 5.0.1.9000
