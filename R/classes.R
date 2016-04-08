@@ -223,6 +223,7 @@ setMethod("info",
 #' @param n Number of rows to be printed.
 #' 
 #' @export
+setGeneric("head");
 setMethod("head",
           signature = "txLoc",
           definition = function(x, n = 6L, ...) {

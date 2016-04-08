@@ -160,7 +160,7 @@ GetRelativeDistance <- function(loc1,
                                 loc2,
                                 filter = NULL,
                                 method = c("ss", "mm", "se", "es", "ee")) {
-    CheckClassTxLocConsistency(locPos, locNeg);
+    CheckClassTxLocConsistency(loc1, loc2);
     method <- match.arg(method);
     id1 <- GetId(loc1);
     id2 <- GetId(loc2);

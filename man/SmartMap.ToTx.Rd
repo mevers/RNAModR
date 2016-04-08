@@ -8,29 +8,44 @@ SmartMap.ToTx(locus, txBySec, seqBySec, geneXID, ignore.strand = FALSE,
   noFactors = TRUE, showPb = FALSE)
 }
 \arguments{
-\item{locus}{A \code{GRanges} object; list of genomic features to
-be mapped.}
+\item{locus}{A \code{GRanges} object; specifies the list of
+genomic features to be mapped.}
 
-\item{txBySec}{List of GRangesList transcript features.}
+\item{txBySec}{A \code{list} of \code{GRangesList} objects;
+specifies the reference transcriptome; the object is usually
+a result of running \code{BuildTx}.}
 
-\item{seqBySec}{List of DNAStringSet sequences.}
+\item{seqBySec}{A \code{list} of \code{DNAStringSet} objects;
+sequences of (some or all) segments from \code{txBySec};
+the object is usually a result of running \code{BuildTx}.}
 
-\item{geneXID}{Dataframe of cross-referencing gene IDs.}
+\item{geneXID}{A \code{data.frame}; specifies different gene
+IDs; the object is usually a result of running \code{BuildTx}.}
 
-\item{ignore.strand}{Ignore strand when mapping genome coordinates to
-transcript coordinates. Default is FALSE.}
+\item{ignore.strand}{A logical scalar; if \code{TRUE} strand
+information is ignored when mapping genome coordinates to
+transcript coordinates; default is \code{FALSE}.}
 
-\item{noFactors}{No (character) factors in output. Default is TRUE.}
+\item{noFactors}{A logical scalar; if \code{TRUE}, the return
+object contains no \code{factors}; default is \code{TRUE}.}
 
-\item{showPb}{A logical scalar; if \code{TRUE} show a progress bar.}
+\item{showPb}{A logical scalar; if \code{TRUE} show a progress
+bar; default is \code{FALSE}.}
 }
 \value{
-A list of dataframes with mapped features in transcript region.
+A \code{list} of \code{data.frame} objects. See
+'Details'.
 }
 \description{
-Map genome coordinates to transcript coordinates. This function
-should not be invoked by the end-user directly. It is called
-from within \code{SmartMap}.
+Map genome coordinates to transcript coordinates. See
+'Details'.
+This is a low-level function that is being called from
+\code{SmartMap}.
 }
-\keyword{internal}
+\details{
+The function maps genomic coordinates from \code{locus} to
+transcript section coordinates from \code{txBySec}. The
+function returns a \code{list} of \code{data.frame} objects
+with additional gene ID and sequence information.
+}
 

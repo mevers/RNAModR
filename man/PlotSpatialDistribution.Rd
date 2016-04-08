@@ -35,6 +35,7 @@ Plot spatial distribution of loci from \code{txLoc} object within every
 transcript section.
 }
 \examples{
+\dontrun{
 bedFile <- system.file("extdata",
                        "miCLIP_m6A_Linder2015_hg38.bed",
                        package = "RNAModR");
@@ -45,6 +46,7 @@ PlotSpatialDistribution(posSites,
                         absolute = TRUE,
                         filter = c("5'UTR", "CDS", "3'UTR"),
                         ylim = c(0, 200));
+}
 
 }
 

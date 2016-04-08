@@ -4,10 +4,10 @@
 \alias{BuildTx}
 \title{Build a custom transcriptome.}
 \usage{
-BuildTx(genome = "hg38", sanityCheck = FALSE)
+BuildTx(genomeVersion = "hg38", sanityCheck = FALSE)
 }
 \arguments{
-\item{genome}{A character string; refers to a specific
+\item{genomeVersion}{A character string; refers to a specific
 reference genome assembly version; default is \code{"hg38"}.}
 
 \item{sanityCheck}{A logical scalar; if \code{TRUE} perform

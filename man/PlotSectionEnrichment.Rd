@@ -23,6 +23,7 @@ Multiple hypothesis testing correction is applied following the method of
 Bejamini and Hochberg.
 }
 \examples{
+\dontrun{
 bedFile <- system.file("extdata",
                        "miCLIP_m6A_Linder2015_hg38.bed",
                        package = "RNAModR");
@@ -31,6 +32,7 @@ posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
 negSites <- GenerateSNMNull(posSites, method = "nuclAbundance");
 PlotSectionEnrichment(posSites, negSites,
                       filter = c("5'UTR", "CDS", "3'UTR"));
+}
 
 }
 

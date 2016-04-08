@@ -23,7 +23,7 @@ Hochberg.
 
 ### Contributors
 
-Please contact [maurits.evers](email:maurits.eves@anu.edu.au) in case of questions/suggestions.
+Please contact [maurits.evers](maurits.evers@anu.edu.au "Email Maurits Evers") in case of questions/suggestions.
 
 ### Licensing
 

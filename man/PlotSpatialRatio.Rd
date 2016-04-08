@@ -25,6 +25,7 @@ the transcript feature. Default is 1000 nt.}
 Plot ratio of two spatial distributions.
 }
 \examples{
+\dontrun{
 bedFile <- system.file("extdata",
                        "miCLIP_m6A_Linder2015_hg38.bed",
                        package = "RNAModR");
@@ -32,6 +33,7 @@ sites <- ReadBED(bedFile);
 posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
 negSites <- GenerateSNMNull(posSites, method = "permutation");
 PlotSpatialRatio(posSites, negSites, c("3'UTR", "CDS", "5'UTR"));
+}
 
 }
 

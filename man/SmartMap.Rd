@@ -4,31 +4,46 @@
 \alias{SmartMap}
 \title{Map genome coordinates to transcript coordinates.}
 \usage{
-SmartMap(gr, id = NULL, refGenome = "hg38", ignore.strand = FALSE)
+SmartMap(locus, id = NULL, refGenome = "hg38", ignore.strand = FALSE)
 }
 \arguments{
-\item{gr}{GRanges object of genomic features}
+\item{locus}{A \code{GRanges} object; specifies the list of
+of genomic features to be mapped.}
 
-\item{id}{Identifier for loci from \code{gr}. If NULL then id = "".
-Default is NULL.}
+\item{id}{A character string; specifies a name for loci from
+\code{locus}; if \code{NULL} then \code{id = ""}; default is
+\code{NULL}.}
 
-\item{refGenome}{Reference transcriptome, defaults to hg38.}
+\item{refGenome}{A character string; specifies a specific
+reference genome assembly version based on which a transcriptome
+is loaded; default is \code{"hg38"}.}
 
-\item{ignore.strand}{Ignore strand when mapping genome coordinates to
-transcript coordinates. Default is FALSE.}
+\item{ignore.strand}{A logical scalar; if \code{TRUE} strand
+information is ignored when mapping genome coordinates to
+transcript coordinates; default is \code{FALSE}.}
 }
 \value{
-A \code{txLoc} object with coordinates from \code{gr} mapped to
-the transcriptome based on assembly version \code{refGenome}.
+A \code{txLoc} object. See 'Details'.
 }
 \description{
 Map genome coordinates to transcript coordinates.
 }
+\details{
+The function maps genomic coordinates from \code{locus} to
+transcript section coordinates. The function automatically
+loads a reference transcriptome based on \code{refGenome}.
+An error is thrown if a reference transcriptome could not
+be found. This usually means that \code{BuildTx} was not yet
+run successfully.
+The function returns a \code{txLoc} object of mapped positions.
+}
 \examples{
+\dontrun{
 bedFile <- system.file("extdata",
                        "miCLIP_m6A_Linder2015_hg38.bed",
                        package = "RNAModR");
 sites <- ReadBED(bedFile);
 txSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
+}
 }
 

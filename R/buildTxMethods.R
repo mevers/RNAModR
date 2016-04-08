@@ -22,9 +22,9 @@
 #' needs to be saved locally as an sqlite db, e.g.
 #' \code{saveDb(x), "txdb_y.sqlite")}, where \code{x} is the
 #' \code{TxDb} object and \code{y} denotes the reference genome
-#' version as in \code{genome}.
+#' version as in \code{genomeVersion}.
 #'
-#' @param genome A character string; refers to a specific
+#' @param genomeVersion A character string; refers to a specific
 #' reference genome assembly version; default is \code{"hg38"}.
 #' @param standardChrOnly A logical scalar; if \code{TRUE} and a
 #' new db is created, keep only fully assembled chromosomes;
@@ -41,7 +41,7 @@
 #' print(txdb);
 #' 
 #' @export
-GetTxDb <- function(genome = "hg38",
+GetTxDb <- function(genomeVersion = "hg38",
                     standardChrOnly = TRUE,
                     forceDownload = FALSE,
                     verbose = FALSE) {
@@ -49,7 +49,7 @@ GetTxDb <- function(genome = "hg38",
     # RefSeq annotation from UCSC. Store database as sqlite file.
     #
     # Args:
-    #   genome: Genome assembly version. Default is "hg38".
+    #   genomeVersion: Genome assembly version. Default is "hg38".
     #   standardChrOnly: As it says. Default is TRUE.
     #   forceDownload: Force re-downloading transcript database from UCSC.
     #                  Default is FALSE.
@@ -57,9 +57,9 @@ GetTxDb <- function(genome = "hg38",
     #
     # Returns:
     #   TxDb object.
-    sqliteFile <- sprintf("txdb_%s.sqlite", genome);
+    sqliteFile <- sprintf("txdb_%s.sqlite", genomeVersion);
     if ((!file.exists(sqliteFile)) || (forceDownload)) {
-        txdb <- makeTxDbFromUCSC(genome = genome,
+        txdb <- makeTxDbFromUCSC(genome = genomeVersion,
                                  tablename = "refGene");
         saveDb(txdb, file = sqliteFile);
     } else {
@@ -128,14 +128,14 @@ GetGeneIds <- function(txdb) {
     }
     if (grepl("(hg38|hg19)", genomeVersion, ignore.case = TRUE)) {
         if (SafeLoad("org.Hs.eg.db")) {
-            refDb <- org.Hs.eg.db;
+            refDb <- get("org.Hs.eg.db");
         } else {
             stop(sprintf("Could not load gene annotation for %s.",
                          genomeVersion));
         }
     } else if (grepl("(mm10|mm9)", genomeVersion, ignore.case = TRUE)) {
         if (SafeLoad("org.Mm.eg.db")) {
-            refDb <- org.Mm.eg.db;
+            refDb <- get("org.Mm.eg.db");
         } else {
             stop(sprintf("Could not load gene annotation for %s.",
                          genomeVersion));
@@ -296,7 +296,7 @@ DedupeBasedOnNearestRef <- function(query, ref, showPb = FALSE) {
         idxQuery <- which(names(query) == dupeID[i]);
         idxRef <- which(names(ref) == dupeID[i]);
         if (length(idxQuery) > 1) {
-            dist <- GenomicRanges::distance(
+            dist <- distance(
                 GenomicRanges::unlist(range(query[idxQuery])),
                 range(ref[[idxRef]]));
             idxMinDist <- which.min(dist);
@@ -382,10 +382,11 @@ CollapseTxBySec <- function(txBySec,
     #      Step 2: Same Entrez ID, multiple CDS isoforms
     #       Example: Entrez ID = 10001
     cds <- txBySec[[whichCDS]];
-    cds <- cds[order(names(cds), -sum(width(cds)))];
+    cds <- cds[order(names(cds), -sum(GenomicRanges::width(cds)))];
     cds <- cds[!duplicated(names(cds))];
     geneData <- geneXID[which(geneXID[, 1] %in% names(cds)), ];
-    geneData$lengthCDS <- sum(width(cds[match(geneData[, 1], names(cds))]));
+    geneData$lengthCDS <- sum(GenomicRanges::width(
+        cds[match(geneData[, 1], names(cds))]));
     geneData <- geneData[order(geneData[, 2], -geneData[, ncol(geneData)]), ];
     geneData <- geneData[!duplicated(geneData[, 2]), ];
     cds <- cds[which(names(cds) %in% geneData[, 1])];
@@ -559,7 +560,7 @@ GetTxSeq <- function(txBySec,
                          width = 80,
                          style = 3);
     for (i in 1:length(sections)) {
-        seq <- extractTranscriptSeqs(genome,txBySec[[i]]);
+        seq <- extractTranscriptSeqs(genome, txBySec[[i]]);
         txSequences[[length(txSequences)+1]] <- seq;
         setTxtProgressBar(pb, i);
     }
@@ -580,24 +581,27 @@ GetTxSeq <- function(txBySec,
 #' UTRs. Transcript segments are stored per transcript section, and
 #' written to a \code{.RData} file.
 #' 
-#' @param genome A character string; refers to a specific
+#' @param genomeVersion A character string; refers to a specific
 #' reference genome assembly version; default is \code{"hg38"}.
 #' @param sanityCheck A logical scalar; if \code{TRUE} perform
 #' sanity checks.
 #'
+#' @import AnnotationDbi GenomeInfoDb GenomicRanges GenomicFeatures
+#' IRanges RSQLite
+#'
 #' @export
-BuildTx <- function(genome = "hg38", sanityCheck = FALSE) {
+BuildTx <- function(genomeVersion = "hg38", sanityCheck = FALSE) {
     # Build a custom transcriptome.
     #
     # Args:
-    #   genome: Genome assembly version. Default is "hg38".
+    #   genomeVersion: Genome assembly version. Default is "hg38".
     #
     # Returns:
     #   NULL
     cat("Building the transcriptome. This will take a few minutes.\n");
     cat("This should only need to be done once.\n");
     cat("Stage 1/5: Getting transcripts and gene annotations.\n");
-    txdb <- GetTxDb(genome = genome);
+    txdb <- GetTxDb(genomeVersion = genomeVersion);
     geneXID <- GetGeneIds(txdb);
     cat("Stage 2/5: Getting transcript segments for every section.\n");
     txBySec <- GetTxBySec(txdb);
@@ -613,7 +617,7 @@ BuildTx <- function(genome = "hg38", sanityCheck = FALSE) {
     seqBySec <- GetTxSeq(txBySec);
     cat("Stage 5/5: Storing results in file.\n");
     save(geneXID, txBySec, seqBySec,
-         file = sprintf("tx_%s.RData", genome),
+         file = sprintf("tx_%s.RData", genomeVersion),
          compress = "gzip");
     cat("[DONE]\n");
 }

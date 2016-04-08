@@ -94,12 +94,14 @@ PlotTxLengthDistribution <- function(txFeatures,
 #' @param locus A \code{txLoc} object.
 #'
 #' @examples
+#' \dontrun{
 #' bedFile <- system.file("extdata",
 #'                        "miCLIP_m6A_Linder2015_hg38.bed",
 #'                        package = "RNAModR");
 #' sites <- ReadBED(bedFile);
 #' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
 #' PlotPieNumberOfLoci(posSites);
+#' }
 #'
 #' @export
 PlotPieNumberOfLoci <- function(locus) {
@@ -142,6 +144,7 @@ PlotPieNumberOfLoci <- function(locus) {
 #' @param ... Additional parameters passed to plot.
 #'
 #' @examples
+#' \dontrun{
 #' bedFile <- system.file("extdata",
 #'                        "miCLIP_m6A_Linder2015_hg38.bed",
 #'                        package = "RNAModR");
@@ -152,6 +155,7 @@ PlotPieNumberOfLoci <- function(locus) {
 #'                         absolute = TRUE,
 #'                         filter = c("5'UTR", "CDS", "3'UTR"),
 #'                         ylim = c(0, 200));
+#' }
 #' 
 #' @export
 PlotSpatialDistribution <- function(locus,
@@ -432,6 +436,7 @@ PlotEnrichment.Generic <- function(mat, title = "",
 #' @param withExtendedAxisLabel Plot extended axis labels. Default is 2. See ??? for details.
 #'
 #' @examples
+#' \dontrun{
 #' bedFile <- system.file("extdata",
 #'                        "miCLIP_m6A_Linder2015_hg38.bed",
 #'                        package = "RNAModR");
@@ -440,6 +445,7 @@ PlotEnrichment.Generic <- function(mat, title = "",
 #' negSites <- GenerateSNMNull(posSites, method = "nuclAbundance");
 #' PlotSectionEnrichment(posSites, negSites,
 #'                       filter = c("5'UTR", "CDS", "3'UTR"));
+#' }
 #'
 #' @export
 PlotSectionEnrichment <- function(locPos,
@@ -494,6 +500,7 @@ PlotSectionEnrichment <- function(locPos,
 #' Default is 1000 nt.
 #'
 #' @examples
+#' \dontrun{
 #' bedFile <- system.file("extdata",
 #'                        "miCLIP_m6A_Linder2015_hg38.bed",
 #'                        package = "RNAModR");
@@ -502,6 +509,7 @@ PlotSectionEnrichment <- function(locPos,
 #' negSites <- GenerateSNMNull(posSites, method = "permutation");
 #' PlotSpatialEnrichment(posSites, negSites,
 #'                       filter = c("5'UTR", "CDS", "3'UTR"));
+#' }
 #'
 #' @export
 PlotSpatialEnrichment <- function(locPos,
@@ -579,6 +587,7 @@ PlotSpatialEnrichment <- function(locPos,
 #' the transcript feature. Default is 1000 nt.
 #'
 #' @examples
+#' \dontrun{
 #' bedFile <- system.file("extdata",
 #'                        "miCLIP_m6A_Linder2015_hg38.bed",
 #'                        package = "RNAModR");
@@ -586,6 +595,7 @@ PlotSpatialEnrichment <- function(locPos,
 #' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
 #' negSites <- GenerateSNMNull(posSites, method = "permutation");
 #' PlotSpatialRatio(posSites, negSites, c("3'UTR", "CDS", "5'UTR"));
+#' }
 #' 
 #' @export
 PlotSpatialRatio <- function(locPos, locNeg,

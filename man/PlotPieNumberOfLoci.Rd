@@ -13,12 +13,14 @@ PlotPieNumberOfLoci(locus)
 Plot piechart of the number of loci in every transcript section.
 }
 \examples{
+\dontrun{
 bedFile <- system.file("extdata",
                        "miCLIP_m6A_Linder2015_hg38.bed",
                        package = "RNAModR");
 sites <- ReadBED(bedFile);
 posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
 PlotPieNumberOfLoci(posSites);
+}
 
 }
 

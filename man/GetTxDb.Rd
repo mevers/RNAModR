@@ -4,11 +4,11 @@
 \alias{GetTxDb}
 \title{Download a new or load an existing reference transcriptome.}
 \usage{
-GetTxDb(genome = "hg38", standardChrOnly = TRUE, forceDownload = FALSE,
-  verbose = FALSE)
+GetTxDb(genomeVersion = "hg38", standardChrOnly = TRUE,
+  forceDownload = FALSE, verbose = FALSE)
 }
 \arguments{
-\item{genome}{A character string; refers to a specific
+\item{genomeVersion}{A character string; refers to a specific
 reference genome assembly version; default is \code{"hg38"}.}
 
 \item{standardChrOnly}{A logical scalar; if \code{TRUE} and a
@@ -47,7 +47,7 @@ In order to use a custom transcriptome, the \code{TxDb} object
 needs to be saved locally as an sqlite db, e.g.
 \code{saveDb(x), "txdb_y.sqlite")}, where \code{x} is the
 \code{TxDb} object and \code{y} denotes the reference genome
-version as in \code{genome}.
+version as in \code{genomeVersion}.
 }
 \examples{
 txdb <- GetTxDb();

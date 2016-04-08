@@ -12,7 +12,7 @@
 \alias{GetRef,txLoc-method}
 \alias{GetVersion}
 \alias{GetVersion,txLoc-method}
-\alias{head,txLoc-method}
+\alias{head}
 \alias{info}
 \alias{info,txLoc-method}
 \alias{txLoc-class}
@@ -38,7 +38,7 @@ info(x)
 
 \S4method{info}{txLoc}(x)
 
-\S4method{head}{txLoc}(x, n = 6L)
+head(x, ...)
 
 GetNumberOfLoci(x)
 
@@ -47,27 +47,27 @@ GetNumberOfLoci(x)
 \arguments{
 \item{x}{A \code{txLoc} object.}
 
+\item{x}{A \code{txLoc} object.}
+
+\item{x}{A \code{txLoc} object.}
+
+\item{x}{A \code{txLoc} object.}
+
+\item{x}{A \code{txLoc} object.}
+
+\item{x}{A \code{txLoc} object.}
+
+\item{x}{A \code{txLoc} object.}
+
+\item{x}{A \code{txLoc} object.}
+
+\item{x}{A \code{txLoc} object.}
+
+\item{x}{A \code{txLoc} object.}
+
+\item{x}{A \code{txLoc} object.}
+
 \item{n}{Number of rows to be printed.}
-
-\item{x}{A \code{txLoc} object.}
-
-\item{x}{A \code{txLoc} object.}
-
-\item{x}{A \code{txLoc} object.}
-
-\item{x}{A \code{txLoc} object.}
-
-\item{x}{A \code{txLoc} object.}
-
-\item{x}{A \code{txLoc} object.}
-
-\item{x}{A \code{txLoc} object.}
-
-\item{x}{A \code{txLoc} object.}
-
-\item{x}{A \code{txLoc} object.}
-
-\item{x}{A \code{txLoc} object.}
 
 \item{x}{A \code{txLoc} object.}
 

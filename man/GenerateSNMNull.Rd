@@ -4,7 +4,7 @@
 \alias{GenerateSNMNull}
 \title{Generate a null distribution of transcript sites based on features from locus.}
 \usage{
-GenerateSNMNull(locus, id = NULL, method = "nuclAbundance",
+GenerateSNMNull(locus, id = NULL, method = c("ntAbund", "perm"),
   nucleotide = "C")
 }
 \arguments{
@@ -32,12 +32,14 @@ available for null sites.
 Generate a null distribution of transcript sites based on features from locus.
 }
 \examples{
+\dontrun{
 bedFile <- system.file("extdata",
                        "miCLIP_m6A_Linder2015_hg38.bed",
                        package = "RNAModR");
 sites <- ReadBED(bedFile);
 posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
 negSites <- GenerateSNMNull(posSites, method = "permutation");
+}
 
 }
 
