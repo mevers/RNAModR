@@ -599,6 +599,8 @@ GetTxSeq <- function(txBySec,
 #' 
 #' @param genomeVersion A character string; refers to a specific
 #' reference genome assembly version; default is \code{"hg38"}.
+#' @param force A logical scalar; if \code{TRUE} force rebuild of
+#' transcriptome; this will overwrite existing data.
 #' @param sanityCheck A logical scalar; if \code{TRUE} perform
 #' sanity checks.
 #'
@@ -606,7 +608,9 @@ GetTxSeq <- function(txBySec,
 #' IRanges RSQLite
 #'
 #' @export
-BuildTx <- function(genomeVersion = "hg38", sanityCheck = FALSE) {
+BuildTx <- function(genomeVersion = "hg38",
+                    force = FALSE,
+                    sanityCheck = FALSE) {
     # Build a custom transcriptome.
     #
     # Args:
@@ -614,32 +618,38 @@ BuildTx <- function(genomeVersion = "hg38", sanityCheck = FALSE) {
     #
     # Returns:
     #   NULL
-    cat("Building the transcriptome. This will take a few minutes.\n");
-    cat("This should only need to be done once.\n");
-    cat(sprintf("%s Stage 1/5: Getting transcripts and gene annotations.\n",
-                format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
-    txdb <- GetTxDb(genomeVersion = genomeVersion);
-    geneXID <- GetGeneIds(txdb);
-    cat(sprintf("%s Stage 2/5: Splitting transcript by section.\n",
-                format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
-    txBySec <- GetTxBySec(txdb);
-    if (sanityCheck) {
-        PerformSanityCheck(txBySec);
+    fn <- sprintf("tx_%s.RData", genomeVersion);
+    if (file.exists(fn)) {
+        cat("Found existing transcriptome data.\n");
+        cat("To rebuild run with force = TRUE.\n");
+    } else if (!file.exists(fn) || (force == TRUE)) {
+        cat("Building the transcriptome. This will take a few minutes.\n");
+        cat("This should only need to be done once.\n");
+        cat(sprintf("%s Stage 1/5: Getting transcripts and gene annotations.\n",
+                    format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
+        txdb <- GetTxDb(genomeVersion = genomeVersion);
+        geneXID <- GetGeneIds(txdb);
+        cat(sprintf("%s Stage 2/5: Splitting transcript by section.\n",
+                    format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
+        txBySec <- GetTxBySec(txdb);
+        if (sanityCheck) {
+            PerformSanityCheck(txBySec);
+        }
+        cat(sprintf("%s Stage 3/5: Collapsing isoforms.\n",
+                    format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
+        txBySec <- CollapseTxBySec(txBySec, geneXID);
+        if (sanityCheck) {
+            PerformSanityCheck(txBySec);
+        }
+        cat(sprintf("%s Stage 4/5: Obtaining sequences.\n",
+                    format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
+        seqBySec <- GetTxSeq(txBySec);
+        cat(sprintf("%s Stage 5/5: Storing results in file.\n",
+                    format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
+        save(geneXID, txBySec, seqBySec,
+             file = fn,
+             compress = "gzip");
+        cat(sprintf("%s [DONE]\n",
+                    format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
     }
-    cat(sprintf("%s Stage 3/5: Collapsing isoforms.\n",
-                format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
-    txBySec <- CollapseTxBySec(txBySec, geneXID);
-    if (sanityCheck) {
-        PerformSanityCheck(txBySec);
-    }
-    cat(sprintf("%s Stage 4/5: Obtaining sequences.\n",
-                format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
-    seqBySec <- GetTxSeq(txBySec);
-    cat(sprintf("%s Stage 5/5: Storing results in file.\n",
-                format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
-    save(geneXID, txBySec, seqBySec,
-         file = sprintf("tx_%s.RData", genomeVersion),
-         compress = "gzip");
-    cat(sprintf("%s [DONE]\n",
-                format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
 }

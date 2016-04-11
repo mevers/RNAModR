@@ -24,10 +24,6 @@ info(x)
 \item{...}{Additional parameters passed to \code{head}.}
 
 \item{x}{A \code{txLoc} object.}
-
-\item{x}{A \code{txLoc} object.}
-
-\item{x}{A \code{txLoc} object.}
 }
 \value{
 A named integer vector with the number of sites per

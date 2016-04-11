@@ -6,9 +6,6 @@
 \usage{
 GetId(x)
 }
-\arguments{
-\item{x}{A \code{txLoc} object.}
-}
 \description{
 Generic method "GetId" for S4 object txLoc.
 }

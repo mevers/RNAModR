@@ -139,6 +139,35 @@ LoadRefTx <- function(refGenome = "hg38",
 }
 
 
+#' Filter sections of a \code{txLoc} object.
+#'
+#' Filter sections of a \code{txLoc} object.
+#'
+#' @param locus A \code{txLoc} object.
+#' @param filter A character vector; only keep transcript sections
+#' specified in \code{filter}; if \code{NULL} consider all sections.
+#'
+#' @return A \code{txLoc} object.
+#' 
+#' @export
+FilterTxLoc <- function(locus, filter = NULL) {
+    CheckClass(locus, "txLoc");
+    id <- GetId(locus);
+    refGenome <- GetRef(locus);
+    version <- GetVersion(locus);
+    locus <- GetLoci(locus);
+    if (!is.null(filter)) {
+        locus <- locus[which(names(locus) %in% filter)];
+    }
+    obj <- new("txLoc",
+               loci = locus,
+               id = id,
+               refGenome = refGenome,
+               version = version);
+    return(obj);
+}
+
+
 #' Calculate 95% confidence interval from data using empirical
 #' bootstrap.
 #'

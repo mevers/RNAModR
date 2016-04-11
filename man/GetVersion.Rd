@@ -6,9 +6,6 @@
 \usage{
 GetVersion(x)
 }
-\arguments{
-\item{x}{A \code{txLoc} object.}
-}
 \description{
 Generic method "GetVersion" for S4 object txLoc.
 }

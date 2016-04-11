@@ -29,8 +29,6 @@ setClass("txLoc",
 
 #' Generic method "GetLoci" for S4 object txLoc.
 #' 
-#' @param x A \code{txLoc} object.
-#' 
 #' @keywords internal
 #' 
 #' @export
@@ -44,8 +42,6 @@ setGeneric(name = "GetLoci",
 #'
 #' Get the loci of a \code{txLoc} object
 #' as a list of dataframes.
-#'
-#' @param x A \code{txLoc} object.
 #'
 #' @return A list of dataframes with loci for
 #' every transcript section.
@@ -63,8 +59,6 @@ setMethod("GetLoci",
 
 #' Generic method "GetId" for S4 object txLoc.
 #' 
-#' @param x A \code{txLoc} object.
-#' 
 #' @keywords internal
 #' 
 #' @export
@@ -77,8 +71,6 @@ setGeneric(name = "GetId",
 #' Method "GetId" for S4 object txLoc.
 #'
 #' Get the id string of a \code{txLoc} object.
-#'
-#' @param x A \code{txLoc} object.
 #'
 #' @return A string.
 #'
@@ -95,8 +87,6 @@ setMethod("GetId",
 
 #' Generic method "GetRef" for S4 object txLoc.
 #' 
-#' @param x A \code{txLoc} object.
-#' 
 #' @keywords internal
 #' 
 #' @export
@@ -109,8 +99,6 @@ setGeneric(name = "GetRef",
 #' Method "GetRef" for S4 object txLoc.
 #'
 #' Get the reference genome string of a \code{txLoc} object.
-#'
-#' @param x A \code{txLoc} object.
 #'
 #' @return A string.
 #'
@@ -127,8 +115,6 @@ setMethod("GetRef",
 
 #' Generic method "GetVersion" for S4 object txLoc.
 #' 
-#' @param x A \code{txLoc} object.
-#' 
 #' @keywords internal
 #' 
 #' @export
@@ -141,8 +127,6 @@ setGeneric(name = "GetVersion",
 #' Method "GetVersion" for S4 object txLoc.
 #'
 #' Get the version string of a \code{txLoc} object.
-#'
-#' @param x A \code{txLoc} object.
 #'
 #' @return A string.
 #'
@@ -165,8 +149,6 @@ setMethod("GetVersion",
 #' 
 #' @rdname txLoc
 #'
-#' @param x A \code{txLoc} object.
-#' 
 #' @export
 setGeneric(name = "info",
            def = function(x) {
@@ -179,8 +161,6 @@ setGeneric(name = "info",
 #' Print general information of a \code{txLoc} object.
 #'
 #' @rdname txLoc
-#'
-#' @param x A \code{txLoc} object.
 #'
 #' @examples
 #' \dontrun{

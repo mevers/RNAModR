@@ -4,11 +4,14 @@
 \alias{BuildTx}
 \title{Build a custom transcriptome.}
 \usage{
-BuildTx(genomeVersion = "hg38", sanityCheck = FALSE)
+BuildTx(genomeVersion = "hg38", force = FALSE, sanityCheck = FALSE)
 }
 \arguments{
 \item{genomeVersion}{A character string; refers to a specific
 reference genome assembly version; default is \code{"hg38"}.}
+
+\item{force}{A logical scalar; if \code{TRUE} force rebuild of
+transcriptome; this will overwrite existing data.}
 
 \item{sanityCheck}{A logical scalar; if \code{TRUE} perform
 sanity checks.}

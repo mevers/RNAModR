@@ -7,9 +7,6 @@
 \usage{
 \S4method{GetRef}{txLoc}(x)
 }
-\arguments{
-\item{x}{A \code{txLoc} object.}
-}
 \value{
 A string.
 }

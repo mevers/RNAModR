@@ -6,9 +6,6 @@
 \usage{
 GetLoci(x)
 }
-\arguments{
-\item{x}{A \code{txLoc} object.}
-}
 \description{
 Generic method "GetLoci" for S4 object txLoc.
 }

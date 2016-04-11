@@ -7,9 +7,6 @@
 \usage{
 \S4method{GetLoci}{txLoc}(x)
 }
-\arguments{
-\item{x}{A \code{txLoc} object.}
-}
 \value{
 A list of dataframes with loci for
 every transcript section.

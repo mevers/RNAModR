@@ -402,3 +402,61 @@ GenerateNull <- function(locus,
 }
 
 
+#' Calculate GC content within window around loci from a \code{txLoc}
+#' object.
+#'
+#' Calculate GC content within window around loci from a \code{txLoc}
+#' object. See 'Details'.
+#'
+#' The function calculates the GC content within a region around every
+#' transcript locus from a \code{txLoc} object. The window is defined
+#' by extending the position of every transcript locus upstream and
+#' downstream by \code{flank} nucleotides (if possible).
+#'
+#' @param locus A \code{txLoc} object.
+#' @param flank An integer scalar; see 'Details'.
+#'
+#' @import Biostrings
+#'
+#' @export
+CalculateGC <- function(locus, flank = 10) {
+    # Calculate GC contents of region and within window around site.
+    #
+    # Args:
+    #   locus: List of dataframes with mapped features across different
+    #          transcript regions
+    #
+    # Returns:
+    #   locus with appended columns for GC content
+    CheckClass(locus, "txLoc");
+    id <- GetId(locus);
+    refGenome <- GetRef(locus);
+    locus <- GetLoci(locus);
+    if (!SafeLoad("Biostrings")) {
+        stop("Could not load library Biostrings.");
+    }
+    for (i in 1:length(locus)) {
+            seq <- BStringSet(locus[[i]]$REGION_SEQ);
+            nucFreq <- letterFrequency(seq,
+                                       letters = c("A", "C", "G", "T"));
+            GC <- rowSums(nucFreq[, c(2, 3)]) / width(seq);
+            locus[[i]]$REGION_GC <- GC;
+        if (is.numeric(locus[[i]]$TXSTART)) {
+            x1 <- locus[[i]]$TXSTART - flank;
+            x2 <- locus[[i]]$TXSTART + flank;
+            subSeq <- BStringSet(substr(locus[[i]]$REGION_SEQ, x1, x2));
+            nucFreq <- letterFrequency(subSeq,
+                                       letters = c("A", "C", "G", "T"));
+            GC <- rowSums(nucFreq[, c(2, 3)]) / nchar(subSeq);
+            locus[[i]]$SITE_GC <- GC;
+        } else {
+            locus[[i]]$SITE_GC <- rep(NA, nrow(locus[[i]]));
+        }
+    }
+    obj <- new("txLoc",
+               loci = locus,
+               id = id,
+               refGenome = refGenome,
+               version  = as.character(Sys.Date()));
+    return(obj);
+}

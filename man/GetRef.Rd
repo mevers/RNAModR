@@ -6,9 +6,6 @@
 \usage{
 GetRef(x)
 }
-\arguments{
-\item{x}{A \code{txLoc} object.}
-}
 \description{
 Generic method "GetRef" for S4 object txLoc.
 }

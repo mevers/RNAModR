@@ -4,10 +4,11 @@
 #' GRangesList transcript features.
 #'
 #' @param txFeatures List of \code{GRangesList} transcript features.
-#' @param asLog Plot length distribution on a log scale. Default is \code{TRUE}.
-#' @param printMetrics Print median and mad. If \code{FALSE}, then print mean and sd.
-#' Default is \code{TRUE}.
-#' @param filter Only plot transcript regions specified in filter.
+#' @param asLog Plot length distribution on a log scale. Default is
+#' \code{TRUE}.
+#' @param printMetrics Print median and mad. If \code{FALSE}, print
+#' mean and sd. Default is \code{TRUE}.
+#' @param filter Only plot transcript sections specified in \code{filter}.
 #' For example, \code{filter = c("3'UTR", "5'UTR")} plots length distributions
 #' of the 3'/5'UTRs only.
 #' @param outliers Show outliers in boxplot. Default is \code{FALSE}.
@@ -92,6 +93,8 @@ PlotTxLengthDistribution <- function(txFeatures,
 #' Plot piechart of the number of loci in every transcript section.
 #'
 #' @param locus A \code{txLoc} object.
+#' @param filter A character vector; only consider transcript sections
+#' specified in \code{filter}; if \code{NULL} consider all sections. 
 #'
 #' @examples
 #' \dontrun{
@@ -112,10 +115,9 @@ PlotPieNumberOfLoci <- function(locus, filter = NULL) {
     #
     # Returns:
     #   NULL
-    if (!is.null(filter)) {
-        locus <- locus[which(names(locus) %in% filter)];
-    }
-
+#    if (!is.null(filter)) {
+#        locus <- locus[which(names(locus) %in% filter)];
+#    }
     id <- GetId(locus);
     N <- GetNumberOfLoci(locus);
     labels <- names(GetLoci(locus));
@@ -703,3 +705,110 @@ PlotSpatialRatio <- function(locPos, locNeg,
         }
     }
 }
+
+
+#' Plot GC content.
+#'
+#' Plot GC content.
+#'
+#' @param locPos A \code{txLoc} object.
+#' @param locNeg A \code{txLoc} object.
+#' @param filter A logical scalar; only consider loci in transcript
+#' regions specified in filter; Default is \code{NULL}.
+#' @param geneNorm A logical scalar; if \code{TRUE} normalise GC
+#' content in window to GC content of transcript section; default
+#' is \code{FALSE}.
+#'
+#' @importFrom beanplot beanplot
+#' 
+#' @export
+PlotGC <- function(locPos, locNeg,
+                   filter = NULL,
+                   geneNorm = FALSE) {
+    # Plot and compare GC content.
+    #
+    # Args:
+    #   locPos: A txLoc object of the positive control sites
+    #   locNeg: A txLoc object of the negative control sites.
+    #
+    # Returns:
+    #   NULL
+    CheckClassTxLocConsistency(locPos, locNeg);
+    idPos <- GetId(locPos);
+    idNeg <- GetId(locNeg);
+    refGenome <- GetRef(locPos);
+    locPos <- GetLoci(locPos);
+    locNeg <- GetLoci(locNeg);
+    if (!is.null(filter)) {
+        locPos <- locPos[which(names(locPos) %in% filter)];
+        locNeg <- locNeg[which(names(locNeg) %in% filter)];
+    }
+    if (length(grep("GC", colnames(locPos[[1]]))) < 1) {
+        ss <- sprintf("Could not find GC content data in %s.",
+                      idPos);
+        ss <- sprintf("%s\nRunning CalculateGC(...) might fix that.",
+                      ss);
+        stop(ss);
+        
+    }
+    if (length(grep("GC", colnames(locNeg[[1]]))) < 1) {
+        ss <- sprintf("Could not find GC content data in %s.",
+                      idNeg);
+        ss <- sprintf("%s\nRunning CalculateGC(...) might fix that.",
+                      ss);
+        stop(ss);
+    }
+    if (length(locPos) < 4) {
+        par(mfrow = c(1, length(locPos)));
+    } else {
+        par(mfrow = c(ceiling(length(locPos) / 2), 2));
+    }
+    labels <- c(idPos, idNeg);
+    GC1 <- unlist(sapply(locPos, function(x) {x$SITE_GC}));
+    GC2 <- unlist(sapply(locNeg, function(x) {x$SITE_GC}));
+    GC1 <- GC1[!is.na(GC1)];
+    GC2 <- GC2[!is.na(GC2)];
+    GCall <- c(GC1, GC2);
+    for (i in 1:length(locPos)) {
+        GC1 <- locPos[[i]]$SITE_GC;
+        GC2 <- locNeg[[i]]$SITE_GC;
+        if (geneNorm) {
+            GC1 <- GC1 / locPos[[i]]$REGION_GC;
+            GC2 <- GC2 / locNeg[[i]]$REGION_GC;
+        }
+        ttest <- t.test(GC1, GC2);
+        wtest <- wilcox.test(GC1, GC2);
+        ylab <- "GC content";
+        ylim <- c(min(GCall), 1.0);
+        if (geneNorm) {
+            ylab <- "GC content / gene region GC content";
+            ylim <- c(0.0, 3.0);
+        }
+        title <- sprintf("%s (%i,%i)\nt-test: diff = %4.3f, 95%%CI = (%4.3f,%4.3f), p = %4.3e\n",
+                         names(locPos)[i],
+                         length(GC1), length(GC2),
+                         ttest$estimate[1] - ttest$estimate[2],
+                         min(ttest$conf.int),
+                         max(ttest$conf.int),
+                         ttest$p.value,
+                         wtest$p.value);
+#        boxplot(list(GC1, GC2),
+#                names = labels,
+#                ylab = ylab,
+#                ylim = ylim,
+#                main = title,
+#                cex.main = 0.8,
+#                outline = FALSE,
+#                font.main = 1);
+        beanplot(list(GC1, GC2),
+                 names = labels,
+                 ylab = ylab,
+                 ylim = ylim,
+                 main = title,
+                 cex.main = 0.8,
+                 font.main = 1,
+                 col = rgb(1,0,0,0.5),
+                 l = 0.05);
+    }
+}
+

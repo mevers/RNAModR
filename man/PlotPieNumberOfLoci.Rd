@@ -4,10 +4,13 @@
 \alias{PlotPieNumberOfLoci}
 \title{Plot piechart of the number of loci in every transcript section.}
 \usage{
-PlotPieNumberOfLoci(locus)
+PlotPieNumberOfLoci(locus, filter = NULL)
 }
 \arguments{
 \item{locus}{A \code{txLoc} object.}
+
+\item{filter}{A character vector; only consider transcript sections
+specified in \code{filter}; if \code{NULL} consider all sections.}
 }
 \description{
 Plot piechart of the number of loci in every transcript section.

@@ -10,12 +10,13 @@ PlotTxLengthDistribution(txFeatures, asLog = TRUE, printMetrics = "median",
 \arguments{
 \item{txFeatures}{List of \code{GRangesList} transcript features.}
 
-\item{asLog}{Plot length distribution on a log scale. Default is \code{TRUE}.}
+\item{asLog}{Plot length distribution on a log scale. Default is
+\code{TRUE}.}
 
-\item{printMetrics}{Print median and mad. If \code{FALSE}, then print mean and sd.
-Default is \code{TRUE}.}
+\item{printMetrics}{Print median and mad. If \code{FALSE}, print
+mean and sd. Default is \code{TRUE}.}
 
-\item{filter}{Only plot transcript regions specified in filter.
+\item{filter}{Only plot transcript sections specified in \code{filter}.
 For example, \code{filter = c("3'UTR", "5'UTR")} plots length distributions
 of the 3'/5'UTRs only.}
 
