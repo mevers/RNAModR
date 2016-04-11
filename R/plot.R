@@ -104,7 +104,7 @@ PlotTxLengthDistribution <- function(txFeatures,
 #' }
 #'
 #' @export
-PlotPieNumberOfLoci <- function(locus) {
+PlotPieNumberOfLoci <- function(locus, filter = NULL) {
     # Plot piechart of the mumber of loci in every transcript section.
     #
     # Args:
@@ -112,6 +112,10 @@ PlotPieNumberOfLoci <- function(locus) {
     #
     # Returns:
     #   NULL
+    if (!is.null(filter)) {
+        locus <- locus[which(names(locus) %in% filter)];
+    }
+
     id <- GetId(locus);
     N <- GetNumberOfLoci(locus);
     labels <- names(GetLoci(locus));

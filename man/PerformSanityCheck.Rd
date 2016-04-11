@@ -21,4 +21,5 @@ across a list of transcripts sections. For example, the return
 object of \code{CollapseTxBySec} should contain transcript
 segments for every transcript section with a unique RefSeq ID.
 }
+\keyword{internal}
 

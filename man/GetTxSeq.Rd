@@ -26,4 +26,5 @@ Get sequences for transcript segments.
 This is a low-level function that is being called from
 \code{BuildTx}.
 }
+\keyword{internal}
 

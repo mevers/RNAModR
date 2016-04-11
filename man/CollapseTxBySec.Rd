@@ -38,4 +38,5 @@ the case of a distance tie, the longest UTR is kept.
 corresponding upstream promoter is chosen.
 }
 }
+\keyword{internal}
 

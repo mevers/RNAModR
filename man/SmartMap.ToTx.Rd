@@ -48,4 +48,5 @@ transcript section coordinates from \code{txBySec}. The
 function returns a \code{list} of \code{data.frame} objects
 with additional gene ID and sequence information.
 }
+\keyword{internal}
 

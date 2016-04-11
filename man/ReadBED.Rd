@@ -7,14 +7,14 @@
 ReadBED(file)
 }
 \arguments{
-\item{file}{Input BED file.}
+\item{file}{A character string; specifies the input BED file.}
 }
 \value{
-a GRanges object of features from the BED input file.
+A \code{GRanges} object.
 }
 \description{
-Open and read a BED file,  and store the annotation
-features in a GRanges object.
+Open and read a BED file, and store the annotation
+features in a \code{GRanges} object.
 }
 \examples{
 bedFile <- system.file("extdata",

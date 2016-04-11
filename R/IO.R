@@ -47,13 +47,15 @@ ReadBED <- function(file) {
 }
 
 
-#' Write a list of GRangesList to BED file
+#' Write a \code{list} of \code{GRangesList} to a BED file.
 #'
-#' Write a list of GRangesList transcript features to a BED file.
-#' One file per transcript region.
+#' Write a \code{list} of \code{GRangesList} to a BED file.
+#' One file per transcript region is generated.
 #'
-#' @param txFeatures List of GRangesList.
+#' @param txFeatures A \code{list} of \code{GRangesList} objects.
 #'
+#' @importFrom rtracklayer export
+#' 
 #' @export
 WriteFeatToBED <- function(txFeatures) {
     # Write list of GRangesList transcript features to BED file.
@@ -99,15 +101,21 @@ WriteLocusToBED <- function(locus,
     BED <- vector();
     for (i in 1:length(locus)) {
         feat <- locus[[i]][, c("CHR", "START", "STOP", "ID", "SCORE", "STRAND")];
-        if (formatChr == "noChrName") {
-            feat[, 1] <- gsub("chr", "", feat[ ,1]);
+        if (is.numeric(feat[, 2]) && is.numeric(feat[, 3])) {
+            if (formatChr == "noChrName") {
+                feat[, 1] <- gsub("chr", "", feat[ ,1]);
+            }
+            feat[, 2] <- feat[ ,2] - 1;
+            feat[, 4] <- sprintf("%s|%s|%s",
+                                 feat[, 4],
+                                 locus[[i]][, c("GENE_ENSEMBL")],
+                                 names(locus)[i]);
+            BED <- rbind(BED, feat);
+        } else {
+            ss <- sprintf("Skipping %s.\n", names(locus)[i]);
+            warning(ss);
         }
-        feat[, 2] <- feat[ ,2] - 1;
-        feat[, 4] <- sprintf("%s|%s|%s",
-                             feat[, 4],
-                             locus[[i]][, c("GENE_ENSEMBL")],
-                             names(locus)[i]);
-        BED <- rbind(BED, feat);
+        
     }
     BED <- BED[order(BED[, 1], BED[, 2]), ];
     if (is.null(file)) {

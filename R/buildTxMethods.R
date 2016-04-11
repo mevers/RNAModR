@@ -36,9 +36,13 @@
 #'
 #' @return A \code{TxDb} object. See 'Details'.
 #'
+#' @keywords internal
+#'
 #' @examples
+#' \dontrun{
 #' txdb <- GetTxDb();
 #' print(txdb);
+#' }
 #' 
 #' @export
 GetTxDb <- function(genomeVersion = "hg38",
@@ -112,6 +116,8 @@ GetTxDb <- function(genomeVersion = "hg38",
 #'
 #' @return A \code{data.frame}. See 'Details'.
 #' 
+#' @keywords internal
+#'
 #' @export
 GetGeneIds <- function(txdb) {
     # Get different cross-referencing gene IDs based on sqlite
@@ -190,6 +196,8 @@ GetGeneIds <- function(txdb) {
 #' output and additional warnings; default is \code{FALSE}.
 #'
 #' @return A \code{list} of \code{GRangesList} objects
+#'
+#' @keywords internal
 #'
 #' @export
 GetTxBySec <- function(txdb,
@@ -278,6 +286,8 @@ GetTxBySec <- function(txdb,
 #'
 #' @return A \code{GRangesList} object.
 #'
+#' @keywords internal
+#'
 #' @export
 DedupeBasedOnNearestRef <- function(query, ref, showPb = FALSE) {
     query <- query[which(elementLengths(query) > 0)];
@@ -340,6 +350,8 @@ DedupeBasedOnNearestRef <- function(query, ref, showPb = FALSE) {
 #' additional output; default it \code{FALSE}
 #'
 #' @return A \code{list} of \code{GRangesList} objects
+#'
+#' @keywords internal
 #'
 #' @export
 CollapseTxBySec <- function(txBySec,
@@ -455,6 +467,8 @@ CollapseTxBySec <- function(txBySec,
 #' @param txBySec A \code{list} of \code{GRangesList} objects;
 #' output of function \code{GetTxBySec} or \code{CollapseTxBySec}.
 #'
+#' @keywords internal
+#'
 #' @export
 PerformSanityCheck <- function(txBySec) {
     # Perform sanity checks of list of transcript features
@@ -499,6 +513,8 @@ PerformSanityCheck <- function(txBySec) {
 #' additional output; default is \code{FALSE}.
 #'
 #' @return A \code{list} of \code{DNAStringSet} objects.
+#'
+#' @keywords internal
 #'
 #' @export
 GetTxSeq <- function(txBySec,
@@ -600,24 +616,30 @@ BuildTx <- function(genomeVersion = "hg38", sanityCheck = FALSE) {
     #   NULL
     cat("Building the transcriptome. This will take a few minutes.\n");
     cat("This should only need to be done once.\n");
-    cat("Stage 1/5: Getting transcripts and gene annotations.\n");
+    cat(sprintf("%s Stage 1/5: Getting transcripts and gene annotations.\n",
+                format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
     txdb <- GetTxDb(genomeVersion = genomeVersion);
     geneXID <- GetGeneIds(txdb);
-    cat("Stage 2/5: Getting transcript segments for every section.\n");
+    cat(sprintf("%s Stage 2/5: Splitting transcript by section.\n",
+                format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
     txBySec <- GetTxBySec(txdb);
     if (sanityCheck) {
         PerformSanityCheck(txBySec);
     }
-    cat("Stage 3/5: Collapsing isoforms.\n");
+    cat(sprintf("%s Stage 3/5: Collapsing isoforms.\n",
+                format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
     txBySec <- CollapseTxBySec(txBySec, geneXID);
     if (sanityCheck) {
         PerformSanityCheck(txBySec);
     }
-    cat("Stage 4/5: Obtaining sequences.\n");
+    cat(sprintf("%s Stage 4/5: Obtaining sequences.\n",
+                format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
     seqBySec <- GetTxSeq(txBySec);
-    cat("Stage 5/5: Storing results in file.\n");
+    cat(sprintf("%s Stage 5/5: Storing results in file.\n",
+                format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
     save(geneXID, txBySec, seqBySec,
          file = sprintf("tx_%s.RData", genomeVersion),
          compress = "gzip");
-    cat("[DONE]\n");
+    cat(sprintf("%s [DONE]\n",
+                format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
 }

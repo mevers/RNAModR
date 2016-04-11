@@ -40,4 +40,5 @@ the following columns:
   \item GENENAME: Gene name
 }
 }
+\keyword{internal}
 

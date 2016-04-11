@@ -50,8 +50,11 @@ needs to be saved locally as an sqlite db, e.g.
 version as in \code{genomeVersion}.
 }
 \examples{
+\dontrun{
 txdb <- GetTxDb();
 print(txdb);
+}
 
 }
+\keyword{internal}
 

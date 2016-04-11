@@ -4,8 +4,6 @@
 
 #' txLoc object definition
 #' 
-#' @rdname txLoc
-#'
 #' @slot loci A list of loci within a transcript section.
 #' @slot id String. Identifier for sites in \code{txLoc} object.
 #' @slot refGenome String. Reference genome upon which the transcriptome
@@ -31,9 +29,9 @@ setClass("txLoc",
 
 #' Generic method "GetLoci" for S4 object txLoc.
 #' 
-#' @rdname txLoc
-#'
 #' @param x A \code{txLoc} object.
+#' 
+#' @keywords internal
 #' 
 #' @export
 setGeneric(name = "GetLoci",
@@ -47,13 +45,13 @@ setGeneric(name = "GetLoci",
 #' Get the loci of a \code{txLoc} object
 #' as a list of dataframes.
 #'
-#' @rdname txLoc
-#'
 #' @param x A \code{txLoc} object.
 #'
 #' @return A list of dataframes with loci for
 #' every transcript section.
 #'
+#' @keywords internal
+#' 
 #' @export
 setMethod("GetLoci",
           signature = "txLoc",
@@ -65,9 +63,9 @@ setMethod("GetLoci",
 
 #' Generic method "GetId" for S4 object txLoc.
 #' 
-#' @rdname txLoc
-#'
 #' @param x A \code{txLoc} object.
+#' 
+#' @keywords internal
 #' 
 #' @export
 setGeneric(name = "GetId",
@@ -80,12 +78,12 @@ setGeneric(name = "GetId",
 #'
 #' Get the id string of a \code{txLoc} object.
 #'
-#' @rdname txLoc
-#'
 #' @param x A \code{txLoc} object.
 #'
 #' @return A string.
 #'
+#' @keywords internal
+#' 
 #' @export
 setMethod("GetId",
           signature = "txLoc",
@@ -97,9 +95,9 @@ setMethod("GetId",
 
 #' Generic method "GetRef" for S4 object txLoc.
 #' 
-#' @rdname txLoc
-#'
 #' @param x A \code{txLoc} object.
+#' 
+#' @keywords internal
 #' 
 #' @export
 setGeneric(name = "GetRef",
@@ -112,12 +110,12 @@ setGeneric(name = "GetRef",
 #'
 #' Get the reference genome string of a \code{txLoc} object.
 #'
-#' @rdname txLoc
-#'
 #' @param x A \code{txLoc} object.
 #'
 #' @return A string.
 #'
+#' @keywords internal
+#' 
 #' @export
 setMethod("GetRef",
           signature = "txLoc",
@@ -129,9 +127,9 @@ setMethod("GetRef",
 
 #' Generic method "GetVersion" for S4 object txLoc.
 #' 
-#' @rdname txLoc
-#'
 #' @param x A \code{txLoc} object.
+#' 
+#' @keywords internal
 #' 
 #' @export
 setGeneric(name = "GetVersion",
@@ -144,12 +142,12 @@ setGeneric(name = "GetVersion",
 #'
 #' Get the version string of a \code{txLoc} object.
 #'
-#' @rdname txLoc
-#'
 #' @param x A \code{txLoc} object.
 #'
 #' @return A string.
 #'
+#' @keywords internal
+#' 
 #' @export
 setMethod("GetVersion",
           signature = "txLoc",
@@ -185,12 +183,14 @@ setGeneric(name = "info",
 #' @param x A \code{txLoc} object.
 #'
 #' @examples
+#' \dontrun{
 #' bedFile <- system.file("extdata",
 #'                        "miCLIP_m6A_Linder2015_hg38.bed",
 #'                        package = "RNAModR");
 #' sites <- ReadBED(bedFile);
 #' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
 #' info(posSites);
+#' }
 #' 
 #' @export
 setMethod("info",
@@ -201,6 +201,8 @@ setMethod("info",
               cat(sprintf("ID               = %s\n", slot(x, "id")));
               cat(sprintf("Reference genome = %s\n", slot(x, "refGenome")));
               cat(sprintf("Version          = %s\n", slot(x, "version")));
+              cat(sprintf("Total # of sites = %i\n",
+                          sum(sapply(slot(x, "loci"), nrow))));
               cat(sprintf("Package          = RNAModR"));
               cat("\n");
               loc <- slot(x, "loci");
@@ -215,15 +217,19 @@ setMethod("info",
           });
 
 
+#' Generic method "head" for S4 object \code{txLoc}.
+setGeneric("head");
+
+
 #' Method "head" for S4 object txLoc.
 #'
 #' @rdname txLoc
 #'
 #' @param x A \code{txLoc} object.
 #' @param n Number of rows to be printed.
+#' @param ... Additional parameters passed to \code{head}.
 #' 
 #' @export
-setGeneric("head");
 setMethod("head",
           signature = "txLoc",
           definition = function(x, n = 6L, ...) {
@@ -244,8 +250,6 @@ setMethod("head",
 
 #' Generic method "GetNumberOfLoci" for S4 object txLoc.
 #' 
-#' @rdname txLoc
-#'
 #' @param x A \code{txLoc} object.
 #' 
 #' @export

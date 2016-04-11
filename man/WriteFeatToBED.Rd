@@ -2,15 +2,15 @@
 % Please edit documentation in R/IO.R
 \name{WriteFeatToBED}
 \alias{WriteFeatToBED}
-\title{Write a list of GRangesList to BED file}
+\title{Write a \code{list} of \code{GRangesList} to a BED file.}
 \usage{
 WriteFeatToBED(txFeatures)
 }
 \arguments{
-\item{txFeatures}{List of GRangesList.}
+\item{txFeatures}{A \code{list} of \code{GRangesList} objects.}
 }
 \description{
-Write a list of GRangesList transcript features to a BED file.
-One file per transcript region.
+Write a \code{list} of \code{GRangesList} to a BED file.
+One file per transcript region is generated.
 }
 

@@ -95,6 +95,50 @@ CheckClassTxLocConsistency <- function(obj1, obj2) {
 }
 
 
+#' Load reference transcriptome.
+#'
+#' Load reference transcriptome.
+#'
+#' @param refGenome A character string; specifies a specific
+#' reference genome assembly version based on which a transcriptome
+#' is loaded; default is \code{"hg38"}.
+#' @param geneXID A \code{data.frame}; this is the return object
+#' generated via R's pseudo call-by-reference.
+#' @param seqBySec A \code{list} of \code{DNAStringSet objects};
+#' this is the return object generated via R's pseudo
+#' call-by-reference.
+#' @param txBySec A \code{list} of \code{GRangesList} objects;
+#' this is the return object generated via R's pseudo
+#' call-by-reference.
+#'
+#' @keywords internal
+#' 
+#' @export
+LoadRefTx <- function(refGenome = "hg38",
+                      geneXID, seqBySec, txBySec) {
+    refTx <- sprintf("tx_%s.RData", refGenome);
+    if (!file.exists(refTx)) {
+        ss <- sprintf("Reference transcriptome for %s not found.", refGenome);
+        ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
+                      ss, refGenome);
+        stop(ss);
+    }
+    load(refTx);
+    requiredObj <- c("geneXID", "seqBySec", "txBySec");
+    if (!all(requiredObj %in% ls())) {
+        ss <- sprintf("Mandatory transcript objects not found.");
+        ss <- sprintf("%s\nNeed all of the following: %s",
+                      ss, paste0(requiredObj, collapse = ", "));
+        ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
+                      ss, refGenome);
+        stop(ss);
+    }
+    eval.parent(substitute(geneXID <- get("geneXID")));
+    eval.parent(substitute(seqBySec <- get("seqBySec")));
+    eval.parent(substitute(txBySec <- get("txBySec")));
+}
+
+
 #' Calculate 95% confidence interval from data using empirical
 #' bootstrap.
 #'
