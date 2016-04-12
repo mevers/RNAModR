@@ -758,17 +758,8 @@ PlotGC <- function(locPos, locNeg,
                       ss);
         stop(ss);
     }
-    if (length(locPos) < 4) {
-        par(mfrow = c(1, length(locPos)));
-    } else {
-        par(mfrow = c(ceiling(length(locPos) / 2), 2));
-    }
-    labels <- c(idPos, idNeg);
-    GC1 <- unlist(sapply(locPos, function(x) {x$SITE_GC}));
-    GC2 <- unlist(sapply(locNeg, function(x) {x$SITE_GC}));
-    GC1 <- GC1[!is.na(GC1)];
-    GC2 <- GC2[!is.na(GC2)];
-    GCall <- c(GC1, GC2);
+    df <- data.frame();
+    namesBean <- vector();
     for (i in 1:length(locPos)) {
         GC1 <- locPos[[i]]$SITE_GC;
         GC2 <- locNeg[[i]]$SITE_GC;
@@ -778,37 +769,54 @@ PlotGC <- function(locPos, locNeg,
         }
         ttest <- t.test(GC1, GC2);
         wtest <- wilcox.test(GC1, GC2);
-        ylab <- "GC content";
-        ylim <- c(min(GCall), 1.0);
-        if (geneNorm) {
-            ylab <- "GC content / gene region GC content";
-            ylim <- c(0.0, 3.0);
-        }
-        title <- sprintf("%s (%i,%i)\nt-test: diff = %4.3f, 95%%CI = (%4.3f,%4.3f), p = %4.3e\n",
-                         names(locPos)[i],
-                         length(GC1), length(GC2),
-                         ttest$estimate[1] - ttest$estimate[2],
-                         min(ttest$conf.int),
-                         max(ttest$conf.int),
-                         ttest$p.value,
-                         wtest$p.value);
-#        boxplot(list(GC1, GC2),
-#                names = labels,
-#                ylab = ylab,
-#                ylim = ylim,
-#                main = title,
-#                cex.main = 0.8,
-#                outline = FALSE,
-#                font.main = 1);
-        beanplot(list(GC1, GC2),
-                 names = labels,
-                 ylab = ylab,
-                 ylim = ylim,
-                 main = title,
-                 cex.main = 0.8,
-                 font.main = 1,
-                 col = rgb(1,0,0,0.5),
-                 l = 0.05);
+        lbl <- sprintf("%s (%i,%i)\ndiff=%4.3f\n95%%CI=(%4.3f,%4.3f)\np=%4.3e",
+                       names(locPos)[i],
+                       length(GC1), length(GC2),
+                       ttest$estimate[1] - ttest$estimate[2],
+                       min(ttest$conf.int),
+                       max(ttest$conf.int),
+                       ttest$p.value,
+                       wtest$p.value);
+        namesBean <- c(namesBean, lbl);
+        df <- rbind(df, cbind.data.frame(
+            c(GC1, GC2),
+            c(rep(sprintf("%s %s", names(locPos)[i], idPos), length(GC1)),
+              rep(sprintf("%s %s", names(locNeg)[i], idNeg), length(GC2))),
+            stringsAsFactors = FALSE));
     }
+    levels <- unique(df[, 2]);
+    levels <- levels[c(grep("Promoter", levels),
+                       grep("5'UTR", levels),
+                       grep("CDS", levels),
+                       grep("3'UTR", levels),
+                       grep("Introns", levels))];
+    df[, 2] <- factor(df[, 2],
+                      levels = levels); 
+    col <- list(c(rgb(1,0,0,0.5), rgb(0.1,0.1,0.1,0.2), rgb(0.1,0.1,0.1,0.2)),
+                c(rgb(0,0,1,0.5), rgb(0.1,0.1,0.1,0.2), rgb(0.1,0.1,0.1,0.2)));
+    ylab <- "GC content";
+    if (geneNorm) {
+        ylab <- "GC content / transcript section GC content";
+    }
+    par(mar = c(7, 4, 4, 4) + 0.1, font.main = 1);
+    beanplot(df[,1] ~ df[,2],
+             bw = "nrd0",
+             side = "both",
+             border = NA,
+             col = col,
+             ylab = ylab,
+             show.names = FALSE,
+             main = ylab,
+             font.main = 1,
+             method = "jitter");
+    axis(1,
+         at = seq(1, length(locPos)),
+         labels = namesBean,
+         padj = 1,
+         las = 1);
+    legend("bottomleft",
+           fill = c(rgb(1,0,0,0.5), rgb(0,0,1,0.5)),
+           legend = c(idPos, idNeg),
+           bty = "n");
 }
 

@@ -4,26 +4,22 @@
 \alias{LoadRefTx}
 \title{Load reference transcriptome.}
 \usage{
-LoadRefTx(refGenome = "hg38", geneXID, seqBySec, txBySec)
+LoadRefTx(refGenome = "hg38", env = .GlobalEnv)
 }
 \arguments{
 \item{refGenome}{A character string; specifies a specific
 reference genome assembly version based on which a transcriptome
 is loaded; default is \code{"hg38"}.}
 
-\item{geneXID}{A \code{data.frame}; this is the return object
-generated via R's pseudo call-by-reference.}
-
-\item{seqBySec}{A \code{list} of \code{DNAStringSet objects};
-this is the return object generated via R's pseudo
-call-by-reference.}
-
-\item{txBySec}{A \code{list} of \code{GRangesList} objects;
-this is the return object generated via R's pseudo
-call-by-reference.}
+\item{env}{An \code{environment} object; default is the user's
+workspace, i.e. \code{env = .GlobalEnv}.}
 }
 \description{
-Load reference transcriptome.
+Load reference transcriptome. See 'Details'.
+}
+\details{
+The function loads transcriptome data stored in a \code{.RData}
+file, and makes the objects assessible in the user's workspace.
 }
 \keyword{internal}
 

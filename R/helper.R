@@ -97,25 +97,21 @@ CheckClassTxLocConsistency <- function(obj1, obj2) {
 
 #' Load reference transcriptome.
 #'
-#' Load reference transcriptome.
+#' Load reference transcriptome. See 'Details'.
+#'
+#' The function loads transcriptome data stored in a \code{.RData}
+#' file, and makes the objects assessible in the user's workspace.
 #'
 #' @param refGenome A character string; specifies a specific
 #' reference genome assembly version based on which a transcriptome
 #' is loaded; default is \code{"hg38"}.
-#' @param geneXID A \code{data.frame}; this is the return object
-#' generated via R's pseudo call-by-reference.
-#' @param seqBySec A \code{list} of \code{DNAStringSet objects};
-#' this is the return object generated via R's pseudo
-#' call-by-reference.
-#' @param txBySec A \code{list} of \code{GRangesList} objects;
-#' this is the return object generated via R's pseudo
-#' call-by-reference.
+#' @param env An \code{environment} object; default is the user's
+#' workspace, i.e. \code{env = .GlobalEnv}.
 #'
 #' @keywords internal
 #' 
 #' @export
-LoadRefTx <- function(refGenome = "hg38",
-                      geneXID, seqBySec, txBySec) {
+LoadRefTx <- function(refGenome = "hg38", env = .GlobalEnv) {
     refTx <- sprintf("tx_%s.RData", refGenome);
     if (!file.exists(refTx)) {
         ss <- sprintf("Reference transcriptome for %s not found.", refGenome);
@@ -133,9 +129,12 @@ LoadRefTx <- function(refGenome = "hg38",
                       ss, refGenome);
         stop(ss);
     }
-    eval.parent(substitute(geneXID <- get("geneXID")));
-    eval.parent(substitute(seqBySec <- get("seqBySec")));
-    eval.parent(substitute(txBySec <- get("txBySec")));
+    geneXID <- base::get("geneXID");
+    seqBySec <- base::get("seqBySec");
+    txBySec <- base::get("txBySec");
+    assign("geneXID", geneXID, envir = env);
+    assign("seqBySec", seqBySec, envir = env);
+    assign("txBySeq", txBySec);
 }
 
 
