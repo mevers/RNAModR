@@ -460,3 +460,75 @@ CalculateGC <- function(locus, flank = 10) {
                version  = as.character(Sys.Date()));
     return(obj);
 }
+
+
+#' Calculate mutual distances between entries for every transcript
+#' region from two txLoc objects.
+#'
+#' Calculate mutual distances between entries for every transcript
+#' region from two txLoc objects.
+#' 
+#' @param loc1 A txLoc object.
+#' @param loc2 A txLoc object.
+#' @param filter Only consider loci in transcript regions specified in filter. Default is NULL.
+#' @param method Method to calculate relative distances. Possible arguments
+#' are "ss" (start-start), "mm" (midpoint-midpoint), "se" (start-end), "es"
+#' (end-start), "ee" (end-end).
+#'
+#' @return List of upper and lower 95% confidence interval
+#' bounds for every bin value.
+#' 
+#' @export
+GetRelativeDistance <- function(loc1,
+                                loc2,
+                                filter = NULL,
+                                method = c("ss", "mm", "se", "es", "ee")) {
+    CheckClassTxLocConsistency(loc1, loc2);
+    method <- match.arg(method);
+    id1 <- GetId(loc1);
+    id2 <- GetId(loc2);
+    refGenome <- GetRef(loc1);
+    loc1 <- GetLoci(loc1);
+    loc2 <- GetLoci(loc2);
+    dist.list <- list();
+    for (i in 1:length(loc1)) {
+        txID <- intersect(loc1[[i]]$REFSEQ, loc2[[i]]$REFSEQ);
+        if (length(txID) == 0) {
+            dist.list[[length(dist.list)+1]] <- 0;
+        } else {
+            dist <- vector();
+            for (j in 1:length(txID)) {
+                loc1.sel <- loc1[[i]][which(loc1[[i]]$REFSEQ == txID[j]), ];
+                loc2.sel <- loc2[[i]][which(loc2[[i]]$REFSEQ == txID[j]), ];
+                if (method == "ss") {
+                    dist <- c(dist,
+                              as.vector(outer(loc1.sel$TXSTART,
+                                              loc2.sel$TXSTART,
+                                              "-")));
+                } else if (method == "mm") {
+                    dist <- c(dist,
+                              as.vector(outer((loc1.sel$TXSTART + loc1.sel$TXEND) / 2,
+                                              (loc2.sel$TXSTART + loc2.sel$TXEND) / 2,
+                                              "-")));
+                } else if (method == "se") {
+                    dist <- c(dist,
+                              as.vector(outer(loc1.sel$TXSTART,
+                                              loc2.sel$TXEND,
+                                              "-")));
+                } else if (method == "es") {
+                    dist <- c(dist,
+                              as.vector(outer(loc1.sel$TXEND,
+                                              loc2.sel$TXSTART,
+                                              "-")));
+                } else if (method == "ee") {
+                    dist <- c(dist,
+                              as.vector(outer(loc1.sel$TXEND,
+                                              loc2.sel$TXEND,
+                                              "-")));
+                }
+            }
+            dist.list[[length(dist.list) + 1]] <- dist;
+        }
+    }
+    names(dist.list) <- names(loc1);
+}

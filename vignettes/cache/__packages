@@ -1,0 +1,11 @@
+base
+knitr
+BiocGenerics
+S4Vectors
+IRanges
+GenomeInfoDb
+GenomicRanges
+Biobase
+AnnotationDbi
+GenomicFeatures
+RNAModR

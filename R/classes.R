@@ -218,7 +218,7 @@ setMethod("head",
               for (i in 1:nSec) {
                   cat(sprintf("$%s\n", names(loc)[i]));
                   locPrint <- loc[[i]];
-                  locPrint[, ncol(locPrint)] <- sprintf(
+                  locPrint[, "REGION_SEQ"] <- sprintf(
                       "%s... (truncated, total length = %i)",
                       substr(locPrint[, ncol(locPrint)], 1, 5),
                       nchar(locPrint[, ncol(locPrint)]));

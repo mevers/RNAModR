@@ -1,30 +1,32 @@
-#' Plot length distribution of transcript regions.
+#' Plot length distribution of transcript sections.
 #'
-#' Plot length distribution of transcript regions from list of
+#' Plot length distribution of transcript sections from list of
 #' GRangesList transcript features.
 #'
-#' @param txFeatures List of \code{GRangesList} transcript features.
-#' @param asLog Plot length distribution on a log scale. Default is
-#' \code{TRUE}.
-#' @param printMetrics Print median and mad. If \code{FALSE}, print
-#' mean and sd. Default is \code{TRUE}.
-#' @param filter Only plot transcript sections specified in \code{filter}.
-#' For example, \code{filter = c("3'UTR", "5'UTR")} plots length distributions
-#' of the 3'/5'UTRs only.
-#' @param outliers Show outliers in boxplot. Default is \code{FALSE}.
-#' @param ... Additional parameters passed to x-axis.
+#' @param txBySec A \code{list} of \code{GRangesList} objects;
+#' specifies the list of transcript sections.
+#' @param asLog A logical scalar; if \code{TRUE} plot length
+#' distribution on a log scale; Default is \code{TRUE}.
+#' @param printMetrics A character string; specifies which metrics
+#' should be printed as part of the box labels; default is \code{"median"}.
+#' @param filter A character vector; only plot transcript sections
+#' specified in \code{filter}; if \code{NULL} plot all sections; default
+#' is \code{NULL}.
+#' @param outliers A logical scalar; if \code{TRUE} show outliers in
+#' boxplot; default is \code{FALSE}.
+#' @param ... Any additional parameters passed to \code{axis}.
 #'
 #' @export
-PlotTxLengthDistribution <- function(txFeatures,
-                                     asLog = TRUE,
-                                     printMetrics = "median",
-                                     filter = NULL,
-                                     outliers = FALSE,
-                                     ...) {
+PlotTxSecLength <- function(txBySec,
+                            asLog = TRUE,
+                            printMetrics = c("median", "mean"),
+                            filter = NULL,
+                            outliers = FALSE,
+                            ...) {
     # Plot length distribution of transcript features.
     #
     # Args:
-    #   txFeatures: List of GRangesList transcript features.
+    #   txBySec: List of GRangesList transcript features.
     #   asLog: Plot length distribution on log scale. Default is TRUE.
     #   printMetrics: Output median and mad of length (TRUE),
     #          or mean and sd (FALSE). Default is TRUE.
@@ -35,23 +37,23 @@ PlotTxLengthDistribution <- function(txFeatures,
     # Returns:
     #   NULL
     par(mfrow = c(1, 1));
-    len <- lapply(txFeatures, function(x) sum(width(x)));
-    cdsIdx <- grep("CDS", names(txFeatures), ignore.case = TRUE);
+    len <- lapply(txBySec, function(x) sum(width(x)));
+    cdsIdx <- grep("CDS", names(txBySec), ignore.case = TRUE);
     if (length(cdsIdx) > 0) {
-        metaData <- slot(txFeatures[[cdsIdx]], "metadata")$genomeInfo;
+        metaData <- slot(txBySec[[cdsIdx]], "metadata")$genomeInfo;
         refOrganism <- metaData[[grep("Organism", names(metaData))]];
         refGenome <- metaData[[grep("Genome", names(metaData))]];
         refSource <- metaData[[grep("Data source", names(metaData))]];
-        len[["CDS_exon"]] <- IRanges::unlist(width(txFeatures[[cdsIdx]]));
+        len[["CDS_exon"]] <- IRanges::unlist(width(txBySec[[cdsIdx]]));
     } else {
         cat("No CDS entry in %s. Could not infer organism meta information",
-            deparse(substitute(txFeatures)));
+            deparse(substitute(txBySec)));
     }
     intronIdx <- grep("(Intron|Intronic)",
-                      names(txFeatures),
+                      names(txBySec),
                       ignore.case = TRUE);
     if (length(intronIdx) > 0) {
-        len[[intronIdx]] <- IRanges::unlist(width(txFeatures[[intronIdx]]));
+        len[[intronIdx]] <- IRanges::unlist(width(txBySec[[intronIdx]]));
     }
     if (!is.null(filter)) {
         len <- len[which(names(len) %in% filter)];
@@ -88,6 +90,104 @@ PlotTxLengthDistribution <- function(txFeatures,
 }
 
 
+#' Plot length distribution of transcript sections.
+#'
+#' Plot length distribution of transcript sections.
+#'
+#' @param txBySec A \code{list} of \code{GRangesList} objects;
+#' specifies the list of transcript sections.
+#' @param asLog A logical scalar; if \code{TRUE} plot length
+#' distribution on a log scale; Default is \code{TRUE}.
+#' @param printMetrics A character string; specifies which metrics
+#' should be printed as part of the box labels; default is \code{"median"}.
+#' @param filter A character vector; only plot transcript sections
+#' specified in \code{filter}; if \code{NULL} plot all sections; default
+#' is \code{NULL}.
+#' @param ... Any additional parameters passed to \code{axis}.
+#'
+#' @keywords internal
+#'
+#' @export
+PlotTxSecLength.bean <- function(txBySec,
+                                 asLog = TRUE,
+                                 printMetrics = c("median", "mean"),
+                                 filter = NULL,
+                                 ...) {
+    # Plot length distribution of transcript features.
+    #
+    # Args:
+    #   txBySec: List of GRangesList transcript features.
+    #   asLog: Plot length distribution on log scale. Default is TRUE.
+    #   printMetrics: Output median and mad of length (TRUE),
+    #          or mean and sd (FALSE). Default is TRUE.
+    #   filter: Only plot transcript regions specified in filter.
+    #   outliers: Show outliers in boxplot. Default is FALSE.
+    #   ...: Additional parameters passed to x-axis.
+    #
+    # Returns:
+    #   NULL
+    par(mfrow = c(1, 1));
+    printMetrics <- match.arg(printMetrics);
+    len <- lapply(txBySec, function(x) sum(width(x)));
+    cdsIdx <- grep("CDS", names(txBySec), ignore.case = TRUE);
+    if (length(cdsIdx) > 0) {
+        metaData <- slot(txBySec[[cdsIdx]], "metadata")$genomeInfo;
+        refOrganism <- metaData[[grep("Organism", names(metaData))]];
+        refGenome <- metaData[[grep("Genome", names(metaData))]];
+        refSource <- metaData[[grep("Data source", names(metaData))]];
+        len[["CDS_exon"]] <- IRanges::unlist(width(txBySec[[cdsIdx]]));
+    } else {
+        cat("No CDS entry in %s. Could not infer organism meta information",
+            deparse(substitute(txBySec)));
+    }
+    intronIdx <- grep("(Intron|Intronic)",
+                      names(txBySec),
+                      ignore.case = TRUE);
+    if (length(intronIdx) > 0) {
+        len[[intronIdx]] <- IRanges::unlist(width(txBySec[[intronIdx]]));
+    }
+    if (!is.null(filter)) {
+        len <- len[which(names(len) %in% filter)];
+    }
+    labels <- sprintf("%s\nmedian = %i nt\nmad = %i nt",
+                      names(len),
+                      round(sapply(len, stats::median)),
+                      round(sapply(len, stats::mad)));
+    if (printMetrics == "mean") {
+        labels <- sprintf("%s\nmean = %i nt\nsd = %i nt",
+                          names(len),
+                          round(sapply(len, mean)),
+                          round(sapply(len, stats::sd)));
+    } else if (printMetrics == "none") {
+        labels <- sprintf("%s", names(len));
+    }
+    ylab <- "Length [nt]";
+    if (asLog) {
+        len <- lapply(len,log10);
+        ylab <- "log10 Length";
+    }
+    par(font.main = 1);
+    col <- addAlpha(rainbow(length(len)));
+    col <- split(cbind(col, rgb(0, 0, 0, 0.2)), col);
+    beanplot(len,
+             ll = 0.02,
+             bw = "nrd0",
+             border = NA,
+             col = as.list(col),
+             show.names = FALSE,
+             ylab = ylab,
+             main = sprintf("%s (version = %s, source = %s)",
+                 refOrganism,
+                 refGenome,
+                 refSource),
+             font.main = 1,
+             method = "jitter");
+    axis(1, at = 1:length(len),
+         labels = labels,
+         padj = 1, cex.axis = 0.7, ...);
+}
+
+
 #' Plot piechart of the number of loci in every transcript section.
 #'
 #' Plot piechart of the number of loci in every transcript section.
@@ -115,10 +215,8 @@ PlotPieNumberOfLoci <- function(locus, filter = NULL) {
     #
     # Returns:
     #   NULL
-#    if (!is.null(filter)) {
-#        locus <- locus[which(names(locus) %in% filter)];
-#    }
     id <- GetId(locus);
+    locus <- FilterTxLoc(locus, filter);
     N <- GetNumberOfLoci(locus);
     labels <- names(GetLoci(locus));
     percentage <- N / sum(N) * 100.0;
@@ -308,6 +406,8 @@ PlotSpatialDistribution <- function(locus,
 #' @param reverseXaxis Reverse the order of values from \code{mat}.
 #' @param withExtendedAxisLabel Print extended axis label.
 #'
+#' @keywords internal
+#' 
 #' @return A list of \code{fisher.test} return objects and \code{mat}
 PlotEnrichment.Generic <- function(mat, title = "",
                                    x.las = 1, x.cex = 1, x.padj = 1,

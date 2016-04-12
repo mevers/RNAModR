@@ -1,0 +1,42 @@
+%\VignetteIndexEntry{Analyzing RNA-seq data with the "DESeq2" package}
+%\VignettePackage{DESeq2}
+%\VignetteEngine{knitr::knitr}
+
+% To compile this document
+% library('knitr'); rm(list=ls()); knit('DESeq2.Rnw')
+
+\documentclass[a4paper,11pt]{article}
+
+<<knitr, echo=FALSE, results="hide">>=
+library("knitr")
+opts_chunk$set(
+  tidy=FALSE,
+  dev="png",
+  fig.show="hide",
+  fig.width=4, fig.height=4.5,
+  cache=TRUE,
+  message=FALSE)
+@ 
+
+<<loadRNAModR, echo=FALSE>>=
+library("RNAModR")
+@
+
+\author{M. Evers$^{1}$\\[1em]
+\small{$^{1}$ The John Curtin School of Medical Research,}\\\small{The Australian National University, Canberra, Australia}}
+
+\title{Visualisation and functional analysis of single-nucleotide modifications in mRNAs using the RNAModR package}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+Following is a typical workflow for visualising and analysing single-nucleotide modifications:
+\begin{enumerate}
+  \item Construction of a custom transcriptome.
+  \item Mapping of genome alignment-based single-nucleotide modifications to transcript coordinates.
+  \item Visualisation of basic metrics, e.g. distribution of sites across different transcript sections.
+  \item Enrichment analyses of single-nucleotide modifications.
+\end{enumerate}
+
+\end{document}

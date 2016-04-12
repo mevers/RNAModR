@@ -7,7 +7,8 @@ Maintainer: Maurits Evers <maurits.evers@anu.edu.au>
 Description: Transcriptome-wide analysis of RNA modifications.
 Imports: AnnotationDbi, beanplot, Biostrings, GenomeInfoDb, methods, RSQLite, rtracklayer
 Depends: GenomicRanges, GenomicFeatures, IRanges
-Suggests: testthat
+Suggests: knitr, testthat
 License: LGPL (>= 3)
 LazyData: false
 RoxygenNote: 5.0.1.9000
+VignetteBuilder: knitr
