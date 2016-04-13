@@ -15,11 +15,12 @@ specifies the list of transcript sections.}
 distribution on a log scale; Default is \code{TRUE}.}
 
 \item{printMetrics}{A character string; specifies which metrics
-should be printed as part of the box labels; default is \code{"median"}.}
+should be printed as part of the box labels; default is
+\code{"median"}.}
 
-\item{filter}{A character vector; only plot transcript sections
-specified in \code{filter}; if \code{NULL} plot all sections; default
-is \code{NULL}.}
+\item{filter}{A character vector; only plot length distributions
+of transcript sections specified in \code{filter}; if \code{NULL}
+plot all sections; default is \code{NULL}.}
 
 \item{outliers}{A logical scalar; if \code{TRUE} show outliers in
 boxplot; default is \code{FALSE}.}

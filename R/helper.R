@@ -223,7 +223,7 @@ EstimateCIFromBS <- function(x, breaks, nBS = 5000) {
 #' @keywords internal
 #' 
 #' @export
-addAlpha <- function(hexList, alpha = 0.5) {
+AddAlpha <- function(hexList, alpha = 0.5) {
     mat <- sapply(hexList, col2rgb, alpha = TRUE) / 255.0;
     mat[4, ] <- alpha;
     col <- vector();
@@ -232,6 +232,60 @@ addAlpha <- function(hexList, alpha = 0.5) {
                           mat[2, i],
                           mat[3, i],
                           mat[4, i]));
+    }
+    return(col);
+}
+
+
+#' Check if all entries in a character vector are empty.
+#'
+#' Check if all entries in a character vector are empty.
+#' 
+#' @param v A character vector.
+#'
+#' @return A logical scalar.
+#'
+#' @keywords internal
+#'
+#' @export
+IsEmptyChar <- function(v) {
+    return(all(nchar(v) == 0));
+}
+
+
+#' Return specific colour palette.
+#'
+#' Return specific colour palette.
+#'
+#' @param pal A character string.
+#' @param n An integer scalar.
+#' @param alpha A real scalar.
+#'
+#' @return A character vector.
+#'
+#' @keywords internal
+#'
+#' @export
+GetColPal <- function(pal = c("apple", "google"), n = NULL, alpha = 1.0) {
+    pal <- match.arg(pal);
+    alpha <- alpha * 255;
+    if (pal == "apple") {
+        col <- c(
+            rgb(95, 178, 51, alpha = alpha, maxColorValue = 255),
+            rgb(106, 127, 147, alpha = alpha, maxColorValue = 255),
+            rgb(245, 114, 6, alpha = alpha, maxColorValue = 255),
+            rgb(235, 15, 19, alpha = alpha, maxColorValue = 255),
+            rgb(143, 47, 139, alpha = alpha, maxColorValue = 255),
+            rgb(19, 150, 219, alpha = alpha, maxColorValue = 255));
+    } else if (pal == "google") {
+        col <- c(
+            rgb(61, 121, 243, alpha = alpha, maxColorValue = 255),
+            rgb(230, 53, 47, alpha = alpha, maxColorValue = 255),
+            rgb(249, 185, 10, alpha = alpha, maxColorValue = 255),
+            rgb(52, 167, 75, alpha = alpha, maxColorValue = 255));
+    }
+    if (!is.null(n)) {
+        col <- col[1:n];
     }
     return(col);
 }

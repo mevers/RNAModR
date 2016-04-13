@@ -2,13 +2,20 @@
 ########################### CLASS DEFINITION ##############################
 ###########################################################################
 
-#' txLoc object definition
+#' txLoc object.
+
+#' The S4 object stores information about mapped loci per transcript
+#' section. Meta-data such as an identifier and the reference genome
+#' are stored in separate slots.
 #' 
-#' @slot loci A list of loci within a transcript section.
-#' @slot id String. Identifier for sites in \code{txLoc} object.
-#' @slot refGenome String. Reference genome upon which the transcriptome
-#' and site positions are based.
-#' @slot version String. Timestamp for version tracking.
+#' @slot loci A \code{list} of \code{GRangesList} objects; specifies
+#' the list of loci per transcript section.
+#' @slot id A character string; identifier for loci in \code{txLoc}
+#' object.
+#' @slot refGenome A character string; gives the reference genome
+#' upon which transcriptome-derived positions are based.
+#' @slot version A character string; can be used to flag specific
+#' version, e.g. using the current system time & date.
 #' 
 #' @export
 setClass("txLoc",
@@ -147,7 +154,7 @@ setMethod("GetVersion",
 
 #' Generic method "info" for S4 object txLoc.
 #' 
-#' @rdname txLoc
+#' @rdname txLoc-class
 #'
 #' @export
 setGeneric(name = "info",
@@ -160,7 +167,7 @@ setGeneric(name = "info",
 #'
 #' Print general information of a \code{txLoc} object.
 #'
-#' @rdname txLoc
+#' @rdname txLoc-class
 #'
 #' @examples
 #' \dontrun{
@@ -203,7 +210,7 @@ setGeneric("head");
 
 #' Method "head" for S4 object txLoc.
 #'
-#' @rdname txLoc
+#' @rdname txLoc-class
 #'
 #' @param x A \code{txLoc} object.
 #' @param n Number of rows to be printed.
@@ -229,8 +236,8 @@ setMethod("head",
 
 
 #' Generic method "GetNumberOfLoci" for S4 object txLoc.
-#' 
-#' @param x A \code{txLoc} object.
+#'
+#' @rdname txLoc-class
 #' 
 #' @export
 setGeneric(name = "GetNumberOfLoci",
@@ -244,7 +251,7 @@ setGeneric(name = "GetNumberOfLoci",
 #' Get the number of loci of a \code{txLoc} object in every
 #' transcript section.
 #'
-#' @rdname txLoc
+#' @rdname txLoc-class
 #'
 #' @param x A \code{txLoc} object.
 #'
@@ -258,5 +265,3 @@ setMethod("GetNumberOfLoci",
               loc <- slot(x, "loci");
               return(sapply(loc, nrow));
           });
-
-

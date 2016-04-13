@@ -13,11 +13,12 @@ GetRelativeDistance(loc1, loc2, filter = NULL, method = c("ss", "mm", "se",
 
 \item{loc2}{A txLoc object.}
 
-\item{filter}{Only consider loci in transcript regions specified in filter. Default is NULL.}
+\item{filter}{Only consider loci in transcript regions specified
+in filter. Default is NULL.}
 
-\item{method}{Method to calculate relative distances. Possible arguments
-are "ss" (start-start), "mm" (midpoint-midpoint), "se" (start-end), "es"
-(end-start), "ee" (end-end).}
+\item{method}{Method to calculate relative distances. Possible
+arguments are "ss" (start-start), "mm" (midpoint-midpoint),
+"se" (start-end), "es" (end-start), "ee" (end-end).}
 }
 \value{
 List of upper and lower 95% confidence interval

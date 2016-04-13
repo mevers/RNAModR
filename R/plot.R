@@ -8,10 +8,11 @@
 #' @param asLog A logical scalar; if \code{TRUE} plot length
 #' distribution on a log scale; Default is \code{TRUE}.
 #' @param printMetrics A character string; specifies which metrics
-#' should be printed as part of the box labels; default is \code{"median"}.
-#' @param filter A character vector; only plot transcript sections
-#' specified in \code{filter}; if \code{NULL} plot all sections; default
-#' is \code{NULL}.
+#' should be printed as part of the box labels; default is
+#' \code{"median"}.
+#' @param filter A character vector; only plot length distributions
+#' of transcript sections specified in \code{filter}; if \code{NULL}
+#' plot all sections; default is \code{NULL}.
 #' @param outliers A logical scalar; if \code{TRUE} show outliers in
 #' boxplot; default is \code{FALSE}.
 #' @param ... Any additional parameters passed to \code{axis}.
@@ -167,7 +168,7 @@ PlotTxSecLength.bean <- function(txBySec,
         ylab <- "log10 Length";
     }
     par(font.main = 1);
-    col <- addAlpha(rainbow(length(len)));
+    col <- AddAlpha(rainbow(length(len)));
     col <- split(cbind(col, rgb(0, 0, 0, 0.2)), col);
     beanplot(len,
              ll = 0.02,
@@ -203,11 +204,11 @@ PlotTxSecLength.bean <- function(txBySec,
 #'                        package = "RNAModR");
 #' sites <- ReadBED(bedFile);
 #' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
-#' PlotPieNumberOfLoci(posSites);
+#' PlotSectionDistribution(posSites);
 #' }
 #'
 #' @export
-PlotPieNumberOfLoci <- function(locus, filter = NULL) {
+PlotSectionDistribution <- function(locus, filter = NULL) {
     # Plot piechart of the mumber of loci in every transcript section.
     #
     # Args:
@@ -221,7 +222,7 @@ PlotPieNumberOfLoci <- function(locus, filter = NULL) {
     labels <- names(GetLoci(locus));
     percentage <- N / sum(N) * 100.0;
     labels <- sprintf("%s %2.1f%% (%i)", labels, percentage, N);
-    pie(N, labels = labels, col = rainbow(length(labels)),
+    pie(N, labels = labels, col = GetColPal("apple", length(N)),
         main = sprintf("Distribution of %i %s sites across transcript sections",
             sum(N), id),
         font.main = 1);
@@ -548,7 +549,7 @@ PlotEnrichment.Generic <- function(mat, title = "",
 #'                        package = "RNAModR");
 #' sites <- ReadBED(bedFile);
 #' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
-#' negSites <- GenerateSNMNull(posSites, method = "nuclAbundance");
+#' negSites <- GenerateNull(posSites, method = "nuclAbundance");
 #' PlotSectionEnrichment(posSites, negSites,
 #'                       filter = c("5'UTR", "CDS", "3'UTR"));
 #' }
@@ -612,7 +613,7 @@ PlotSectionEnrichment <- function(locPos,
 #'                        package = "RNAModR");
 #' sites <- ReadBED(bedFile);
 #' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
-#' negSites <- GenerateSNMNull(posSites, method = "permutation");
+#' negSites <- GenerateNull(posSites, method = "permutation");
 #' PlotSpatialEnrichment(posSites, negSites,
 #'                       filter = c("5'UTR", "CDS", "3'UTR"));
 #' }
@@ -699,7 +700,7 @@ PlotSpatialEnrichment <- function(locPos,
 #'                        package = "RNAModR");
 #' sites <- ReadBED(bedFile);
 #' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
-#' negSites <- GenerateSNMNull(posSites, method = "permutation");
+#' negSites <- GenerateNull(posSites, method = "permutation");
 #' PlotSpatialRatio(posSites, negSites, c("3'UTR", "CDS", "5'UTR"));
 #' }
 #' 
@@ -920,3 +921,87 @@ PlotGC <- function(locPos, locNeg,
            bty = "n");
 }
 
+
+#' Plot sequence logo.
+#'
+#' Plot sequence logo.
+#'
+#' The function determines the sequence logo within a window
+#' defined by extending sites from \code{locus} upstream and
+#' downstream by \code{flank} nucleotides. By default logos
+#' are shown for every transcript section from \code{locus}.
+#' Use \code{filter} to specify specific transcript sections.
+#' 
+#' @param locus A \code{txLoc} object.
+#' @param flank An integer scalar; see 'Details'.
+#' @param filter A character vector; only plot sequence logos
+#' of sections specified in \code{filter}; if \code{NULL} plot
+#' all sections; default is NULL.
+# @param giveMeUgly A logical scalar; explanation withheld.
+#'
+#' @import Biostrings
+#' 
+#' @export
+PlotSeqLogo <- function(locus, flank = 5, filter = NULL) {
+#PlotSeqLogo <- function(locus, flank = 5, filter = NULL, giveMeUgly = FALSE) {
+    CheckClass(locus, "txLoc");
+    id <- GetId(locus);
+    refGenome <- GetRef(locus);
+    locus <- GetLoci(locus);
+    if (!is.null(filter)) {
+        locus <- locus[which(names(locus) %in% filter)];
+    }
+    if (length(locus) < 4) {
+        par(mfrow = c(1, length(locus)));
+    } else {
+        par(mfrow = c(ceiling(length(locus) / 2), 2));
+    }
+    for (i in 1:length(locus)) {
+        if (is.numeric(locus[[i]]$TXSTART) &
+            !IsEmptyChar(locus[[i]]$REGION_SEQ)) {
+            x1 <- locus[[i]]$TXSTART - flank;
+            x2 <- locus[[i]]$TXSTART + flank;
+            subSeq <- DNAStringSet(substr(locus[[i]]$REGION_SEQ, x1, x2));
+            subSeq <- subSeq[which(nchar(subSeq) == 2 * flank + 1)];
+            mat <- consensusMatrix(subSeq, as.prob = TRUE)[1:4, ];
+# Keep this for any whiny biologists out there ...
+#            if (giveMeUgly) {
+#                seqLogo(makePWM(mat));
+#            } else {
+            freqdf <- as.data.frame(t(mat));
+            freqdf$pos <- seq(-flank, flank);
+            freqdf$height <- apply(freqdf[, c("A", "C", "G", "T")],
+                                   MARGIN=1,
+                                   FUN=function(x){
+                                       x[which(x == 0)] = 1.e-7;
+                                       2 + sum(x * log2(x))});
+            logodf <- data.frame(A = freqdf$A * freqdf$height,
+                                 C = freqdf$C * freqdf$height,
+                                 G = freqdf$G*freqdf$height,
+                                 T = freqdf$T*freqdf$height, 
+                                 pos = freqdf$pos);
+            title <- sprintf("%s, N(%s)=%i\nSequence logo in %i nt window",
+                             names(locus)[i],
+                             id,
+                             nrow(locus[[i]]),
+                             2 * flank + 1);
+            mp <- barplot(t(logodf[ ,1:4]),
+                          col = GetColPal("google", 4),
+                          ylim = c(0, 2),
+                          ylab = "Information content [bits]",
+                          main = title,
+                          font.main = 1);
+            axis(1, at = mp, labels = logodf[, ncol(logodf)]);
+            mtext("Relative position [nt]", 1, padj = 4);
+            legend("topright",
+                   fill = GetColPal("google", 4),
+                   legend = c("A", "C", "G", "T"),
+                   bty = "n");
+#            }
+        } else {
+            ss <- sprintf("Skip %s: No position or sequence information.",
+                          names(locus)[i]);
+            warning(ss);
+        }
+    }
+}

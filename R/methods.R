@@ -470,10 +470,11 @@ CalculateGC <- function(locus, flank = 10) {
 #' 
 #' @param loc1 A txLoc object.
 #' @param loc2 A txLoc object.
-#' @param filter Only consider loci in transcript regions specified in filter. Default is NULL.
-#' @param method Method to calculate relative distances. Possible arguments
-#' are "ss" (start-start), "mm" (midpoint-midpoint), "se" (start-end), "es"
-#' (end-start), "ee" (end-end).
+#' @param filter Only consider loci in transcript regions specified
+#' in filter. Default is NULL.
+#' @param method Method to calculate relative distances. Possible
+#' arguments are "ss" (start-start), "mm" (midpoint-midpoint),
+#' "se" (start-end), "es" (end-start), "ee" (end-end).
 #'
 #' @return List of upper and lower 95% confidence interval
 #' bounds for every bin value.
