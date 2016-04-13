@@ -1,4 +1,4 @@
-	# miCLIP-based transcriptome-wide map of m6A and m6Am sites [hg38 coordinates]
+# miCLIP-based transcriptome-wide map of m6A and m6Am sites [hg38 coordinates]
 # Reference: Linder et al., Nat. Methods 12, 767 (2015) [PMID 26121403, DOI 10.1038/nmeth.3453]
 # Data converted to BED from Supplementary tables S2 and S3, conversion to hg38 using liftOver.
 #

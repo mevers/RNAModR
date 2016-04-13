@@ -1,5 +1,5 @@
 # MeRIP-seq-based transcriptome-wide map of m1A [hg38 coordinates]
-# Reference: Dominissini et al., Nature 530, 441 [PMID 26863196, DOI 10.1038/nature16998]
+# Reference: Dominissini et al., Nature 530, 441 (2016) [PMID 26863196, DOI 10.1038/nature16998]
 # Data converted to BED from Supplementary table 1, conversion to hg38 using liftOver.
 # Strand information is missing in original reference, and was added using current
 # RefSeq annotation from NCBI and UCSC.
