@@ -631,26 +631,46 @@ GetRelativeDistance <- function(loc1,
 }
 
 
-#GetRelDistSpliceSite <- function(locus,
-#                                 ss) {
-#    CheckClass(locus, "txLoc");
-#    refGenome <- GetRef(locus);
-#    id <- GetId(locus);
-#    locus <- GetLoci(locus);
-#    locusCDS <- locus[[grep("(CDS|coding)", names(locus))]];
-#    ss <- ss[grep("(CDS|coding)", ss$id)];
-#    locusCDS <- split(locusCDS, locusCDS$REFSEQ);
-#    dist <- vector();
-#    for (i in 1:length(locusCDS)) {
-#        sel <- grep(names(locusCDS)[i], ss$id);
-#        pos1 <- locusCDS[[i]]$START;
-#        pos2 <- ifelse(all(as.character(strand(ss[sel])) == "+"),
-#               min(as.data.frame(ranges(ss[sel]))$start),
-#               max(as.data.frame(ranges(ss[sel]))$start));
-#        dist <- c(dist,
-#                  as.vector(
-#                      ifelse(all(as.character(strand(ss[sel])) == "+"),
-#                             outer(pos1, pos2, "-"),
-#                             outer(pos2, pos1, "-"))));
-#    }
-#}
+#' Calculate relative distances between given loci and splice sites.
+#'
+#' Calculate relative distances between given loci and splice sites.
+#'
+#' @param locus A \code{txLoc} object.
+#' @param ss A \code{GRanges} object.
+#'
+#' @return An integer vector.
+#'
+#' @export
+GetRelDistSpliceSite <- function(locus,
+                                 ss) {
+    CheckClass(locus, "txLoc");
+    refGenome <- GetRef(locus);
+    id <- GetId(locus);
+    locus <- GetLoci(locus);
+    # Pull out loci in CDS only
+    locusCDS <- locus[[grep("(CDS|coding)", names(locus))]];
+    locusCDS <- split(locusCDS, locusCDS$REFSEQ);
+    # Match relevant gene IDs of splice sites 
+    ss <- ss[grep("(CDS|coding)", ss$id)];
+    ss <- ss[gsub("(ss\\d+p\\||\\|CDS)", "", ss$id) %in% names(locusCDS)];
+    # Calculate distances
+    dist <- vector();
+    pb <- txtProgressBar(min = 0,
+                         max = length(locusCDS),
+                         width = 80,
+                         style = 3);
+    for (i in 1:length(locusCDS)) {
+        sel <- grep(names(locusCDS)[i], ss$id);
+        if (all(as.character(strand(ss[sel])) == "+")) {
+            pos1 <- locusCDS[[i]]$START;
+            pos2 <- min(as.data.frame(ranges(ss[sel]))$start);
+        } else {
+            pos1 <- max(as.data.frame(ranges(ss[sel]))$start);
+            pos2 <- locusCDS[[i]]$START;
+        }
+        dist <- c(dist, as.vector(outer(pos1, pos2, "-")));
+        setTxtProgressBar(pb, i);
+    }
+    close(pb);
+    return(dist);
+}
