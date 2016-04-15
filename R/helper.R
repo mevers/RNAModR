@@ -289,3 +289,21 @@ GetColPal <- function(pal = c("apple", "google"), n = NULL, alpha = 1.0) {
     }
     return(col);
 }
+
+
+#' Unfactor entries in a \code{data.frame}.
+#'
+#' Unfactor entries in a \code{data.frame}.
+#'
+#' @param df A \code{data.frame} object.
+#'
+#' @return A \code{data.frame} object.
+#'
+#' @keywords internal
+#'
+#' @export
+Unfactor <- function(df) {
+    idx <- sapply(df, is.factor);
+    df[idx] <- lapply(df[idx], as.character);
+    return(df);
+}

@@ -29,7 +29,7 @@ bedFile <- system.file("extdata",
                        package = "RNAModR");
 sites <- ReadBED(bedFile);
 posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
-negSites <- GenerateSNMNull(posSites, method = "nuclAbundance");
+negSites <- GenerateNull(posSites, method = "nuclAbundance");
 PlotSectionEnrichment(posSites, negSites,
                       filter = c("5'UTR", "CDS", "3'UTR"));
 }

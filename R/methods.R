@@ -108,8 +108,7 @@ SmartMap.ToTx <- function(locus,
                            dataFromQuery,
                            dataFromRef);
         if (noFactors) {
-            idx <- sapply(locusInTx, is.factor);
-            locusInTx[idx] <- lapply(locusInTx[idx], as.character);
+            locusInTx <- Unfactor(locusInTx);
         }
         locusInTx.list[[length(locusInTx.list) + 1]] <- locusInTx;
     }
@@ -137,8 +136,8 @@ SmartMap.ToTx <- function(locus,
 #' \code{locus}; if \code{NULL} then \code{id = ""}; default is
 #' \code{NULL}.
 #' @param refGenome A character string; specifies a specific
-#' reference genome assembly version based on which a transcriptome
-#' is loaded; default is \code{"hg38"}.
+#' reference genome assembly version based on which the matching
+#' transcriptome is loaded; default is \code{"hg38"}.
 #' @param ignore.strand A logical scalar; if \code{TRUE} strand
 #' information is ignored when mapping genome coordinates to
 #' transcript coordinates; default is \code{FALSE}.
@@ -187,7 +186,7 @@ SmartMap <- function(locus,
         ss <- sprintf("Mandatory transcript objects not found.");
         ss <- sprintf("%s\nNeed all of the following: %s",
                       ss, paste0(requiredObj, collapse = ", "));
-        ss <- sprintf("%s\nRunning BuildTx(\"%\") might fix that.",
+        ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
                       ss, refGenome);
         stop(ss);
     }
@@ -302,7 +301,7 @@ GenerateNull <- function(locus,
         refTx <- sprintf("tx_%s.RData", refGenome);
         if (!file.exists(refTx)) {
             ss <- sprintf("Reference transcriptome for %s not found.", refGenome);
-            ss <- sprintf("%s\nRunning BuildTx(\"%\") might fix that.",
+            ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
                           ss, refGenome);
             stop(ss);
         }
@@ -373,8 +372,7 @@ GenerateNull <- function(locus,
                 rep(sprintf("nucl_%s", nt), nrow(txPos)),
                 locus[[i]][idxLoc, 12:ncol(locus[[i]])]);      
             colnames(locusNull) <- colnames(locus[[i]]);
-            idx <- sapply(locusNull, is.factor);
-            locusNull[idx] <- lapply(locusNull[idx], as.character);
+            locusNull <- Unfactor(locusNull);
         } else if (method == "perm") {
             locusNull <- locus[[i]];
             locusNull$TXSTART <- apply(
@@ -462,6 +460,104 @@ CalculateGC <- function(locus, flank = 10) {
 }
 
 
+#' Get 5'/3' splice sites from transcriptome.
+#'
+#' Get 5'/3' splice sites from transcriptome. See 'Details'.
+#'
+#' This function extracts splice site positions from a reference
+#' transcriptome, and returns a list of two \code{GRanges} objects
+#' of all 5' and 3' splice sites.
+#'
+#' @param refGenome A character string; specifies a specific
+#' reference genome assembly version based on which the matching
+#' transcriptome is loaded; default is \code{"hg38"}.
+#' @param writeBED A logical scalar; if \code{TRUE} write 5'/3'
+#' splice sites to two BED files; default is \code{FALSE}.
+#'
+#' @import GenomicRanges
+#' 
+#' @return A list of two \code{GRanges} objects. See 'Details'.
+#'
+#' @export
+GetSpliceSites <- function(refGenome = "hg38", writeBED = FALSE) {
+    refTx <- sprintf("tx_%s.RData", refGenome);
+    if (!file.exists(refTx)) {
+        ss <- sprintf("Reference transcriptome for %s not found.", refGenome);
+        ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
+                      ss, refGenome);
+        stop(ss);
+    }
+    load(refTx);
+    requiredObj <- c("geneXID", "seqBySec", "txBySec");
+    if (!all(requiredObj %in% ls())) {
+        ss <- sprintf("Mandatory transcript objects not found.");
+        ss <- sprintf("%s\nNeed all of the following: %s",
+                      ss, paste0(requiredObj, collapse = ", "));
+        ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
+                      ss, refGenome);
+        stop(ss);
+    }
+    geneXID <- get("geneXID");
+    seqBySec <- get("seqBySec");
+    txBySec <- get("txBySec");
+    secWithSpliceSites <- c("5'UTR", "CDS", "3'UTR");
+    sel <- which(names(txBySec) %in% secWithSpliceSites);
+    bedSS5p.all <- data.frame();
+    bedSS3p.all <- data.frame();
+    for (i in 1:length(sel)) {
+        junct <- psetdiff(range(txBySec[[sel[i]]]), txBySec[[sel[i]]]);
+        junct <- as.data.frame(junct);
+        bedSS5p <- cbind.data.frame(
+            junct$seqnames,
+            ifelse(junct$strand == "+", junct$start - 1, junct$end - 1),
+            ifelse(junct$strand == "+", junct$start, junct$end),
+            sprintf("ss5p|%s|%s", junct$group_name, names(txBySec)[sel[i]]),
+            0,
+            junct$strand);
+        colnames(bedSS5p) <- c("chr", "start", "end", "id", "score", "strand");
+        bedSS3p <- cbind.data.frame(
+            junct$seqnames,
+            ifelse(junct$strand == "+", junct$end - 1, junct$start - 1),
+            ifelse(junct$strand == "+", junct$end, junct$start),
+            sprintf("ss3p|%s|%s", junct$group_name, names(txBySec)[sel[i]]),
+            0,
+            junct$strand);
+        colnames(bedSS3p) <- c("chr", "start", "end", "id", "score", "strand");
+        bedSS5p.all <- rbind(bedSS5p.all, bedSS5p);
+        bedSS3p.all <- rbind(bedSS3p.all, bedSS3p);
+    }
+    bedSS5p.all <- Unfactor(bedSS5p.all);
+    bedSS3p.all <- Unfactor(bedSS3p.all);
+    if (writeBED) {
+        write.table(bedSS5p.all[order(bedSS5p.all$chr, bedSS5p.all$start), ],
+                    file = "spliceSites_5p.bed",
+                    sep = "\t",
+                    quote = FALSE,
+                    col.names = FALSE,
+                    row.names = FALSE);
+        write.table(bedSS3p.all[order(bedSS3p.all$chr, bedSS3p.all$start), ],
+                    file = "spliceSites_3p.bed",
+                    sep = "\t",
+                    quote = FALSE,
+                    col.names = FALSE,
+                    row.names = FALSE);
+    }
+    ret <- list(
+        GRanges(bedSS5p.all$chr,
+                IRanges(bedSS5p.all$start + 1, bedSS5p.all$end),
+                bedSS5p.all$strand,
+                score = bedSS5p.all$score,
+                id = bedSS5p.all$id),
+        GRanges(bedSS3p.all$chr,
+                IRanges(bedSS3p.all$start + 1, bedSS3p.all$end),
+                bedSS3p.all$strand,
+                score = bedSS3p.all$score,
+                id = bedSS3p.all$id)
+        );
+    names(ret) <- c("ss5p", "ss3p");
+    return(ret);
+}
+
 #' Calculate mutual distances between entries for every transcript
 #' region from two txLoc objects.
 #'
@@ -533,3 +629,28 @@ GetRelativeDistance <- function(loc1,
     }
     names(dist.list) <- names(loc1);
 }
+
+
+#GetRelDistSpliceSite <- function(locus,
+#                                 ss) {
+#    CheckClass(locus, "txLoc");
+#    refGenome <- GetRef(locus);
+#    id <- GetId(locus);
+#    locus <- GetLoci(locus);
+#    locusCDS <- locus[[grep("(CDS|coding)", names(locus))]];
+#    ss <- ss[grep("(CDS|coding)", ss$id)];
+#    locusCDS <- split(locusCDS, locusCDS$REFSEQ);
+#    dist <- vector();
+#    for (i in 1:length(locusCDS)) {
+#        sel <- grep(names(locusCDS)[i], ss$id);
+#        pos1 <- locusCDS[[i]]$START;
+#        pos2 <- ifelse(all(as.character(strand(ss[sel])) == "+"),
+#               min(as.data.frame(ranges(ss[sel]))$start),
+#               max(as.data.frame(ranges(ss[sel]))$start));
+#        dist <- c(dist,
+#                  as.vector(
+#                      ifelse(all(as.character(strand(ss[sel])) == "+"),
+#                             outer(pos1, pos2, "-"),
+#                             outer(pos2, pos1, "-"))));
+#    }
+#}

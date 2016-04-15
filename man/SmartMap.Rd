@@ -15,8 +15,8 @@ of genomic features to be mapped.}
 \code{NULL}.}
 
 \item{refGenome}{A character string; specifies a specific
-reference genome assembly version based on which a transcriptome
-is loaded; default is \code{"hg38"}.}
+reference genome assembly version based on which the matching
+transcriptome is loaded; default is \code{"hg38"}.}
 
 \item{ignore.strand}{A logical scalar; if \code{TRUE} strand
 information is ignored when mapping genome coordinates to

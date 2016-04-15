@@ -32,7 +32,7 @@ bedFile <- system.file("extdata",
                        package = "RNAModR");
 sites <- ReadBED(bedFile);
 posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
-negSites <- GenerateSNMNull(posSites, method = "permutation");
+negSites <- GenerateNull(posSites, method = "permutation");
 PlotSpatialEnrichment(posSites, negSites,
                       filter = c("5'UTR", "CDS", "3'UTR"));
 }

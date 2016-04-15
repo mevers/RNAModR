@@ -31,7 +31,7 @@ bedFile <- system.file("extdata",
                        package = "RNAModR");
 sites <- ReadBED(bedFile);
 posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
-negSites <- GenerateSNMNull(posSites, method = "permutation");
+negSites <- GenerateNull(posSites, method = "permutation");
 PlotSpatialRatio(posSites, negSites, c("3'UTR", "CDS", "5'UTR"));
 }
 

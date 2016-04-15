@@ -41,7 +41,7 @@ ReadBED <- function(file) {
             file));
     }
     colnames(bed) <- c("chr", "start", "end", "id", "score", "strand");
-    gr <- GRanges(bed$chr, IRanges(bed$start+1,bed$end), bed$strand,
+    gr <- GRanges(bed$chr, IRanges(bed$start + 1,bed$end), bed$strand,
                   score = bed$score, id = bed$id);
     return(gr);
 }
