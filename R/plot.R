@@ -38,6 +38,7 @@ PlotTxSecLength <- function(txBySec,
     # Returns:
     #   NULL
     par(mfrow = c(1, 1));
+    printMetrics <- match.arg(printMetrics);
     len <- lapply(txBySec, function(x) sum(width(x)));
     cdsIdx <- grep("CDS", names(txBySec), ignore.case = TRUE);
     if (length(cdsIdx) > 0) {
@@ -47,8 +48,8 @@ PlotTxSecLength <- function(txBySec,
         refSource <- metaData[[grep("Data source", names(metaData))]];
         len[["CDS_exon"]] <- IRanges::unlist(width(txBySec[[cdsIdx]]));
     } else {
-        cat("No CDS entry in %s. Could not infer organism meta information",
-            deparse(substitute(txBySec)));
+        ss <- sprintf("No CDS entry in txBySec. Could not infer organism meta information.\n");
+        stop(ss);
     }
     intronIdx <- grep("(Intron|Intronic)",
                       names(txBySec),
