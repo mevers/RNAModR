@@ -15,14 +15,14 @@ transcriptome is loaded; default is \code{"hg38"}.}
 splice sites to two BED files; default is \code{FALSE}.}
 }
 \value{
-A list of two \code{GRanges} objects. See 'Details'.
+A list of two \code{GRangesList} objects. See 'Details'.
 }
 \description{
 Get 5'/3' splice sites from transcriptome. See 'Details'.
 }
 \details{
 This function extracts splice site positions from a reference
-transcriptome, and returns a list of two \code{GRanges} objects
-of all 5' and 3' splice sites.
+transcriptome, and returns a list of two \code{GRangesList}
+objects of all 5' and 3' splice sites per gene.
 }
 

@@ -465,8 +465,8 @@ CalculateGC <- function(locus, flank = 10) {
 #' Get 5'/3' splice sites from transcriptome. See 'Details'.
 #'
 #' This function extracts splice site positions from a reference
-#' transcriptome, and returns a list of two \code{GRanges} objects
-#' of all 5' and 3' splice sites.
+#' transcriptome, and returns a list of two \code{GRangesList}
+#' objects of all 5' and 3' splice sites per gene.
 #'
 #' @param refGenome A character string; specifies a specific
 #' reference genome assembly version based on which the matching
@@ -474,9 +474,10 @@ CalculateGC <- function(locus, flank = 10) {
 #' @param writeBED A logical scalar; if \code{TRUE} write 5'/3'
 #' splice sites to two BED files; default is \code{FALSE}.
 #'
-#' @import GenomicRanges
+#' @import GenomicRanges IRanges
+#' @importFrom rtracklayer export
 #' 
-#' @return A list of two \code{GRanges} objects. See 'Details'.
+#' @return A list of two \code{GRangesList} objects. See 'Details'.
 #'
 #' @export
 GetSpliceSites <- function(refGenome = "hg38", writeBED = FALSE) {
@@ -502,61 +503,52 @@ GetSpliceSites <- function(refGenome = "hg38", writeBED = FALSE) {
     txBySec <- get("txBySec");
     secWithSpliceSites <- c("5'UTR", "CDS", "3'UTR");
     sel <- which(names(txBySec) %in% secWithSpliceSites);
-    bedSS5p.all <- data.frame();
-    bedSS3p.all <- data.frame();
+    ss5p.all <- GRanges();
+    ss3p.all <- GRanges();
     for (i in 1:length(sel)) {
         junct <- psetdiff(range(txBySec[[sel[i]]]), txBySec[[sel[i]]]);
-        junct <- as.data.frame(junct);
-        bedSS5p <- cbind.data.frame(
-            junct$seqnames,
-            ifelse(junct$strand == "+", junct$start - 1, junct$end - 1),
-            ifelse(junct$strand == "+", junct$start, junct$end),
-            sprintf("ss5p|%s|%s", junct$group_name, names(txBySec)[sel[i]]),
-            0,
-            junct$strand);
-        colnames(bedSS5p) <- c("chr", "start", "end", "id", "score", "strand");
-        bedSS3p <- cbind.data.frame(
-            junct$seqnames,
-            ifelse(junct$strand == "+", junct$end - 1, junct$start - 1),
-            ifelse(junct$strand == "+", junct$end, junct$start),
-            sprintf("ss3p|%s|%s", junct$group_name, names(txBySec)[sel[i]]),
-            0,
-            junct$strand);
-        colnames(bedSS3p) <- c("chr", "start", "end", "id", "score", "strand");
-        bedSS5p.all <- rbind(bedSS5p.all, bedSS5p);
-        bedSS3p.all <- rbind(bedSS3p.all, bedSS3p);
+        junct <- unlist(junct[elementLengths(junct) > 0]);
+        ss5p <- GRanges(
+            seqnames(junct),
+            IRanges(ifelse(strand(junct) == "+",
+                           start(junct),
+                           end(junct)),
+                    ifelse(strand(junct) == "+",
+                           start(junct),
+                           end(junct))),
+            strand(junct),
+            type = "ss5p",
+            gene = names(junct),
+            section = names(txBySec)[sel[i]]);
+        ss3p <- GRanges(
+            seqnames(junct),
+            IRanges(ifelse(strand(junct) == "+",
+                           end(junct),
+                           start(junct)),
+                    ifelse(strand(junct) == "+",
+                           end(junct),
+                           start(junct))),
+            strand(junct),
+            type = "ss3p",
+            gene = names(junct),
+            section = names(txBySec)[sel[i]]);
+        ss5p.all <- append(ss5p.all, ss5p);
+        ss3p.all <- append(ss3p.all, ss3p);
     }
-    bedSS5p.all <- Unfactor(bedSS5p.all);
-    bedSS3p.all <- Unfactor(bedSS3p.all);
+    ss5p.all <- sort(ss5p.all);
+    ss3p.all <- sort(ss3p.all);
+    ss5p.all$name <- paste(ss5p.all$type, ss5p.all$gene, ss5p.all$section, sep = "|");
+    ss3p.all$name <- paste(ss3p.all$type, ss3p.all$gene, ss3p.all$section, sep = "|");
     if (writeBED) {
-        write.table(bedSS5p.all[order(bedSS5p.all$chr, bedSS5p.all$start), ],
-                    file = "spliceSites_5p.bed",
-                    sep = "\t",
-                    quote = FALSE,
-                    col.names = FALSE,
-                    row.names = FALSE);
-        write.table(bedSS3p.all[order(bedSS3p.all$chr, bedSS3p.all$start), ],
-                    file = "spliceSites_3p.bed",
-                    sep = "\t",
-                    quote = FALSE,
-                    col.names = FALSE,
-                    row.names = FALSE);
+        rtracklayer::export(ss5p.all, "ss5p.bed");
+        rtracklayer::export(ss3p.all, "ss3p.bed");
     }
-    ret <- list(
-        GRanges(bedSS5p.all$chr,
-                IRanges(bedSS5p.all$start + 1, bedSS5p.all$end),
-                bedSS5p.all$strand,
-                score = bedSS5p.all$score,
-                id = bedSS5p.all$id),
-        GRanges(bedSS3p.all$chr,
-                IRanges(bedSS3p.all$start + 1, bedSS3p.all$end),
-                bedSS3p.all$strand,
-                score = bedSS3p.all$score,
-                id = bedSS3p.all$id)
-        );
+    ret <- list(GenomicRanges::split(ss5p.all, ss5p.all$gene),
+                GenomicRanges::split(ss3p.all, ss3p.all$gene));
     names(ret) <- c("ss5p", "ss3p");
     return(ret);
 }
+
 
 #' Calculate mutual distances between entries for every transcript
 #' region from two txLoc objects.
@@ -636,41 +628,100 @@ GetRelativeDistance <- function(loc1,
 #' Calculate relative distances between given loci and splice sites.
 #'
 #' @param locus A \code{txLoc} object.
-#' @param ss A \code{GRanges} object.
+#' @param ss A \code{GRangesList} object.
 #'
 #' @return An integer vector.
 #'
 #' @export
 GetRelDistSpliceSite <- function(locus,
-                                 ss) {
+                                 ss,
+                                 flank = 1000) {
     CheckClass(locus, "txLoc");
     refGenome <- GetRef(locus);
     id <- GetId(locus);
     locus <- GetLoci(locus);
-    # Pull out loci in CDS only
+    # Select modification and 5' splice sites in CDS
     locusCDS <- locus[[grep("(CDS|coding)", names(locus))]];
-    locusCDS <- split(locusCDS, locusCDS$REFSEQ);
-    # Match relevant gene IDs of splice sites 
-    ss <- ss[grep("(CDS|coding)", ss$id)];
-    ss <- ss[gsub("(ss\\d+p\\||\\|CDS)", "", ss$id) %in% names(locusCDS)];
-    # Calculate distances
-    dist <- vector();
-    pb <- txtProgressBar(min = 0,
-                         max = length(locusCDS),
-                         width = 80,
-                         style = 3);
-    for (i in 1:length(locusCDS)) {
-        sel <- grep(names(locusCDS)[i], ss$id);
-        if (all(as.character(strand(ss[sel])) == "+")) {
-            pos1 <- locusCDS[[i]]$START;
-            pos2 <- min(as.data.frame(ranges(ss[sel]))$start);
-        } else {
-            pos1 <- max(as.data.frame(ranges(ss[sel]))$start);
-            pos2 <- locusCDS[[i]]$START;
-        }
-        dist <- c(dist, as.vector(outer(pos1, pos2, "-")));
-        setTxtProgressBar(pb, i);
-    }
-    close(pb);
+    ss5pCDS <- unlist(ss[[grep("5p", names(ss))]]);
+    ss5pCDS <- ss5pCDS[grep("(CDS|coding)",
+                            ss5pCDS$section,
+                            ignore.case = TRUE)];
+    # Filter genes with ss _and_ modification site
+    genes <- intersect(ss5pCDS$gene, locusCDS$REFSEQ);
+    ss5pCDS <- ss5pCDS[which(ss5pCDS$gene %in% genes)];
+    locusCDS <- locusCDS[which(locusCDS$REFSEQ %in% genes), ];
+    # Select first CDS splice site upstream of start codon
+    tmp <- ss5pCDS;
+    tmp.pos <- tmp[which(strand(tmp) == "+")];
+    tmp.neg <- tmp[which(strand(tmp) == "-")];
+    dup.pos <- duplicated(tmp.pos$gene,
+                          fromLast = FALSE);
+    dup.neg <- duplicated(tmp.neg$gene,
+                          fromLast = TRUE);
+    tmp.pos <- tmp.pos[!dup.pos];
+    tmp.neg <- tmp.neg[!dup.neg];
+    tmp <- sort(append(tmp.pos, tmp.neg));
+    ss5pCDS <- as.data.frame(tmp);
+    rtracklayer::export(ss5pCDS, "ss5p_firstCDS.bed");
+    gr1 <- GRanges(locusCDS$CHR,
+                   IRanges(locusCDS$START, locusCDS$STOP),
+                   locusCDS$STRAND);
+    gr2 <- GRanges(ss5pCDS$seqnames,
+                   IRanges(ss5pCDS$start, ss5pCDS$end),
+                   ss5pCDS$strand);
+    d <- as.data.frame(distanceToNearest(gr1, gr2));
+    idx <- d$subjectHits;
+    dist <- ifelse(end(gr1) > start(gr2[idx]), d$distance, -d$distance);
+    dist <- ifelse(strand(gr1) == "+", dist, -dist);
+    dist <- dist[abs(dist) <= flank];
     return(dist);
+    # Calculate distances
+#    pos <- cbind.data.frame(
+#        locusCDS[, c("REFSEQ", "STRAND", "START")],
+#        ss5pCDS[match(locusCDS$REFSEQ, ss5pCDS$gene), c("start")]);
+#    colnames(pos) <- c("REFSEQ", "STRAND", "SITE", "SS");
+#    dist <- ifelse(pos$STRAND == "+", pos$SS - pos$SITE, pos$SITE - pos$SS);
+#    dist <- dist[abs(dist) <= 1000];
+#    pdf(sprintf("site_%s.pdf", id));
+#    hist(dist[abs(dist) <= 1000], breaks = 50);
+#    dev.off();
+}
+
+
+PlotDistSSDistribution <- function(locus, ss, nbreaks = 50) {
+    dist <- GetRelDistSpliceSite(locus, ss);
+    breaks <- seq(-1000, 1000, length.out = nbreaks);
+    h0 <- hist(dist, breaks = breaks, plot = FALSE);
+    plot(h0$mids, h0$counts,
+         type = "s",
+         lwd = 2,
+         xlab = "Relative distance from 1st CDS splice site [nt]",
+         ylab = "Abundance",
+         xlim = c(-1000, 1000),
+         font.main = 1);
+    CIFromBS <- EstimateCIFromBS(dist,
+                                 breaks = breaks,
+                                 nBS = 5000);
+    x1 <- c(CIFromBS$x[1],
+            rep(CIFromBS$x[-1], each = 2),
+            CIFromBS$x[length(CIFromBS$x)]);
+    CI <- cbind(c(x1,
+                  rev(x1)),
+                c(rep(CIFromBS$y.low, each = 2),
+                  rev(rep(CIFromBS$y.high, each = 2))));
+    polygon(CI[, 1], CI[, 2], col = rgb(1, 0, 0, 0.2),
+            lwd = 1, border = NA, lty = 1);
+}
+
+
+PlotRelDistSSEnrichment <- function(locPos, locNeg, ss, flank = 500, binWidth = 40) {
+    distPos <- GetRelDistSpliceSite(locPos, ss, flank);
+    distNeg <- GetRelDistSpliceSite(locNeg, ss, flank);
+    breaks <- seq(-flank, flank, by = binWidth);
+    ctsPos <- table(cut(distPos, breaks = breaks));
+    ctsNeg <- table(cut(distNeg, breaks = breaks));
+    ctsMat <- as.matrix(rbind(ctsPos, ctsNeg));
+    rownames(ctsMat) <- c("pos", "neg");
+    tmp <- PlotEnrichment.Generic(ctsMat,
+                                  x.las = 2, x.cex = 0.8, x.padj = 0.8);
 }

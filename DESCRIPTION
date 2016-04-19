@@ -8,7 +8,7 @@ Description: Transcriptome-wide analysis of RNA modifications.
 Imports: AnnotationDbi, beanplot, Biostrings, GenomeInfoDb, methods, RSQLite, rtracklayer
 Depends: GenomicRanges, GenomicFeatures, IRanges
 Suggests: knitr, testthat
-License: GPLv3
+License: GPL
 LazyData: false
 RoxygenNote: 5.0.1.9000
 VignetteBuilder: knitr
