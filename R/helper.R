@@ -31,14 +31,15 @@ SafeLoad <- function(lib) {
 #' Check if object has class classType.
 #' 
 #' @param object An R object.
-#' @param classType String of class type.
+#' @param classType String of class type for toplevel.
+#' @param classType2 String of class type for level 2.
 #'
 #' @return Logical. \code{TRUE} if object is of class classType.
 #'
 #' @keywords internal
 #' 
 #' @export
-CheckClass <- function(object, classType = NULL) {
+CheckClass <- function(object, classType = NULL, classType2 = NULL) {
     # Check that object is of type classType
     #
     # Args:
@@ -49,21 +50,63 @@ CheckClass <- function(object, classType = NULL) {
     #    TRUE
     if (class(object) != classType) {
         objName <- deparse(substitute(object));
-        stop(sprintf("%s is not an object of type %s.", object, classType));
+        stop(sprintf("%s is not an object of type %s.\n",
+                     objName, classType),
+             call. = FALSE);
+    }
+    if (classType == "list" &&
+        !is.null(classType2) &&
+        !all(lapply(object, class) == classType2)) {
+        objName <- deparse(substitute(object));
+        stop(sprintf("%s does not contain a list of objects of type %s.\n",
+                     objName, classType2),
+             call. = FALSE);
     }
     return(TRUE);
 }
 
 
-#' Check if two txLoc objects are consistent.
-#'
-#' Check if two txLoc objects are consistent, i.e. are based on the same
-#' reference genome and contain the same transcript regions.
+#' Check if entries of two \code{txLoc} objects are based on the
+#' same reference genome.
 #' 
-#' @param obj1 A txLoc object.
-#' @param obj2 A txLoc object.
+#' Check if entries of two \code{txLoc} objects are based on the
+#' same reference genome.
 #'
-#' @return Logical. \code{TRUE} if obj1 and obj2 are consistent.
+#' @param obj1 A \code{txLoc} object.
+#' @param obj2 A \code{txLoc} object.
+#'
+#' @return A logical scalar.
+#'
+#' @keywords internal
+#' 
+#' @export
+CheckClassTxLocRef <- function(obj1, obj2) {
+    ref1 <- GetRef(obj1);
+    ref2 <- GetRef(obj2);
+    objName1 <- deparse(substitute(obj1));
+    objName2 <- deparse(substitute(obj2));
+    if (ref1 != ref2) {
+        ss <- sprintf("%s and %s are not based on the same reference genome: %s != %s.",
+                      objName1, objName2, ref1, ref2);
+        stop(ss);
+    }
+    return(TRUE);
+}
+
+
+#' Check if entries of two \code{txLoc} objects are consistent.
+#'
+#' Check if entries of two \code{txLoc} objects are consistent.
+#' See 'Details'.
+#'
+#' The function checks if entries from two \code{txLoc} objects
+#' are based on the same reference genome _and_ contain entries
+#' for the same transcript sections.
+#' 
+#' @param obj1 A \code{txLoc} object.
+#' @param obj2 A \code{txLoc} object.
+#'
+#' @return A logical scalar.
 #'
 #' @keywords internal
 #' 
@@ -78,18 +121,13 @@ CheckClassTxLocConsistency <- function(obj1, obj2) {
     #
     # Returns:
     #   TRUE
-    ref1 <- slot(obj1, "refGenome");
-    ref2 <- slot(obj2, "refGenome");
-    objName1 <- deparse(substitute(obj1));
-    objName2 <- deparse(substitute(obj2));
-    if (ref1 != ref2) {
-        stop("%s and %s are not based on the same reference genome: %s != %s.",
-             objName1, objName2, ref1, ref2);
-    }
-    if (!identical(names(slot(obj1, "loci")),
-                   names(slot(obj2, "loci")))) {
-        stop("Transcript regions in %s and %s do not match.",
+    CheckClassTxLocRef(obj1, obj2);
+    matchSec <- intersect(names(GetLoci(obj1)), names(GetLoci(obj2)));
+    if (!identical(names(GetLoci(obj1)),
+                   names(GetLoci(obj2)))) {
+        ss <- sprintf("Transcript regions in %s and %s do not match.",
              objName1, objName2);
+        stop(ss);
     }
     return(TRUE);
 }
@@ -166,6 +204,43 @@ FilterTxLoc <- function(locus, filter = NULL) {
     return(obj);
 }
 
+
+#' Convert a \code{txLoc} object to a \code{GRangesList} object.
+#'
+#' Convert a \code{txLoc} object to a \code{GRangesList} object.
+#'
+#' @param locus A \code{txLoc} object.
+#' @param filter A character vector; only keep transcript sections
+#' specified in \code{filter}; if \code{NULL} consider all sections.
+#'
+#' @return A \code{GRangesList} object.
+#'
+#' @import GenomicRanges
+#'
+#' @keywords internal
+#' 
+#' @export
+TxLoc2GRangesList <- function(locus, filter = NULL) {
+    CheckClass(locus, "txLoc");
+    id <- GetId(locus);
+    locus <- GetLoci(locus);
+    if (!is.null(filter)) {
+        locus <- locus[which(names(locus) %in% filter)];
+    }
+    gr <- GRangesList();
+    for (i in 1:length(locus)) {
+        gr[[length(gr) + 1]] <- GRanges(
+            locus[[i]]$CHR,
+            IRanges(locus[[i]]$START, locus[[i]]$STOP),
+            locus[[i]]$STRAND,
+            type = id,
+            gene = locus[[i]]$REFSEQ,
+            section = locus[[i]]$GENE_REGION,
+            name = locus[[i]]$ID);
+    }
+    names(gr) <- names(locus);
+    return(gr);
+}
 
 #' Calculate 95% confidence interval from data using empirical
 #' bootstrap.

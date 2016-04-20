@@ -2,21 +2,26 @@
 % Please edit documentation in R/helper.R
 \name{CheckClassTxLocConsistency}
 \alias{CheckClassTxLocConsistency}
-\title{Check if two txLoc objects are consistent.}
+\title{Check if entries of two \code{txLoc} objects are consistent.}
 \usage{
 CheckClassTxLocConsistency(obj1, obj2)
 }
 \arguments{
-\item{obj1}{A txLoc object.}
+\item{obj1}{A \code{txLoc} object.}
 
-\item{obj2}{A txLoc object.}
+\item{obj2}{A \code{txLoc} object.}
 }
 \value{
-Logical. \code{TRUE} if obj1 and obj2 are consistent.
+A logical scalar.
 }
 \description{
-Check if two txLoc objects are consistent, i.e. are based on the same
-reference genome and contain the same transcript regions.
+Check if entries of two \code{txLoc} objects are consistent.
+See 'Details'.
+}
+\details{
+The function checks if entries from two \code{txLoc} objects
+are based on the same reference genome _and_ contain entries
+for the same transcript sections.
 }
 \keyword{internal}
 

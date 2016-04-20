@@ -550,33 +550,124 @@ GetSpliceSites <- function(refGenome = "hg38", writeBED = FALSE) {
 }
 
 
+#' Get exon-exon junctions from transcriptome.
+#'
+#' Get exon-exon junctions from transcriptome. See 'Details'.
+#'
+#' This function extracts exon-exon junction positions from a
+#' reference transcriptome, and returns a \code{txLoc} object.
+#'
+#' @param refGenome A character string; specifies a specific
+#' reference genome assembly version based on which the matching
+#' transcriptome is loaded; default is \code{"hg38"}.
+#'
+#' @return A \code{txLoc} object. See 'Details'.
+#'
+#' @export
+GetEEJunct <- function(refGenome = "hg38", filter = "CDS") {
+    refTx <- sprintf("tx_%s.RData", refGenome);
+    if (!file.exists(refTx)) {
+        ss <- sprintf("Reference transcriptome for %s not found.", refGenome);
+        ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
+                      ss, refGenome);
+        stop(ss);
+    }
+    load(refTx);
+    requiredObj <- c("geneXID", "seqBySec", "txBySec");
+    if (!all(requiredObj %in% ls())) {
+        ss <- sprintf("Mandatory transcript objects not found.");
+        ss <- sprintf("%s\nNeed all of the following: %s",
+                      ss, paste0(requiredObj, collapse = ", "));
+        ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
+                      ss, refGenome);
+        stop(ss);
+    }
+    geneXID <- get("geneXID");
+    seqBySec <- get("seqBySec");
+    txBySec <- get("txBySec");
+    if (is.null(filter)) {
+        filter <- c("5'UTR", "CDS", "3'UTR");
+    }
+    sel <- which(names(txBySec) %in% filter);
+    locus <- GRanges();
+    for (i in 1:length(sel)) {
+        junct <- psetdiff(range(txBySec[[sel[i]]]), txBySec[[sel[i]]]);
+        junct <- unlist(junct[elementLengths(junct) > 0]);
+        eej <- GRanges(
+            seqnames(junct),
+            IRanges(ifelse(strand(junct) == "+",
+                           start(junct) - 1,
+                           end(junct) + 1),
+                    ifelse(strand(junct) == "+",
+                           start(junct) - 1,
+                           end(junct) + 1)),
+            strand(junct),
+            score = 0,
+            id = sprintf("eej|%s|%s",
+                gene = names(junct),
+                section = names(txBySec)[sel[i]]));
+        locus <- append(locus, eej);
+    }
+    locusInTx.list <- SmartMap.ToTx(
+        locus, txBySec, seqBySec, geneXID,
+        ignore.strand = FALSE,
+        showPb = TRUE);
+    obj <- new("txLoc",
+               loci = locusInTx.list,
+               id = "eej",
+               refGenome = refGenome,
+               version = as.character(Sys.Date()));
+    obj <- FilterTxLoc(obj, filter);
+    return(obj);
+}
+
+
 #' Calculate mutual distances between entries for every transcript
 #' region from two txLoc objects.
 #'
 #' Calculate mutual distances between entries for every transcript
 #' region from two txLoc objects.
+#'
+#' The function calculates relative distances between loci from
+#' \code{loc1} and \code{loc2} within the same transcript section.
+#' Positive distances refer to loc1 > loc2, negative distances to
+#' loc1 < loc2. By default only the smallest distance for every
+#' locus from \code{loc1} is kept (\code{method = "nearest"}).
+#' By default relative distances correspond to distances between
+#' start coordinates (\code{refPoint = "ss"}). 
 #' 
-#' @param loc1 A txLoc object.
-#' @param loc2 A txLoc object.
-#' @param filter Only consider loci in transcript regions specified
-#' in filter. Default is NULL.
-#' @param method Method to calculate relative distances. Possible
-#' arguments are "ss" (start-start), "mm" (midpoint-midpoint),
-#' "se" (start-end), "es" (end-start), "ee" (end-end).
+#' @param loc1 A \code{txLoc} object.
+#' @param loc2 A \code{txLoc} object.
+#' @param filter A character vector; only consider transcript sections
+#' specified in \code{filter}; if \code{NULL} consider all sections.
+#' @param method A character strings; specifies the distance
+#' calculation method; possible arguments are "all", "nearest";
+#' default is "nearest".
+#' @param refPoint A character string; specifies the reference point
+#' for calculating relative distances; possible arguments are "ss"
+#' (start-start), "mm" (midpoint-midpoint), "se" (start-end), "es"
+#' (end-start), "ee" (end-end); default is "ss".
 #'
 #' @return List of upper and lower 95% confidence interval
 #' bounds for every bin value.
 #' 
 #' @export
-GetRelativeDistance <- function(loc1,
-                                loc2,
-                                filter = NULL,
-                                method = c("ss", "mm", "se", "es", "ee")) {
-    CheckClassTxLocConsistency(loc1, loc2);
+GetRelDist <- function(loc1,
+                       loc2,
+                       filter = NULL,
+                       method = c("nearest", "all"),
+                       refPoint = c("ss", "mm", "se", "es", "ee")) {
+    CheckClass(loc1, "txLoc");
+    CheckClass(loc2, "txLoc");
+    CheckClassTxLocRef(loc1, loc2);
+    refPoint <- match.arg(refPoint);
     method <- match.arg(method);
     id1 <- GetId(loc1);
     id2 <- GetId(loc2);
     refGenome <- GetRef(loc1);
+    sec <- intersect(names(GetLoci(loc1)), names(GetLoci(loc2)));
+    loc1 <- FilterTxLoc(loc1, sec);
+    loc2 <- FilterTxLoc(loc2, sec);
     loc1 <- GetLoci(loc1);
     loc2 <- GetLoci(loc2);
     dist.list <- list();
@@ -589,139 +680,96 @@ GetRelativeDistance <- function(loc1,
             for (j in 1:length(txID)) {
                 loc1.sel <- loc1[[i]][which(loc1[[i]]$REFSEQ == txID[j]), ];
                 loc2.sel <- loc2[[i]][which(loc2[[i]]$REFSEQ == txID[j]), ];
-                if (method == "ss") {
-                    dist <- c(dist,
-                              as.vector(outer(loc1.sel$TXSTART,
-                                              loc2.sel$TXSTART,
-                                              "-")));
-                } else if (method == "mm") {
-                    dist <- c(dist,
-                              as.vector(outer((loc1.sel$TXSTART + loc1.sel$TXEND) / 2,
-                                              (loc2.sel$TXSTART + loc2.sel$TXEND) / 2,
-                                              "-")));
-                } else if (method == "se") {
-                    dist <- c(dist,
-                              as.vector(outer(loc1.sel$TXSTART,
-                                              loc2.sel$TXEND,
-                                              "-")));
-                } else if (method == "es") {
-                    dist <- c(dist,
-                              as.vector(outer(loc1.sel$TXEND,
-                                              loc2.sel$TXSTART,
-                                              "-")));
-                } else if (method == "ee") {
-                    dist <- c(dist,
-                              as.vector(outer(loc1.sel$TXEND,
-                                              loc2.sel$TXEND,
-                                              "-")));
+                distMat <- switch(refPoint,
+                                  "ss" = outer(loc1.sel$TXSTART,
+                                      loc2.sel$TXSTART,
+                                      "-"),
+                                  "mm" = outer((loc1.sel$TXSTART + loc1.sel$TXEND) / 2,
+                                      (loc2.sel$TXSTART + loc2.sel$TXEND) / 2,
+                                      "-"),
+                                  "se" = outer(loc1.sel$TXSTART,
+                                      loc2.sel$TXEND,
+                                      "-"),
+                                  "es" = outer(loc1.sel$TXEND,
+                                      loc2.sel$TXSTART,
+                                      "-"),
+                                  "ee" = outer(loc1.sel$TXEND,
+                                      loc2.sel$TXEND,
+                                      "-"));
+                if (method == "nearest") {
+                    dist <- c(dist, apply(distMat, 1, function(x) x[which.min(abs(x))]));
+                } else {
+                    dist <- c(dist, as.vector(distMat));
                 }
             }
             dist.list[[length(dist.list) + 1]] <- dist;
         }
     }
     names(dist.list) <- names(loc1);
+    return(dist.list);
 }
 
 
-#' Calculate relative distances between given loci and splice sites.
+#' Calculate relative distances between loci from \code{txLoc}
+#' object to splice sites.
 #'
-#' Calculate relative distances between given loci and splice sites.
+#' Calculate relative distances between loci from \code{txLoc}
+#' and splice sites. See 'Details'.
+#' This is a low-level function that is being called from
+#' \code{PlotRelDistSSDistribution} and
+#' \code{PlotRelDistSSEnrichment}.
+#'
+#' The function calculates relative distances between 5' splice
+#' sites from \code{ss} and loci from \code{locus}. Distances
+#' are taken to be negative (positive) if a locus from
+#' \code{txLoc} is upstream (downstream) of a splice site.
+#' Distances flank <= d <= flank are considered. The fun
 #'
 #' @param locus A \code{txLoc} object.
-#' @param ss A \code{GRangesList} object.
+#' @param ss A list of two \code{GRangesList} objects.
+#' @param flank An integer scalar; specifies the absolute maximum
+#' relative distance used as a cutoff; default is 1000.
 #'
 #' @return An integer vector.
 #'
+#' @keywords internal
+#'
 #' @export
-GetRelDistSpliceSite <- function(locus,
-                                 ss,
-                                 flank = 1000) {
+GetRelDistSS <- function(locus,
+                         ss,
+                         flank = 1000) {
     CheckClass(locus, "txLoc");
-    refGenome <- GetRef(locus);
-    id <- GetId(locus);
-    locus <- GetLoci(locus);
-    # Select modification and 5' splice sites in CDS
-    locusCDS <- locus[[grep("(CDS|coding)", names(locus))]];
-    ss5pCDS <- unlist(ss[[grep("5p", names(ss))]]);
-    ss5pCDS <- ss5pCDS[grep("(CDS|coding)",
-                            ss5pCDS$section,
-                            ignore.case = TRUE)];
+    CheckClass(ss, "list", "GRangesList");
+    grLoc <- unlist(
+        TxLoc2GRangesList(locus,
+                          filter = c("5'UTR", "CDS", "3'UTR")));
+    # Select 5' splice sites in CDS
+    grSS <- unlist(ss[[grep("5p", names(ss))]]);
+    grSS <- grSS[grep("(CDS|coding)",
+                      grSS$section,
+                      ignore.case = TRUE)];
     # Filter genes with ss _and_ modification site
-    genes <- intersect(ss5pCDS$gene, locusCDS$REFSEQ);
-    ss5pCDS <- ss5pCDS[which(ss5pCDS$gene %in% genes)];
-    locusCDS <- locusCDS[which(locusCDS$REFSEQ %in% genes), ];
-    # Select first CDS splice site upstream of start codon
-    tmp <- ss5pCDS;
-    tmp.pos <- tmp[which(strand(tmp) == "+")];
-    tmp.neg <- tmp[which(strand(tmp) == "-")];
-    dup.pos <- duplicated(tmp.pos$gene,
+    genes <- intersect(grSS$gene, grLoc$gene);
+    grSS <- grSS[which(grSS$gene %in% genes)];
+    grLoc <- grLoc[which(grLoc$gene %in% genes)];
+    # Select first 5' splice site upstream of start codon in CDS
+    grSSPos <- grSS[which(strand(grSS) == "+")];
+    grSSNeg <- grSS[which(strand(grSS) == "-")];
+    dupIDPos <- duplicated(grSSPos$gene,
                           fromLast = FALSE);
-    dup.neg <- duplicated(tmp.neg$gene,
+    dupIDNeg <- duplicated(grSSNeg$gene,
                           fromLast = TRUE);
-    tmp.pos <- tmp.pos[!dup.pos];
-    tmp.neg <- tmp.neg[!dup.neg];
-    tmp <- sort(append(tmp.pos, tmp.neg));
-    ss5pCDS <- as.data.frame(tmp);
-    rtracklayer::export(ss5pCDS, "ss5p_firstCDS.bed");
-    gr1 <- GRanges(locusCDS$CHR,
-                   IRanges(locusCDS$START, locusCDS$STOP),
-                   locusCDS$STRAND);
-    gr2 <- GRanges(ss5pCDS$seqnames,
-                   IRanges(ss5pCDS$start, ss5pCDS$end),
-                   ss5pCDS$strand);
-    d <- as.data.frame(distanceToNearest(gr1, gr2));
+    grSSPos <- grSSPos[!dupIDPos];
+    grSSNeg <- grSSNeg[!dupIDNeg];
+    grSS <- sort(append(grSSPos, grSSNeg));
+#    rtracklayer::export(grSS, "ss5p_firstCDS.bed");
+    # Get distances
+    d <- as.data.frame(distanceToNearest(grLoc, grSS));
     idx <- d$subjectHits;
-    dist <- ifelse(end(gr1) > start(gr2[idx]), d$distance, -d$distance);
-    dist <- ifelse(strand(gr1) == "+", dist, -dist);
+    dist <- ifelse(end(grLoc) > start(grSS[idx]), d$distance, -d$distance);
+    dist <- ifelse(strand(grLoc) == "+", dist, -dist);
     dist <- dist[abs(dist) <= flank];
     return(dist);
-    # Calculate distances
-#    pos <- cbind.data.frame(
-#        locusCDS[, c("REFSEQ", "STRAND", "START")],
-#        ss5pCDS[match(locusCDS$REFSEQ, ss5pCDS$gene), c("start")]);
-#    colnames(pos) <- c("REFSEQ", "STRAND", "SITE", "SS");
-#    dist <- ifelse(pos$STRAND == "+", pos$SS - pos$SITE, pos$SITE - pos$SS);
-#    dist <- dist[abs(dist) <= 1000];
-#    pdf(sprintf("site_%s.pdf", id));
-#    hist(dist[abs(dist) <= 1000], breaks = 50);
-#    dev.off();
 }
 
 
-PlotDistSSDistribution <- function(locus, ss, nbreaks = 50) {
-    dist <- GetRelDistSpliceSite(locus, ss);
-    breaks <- seq(-1000, 1000, length.out = nbreaks);
-    h0 <- hist(dist, breaks = breaks, plot = FALSE);
-    plot(h0$mids, h0$counts,
-         type = "s",
-         lwd = 2,
-         xlab = "Relative distance from 1st CDS splice site [nt]",
-         ylab = "Abundance",
-         xlim = c(-1000, 1000),
-         font.main = 1);
-    CIFromBS <- EstimateCIFromBS(dist,
-                                 breaks = breaks,
-                                 nBS = 5000);
-    x1 <- c(CIFromBS$x[1],
-            rep(CIFromBS$x[-1], each = 2),
-            CIFromBS$x[length(CIFromBS$x)]);
-    CI <- cbind(c(x1,
-                  rev(x1)),
-                c(rep(CIFromBS$y.low, each = 2),
-                  rev(rep(CIFromBS$y.high, each = 2))));
-    polygon(CI[, 1], CI[, 2], col = rgb(1, 0, 0, 0.2),
-            lwd = 1, border = NA, lty = 1);
-}
-
-
-PlotRelDistSSEnrichment <- function(locPos, locNeg, ss, flank = 500, binWidth = 40) {
-    distPos <- GetRelDistSpliceSite(locPos, ss, flank);
-    distNeg <- GetRelDistSpliceSite(locNeg, ss, flank);
-    breaks <- seq(-flank, flank, by = binWidth);
-    ctsPos <- table(cut(distPos, breaks = breaks));
-    ctsNeg <- table(cut(distNeg, breaks = breaks));
-    ctsMat <- as.matrix(rbind(ctsPos, ctsNeg));
-    rownames(ctsMat) <- c("pos", "neg");
-    tmp <- PlotEnrichment.Generic(ctsMat,
-                                  x.las = 2, x.cex = 0.8, x.padj = 0.8);
-}

@@ -4,12 +4,14 @@
 \alias{CheckClass}
 \title{Check if object has class classType.}
 \usage{
-CheckClass(object, classType = NULL)
+CheckClass(object, classType = NULL, classType2 = NULL)
 }
 \arguments{
 \item{object}{An R object.}
 
-\item{classType}{String of class type.}
+\item{classType}{String of class type for toplevel.}
+
+\item{classType2}{String of class type for level 2.}
 }
 \value{
 Logical. \code{TRUE} if object is of class classType.
