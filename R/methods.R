@@ -144,7 +144,7 @@ SmartMap.ToTx <- function(locus,
 #'
 #' @return A \code{txLoc} object. See 'Details'.
 #'
-#' @import GenomicFeatures GenomicRanges IRanges methods
+#' @import GenomicFeatures GenomicRanges methods
 #' 
 #' @examples
 #' \dontrun{
@@ -563,6 +563,8 @@ GetSpliceSites <- function(refGenome = "hg38", writeBED = FALSE) {
 #'
 #' @return A \code{txLoc} object. See 'Details'.
 #'
+#' @import GenomicRanges IRanges
+#'
 #' @export
 GetEEJunct <- function(refGenome = "hg38", filter = "CDS") {
     refTx <- sprintf("tx_%s.RData", refGenome);
@@ -621,93 +623,94 @@ GetEEJunct <- function(refGenome = "hg38", filter = "CDS") {
     return(obj);
 }
 
-
-#' Calculate mutual distances between entries for every transcript
-#' region from two txLoc objects.
-#'
-#' Calculate mutual distances between entries for every transcript
-#' region from two txLoc objects.
-#'
-#' The function calculates relative distances between loci from
-#' \code{loc1} and \code{loc2} within the same transcript section.
-#' Positive distances refer to loc1 > loc2, negative distances to
-#' loc1 < loc2. By default only the smallest distance for every
-#' locus from \code{loc1} is kept (\code{method = "nearest"}).
-#' By default relative distances correspond to distances between
-#' start coordinates (\code{refPoint = "ss"}). 
-#' 
-#' @param loc1 A \code{txLoc} object.
-#' @param loc2 A \code{txLoc} object.
-#' @param filter A character vector; only consider transcript sections
-#' specified in \code{filter}; if \code{NULL} consider all sections.
-#' @param method A character strings; specifies the distance
-#' calculation method; possible arguments are "all", "nearest";
-#' default is "nearest".
-#' @param refPoint A character string; specifies the reference point
-#' for calculating relative distances; possible arguments are "ss"
-#' (start-start), "mm" (midpoint-midpoint), "se" (start-end), "es"
-#' (end-start), "ee" (end-end); default is "ss".
-#'
-#' @return List of upper and lower 95% confidence interval
-#' bounds for every bin value.
-#' 
-#' @export
-GetRelDist <- function(loc1,
-                       loc2,
-                       filter = NULL,
-                       method = c("nearest", "all"),
-                       refPoint = c("ss", "mm", "se", "es", "ee")) {
-    CheckClass(loc1, "txLoc");
-    CheckClass(loc2, "txLoc");
-    CheckClassTxLocRef(loc1, loc2);
-    refPoint <- match.arg(refPoint);
-    method <- match.arg(method);
-    id1 <- GetId(loc1);
-    id2 <- GetId(loc2);
-    refGenome <- GetRef(loc1);
-    sec <- intersect(names(GetLoci(loc1)), names(GetLoci(loc2)));
-    loc1 <- FilterTxLoc(loc1, sec);
-    loc2 <- FilterTxLoc(loc2, sec);
-    loc1 <- GetLoci(loc1);
-    loc2 <- GetLoci(loc2);
-    dist.list <- list();
-    for (i in 1:length(loc1)) {
-        txID <- intersect(loc1[[i]]$REFSEQ, loc2[[i]]$REFSEQ);
-        if (length(txID) == 0) {
-            dist.list[[length(dist.list)+1]] <- 0;
-        } else {
-            dist <- vector();
-            for (j in 1:length(txID)) {
-                loc1.sel <- loc1[[i]][which(loc1[[i]]$REFSEQ == txID[j]), ];
-                loc2.sel <- loc2[[i]][which(loc2[[i]]$REFSEQ == txID[j]), ];
-                distMat <- switch(refPoint,
-                                  "ss" = outer(loc1.sel$TXSTART,
-                                      loc2.sel$TXSTART,
-                                      "-"),
-                                  "mm" = outer((loc1.sel$TXSTART + loc1.sel$TXEND) / 2,
-                                      (loc2.sel$TXSTART + loc2.sel$TXEND) / 2,
-                                      "-"),
-                                  "se" = outer(loc1.sel$TXSTART,
-                                      loc2.sel$TXEND,
-                                      "-"),
-                                  "es" = outer(loc1.sel$TXEND,
-                                      loc2.sel$TXSTART,
-                                      "-"),
-                                  "ee" = outer(loc1.sel$TXEND,
-                                      loc2.sel$TXEND,
-                                      "-"));
-                if (method == "nearest") {
-                    dist <- c(dist, apply(distMat, 1, function(x) x[which.min(abs(x))]));
-                } else {
-                    dist <- c(dist, as.vector(distMat));
-                }
-            }
-            dist.list[[length(dist.list) + 1]] <- dist;
-        }
-    }
-    names(dist.list) <- names(loc1);
-    return(dist.list);
-}
+## UGLY CODE
+## DON'T USE
+##  #' Calculate mutual distances between entries for every transcript
+##  #' region from two txLoc objects.
+##  #'
+##  #' Calculate mutual distances between entries for every transcript
+##  #' region from two txLoc objects.
+##  #'
+##  #' The function calculates relative distances between loci from
+##  #' \code{loc1} and \code{loc2} within the same transcript section.
+##  #' Positive distances refer to loc1 > loc2, negative distances to
+##  #' loc1 < loc2. By default only the smallest distance for every
+##  #' locus from \code{loc1} is kept (\code{method = "nearest"}).
+##  #' By default relative distances correspond to distances between
+##  #' start coordinates (\code{refPoint = "ss"}). 
+##  #' 
+##  #' @param loc1 A \code{txLoc} object.
+##  #' @param loc2 A \code{txLoc} object.
+##  #' @param filter A character vector; only consider transcript sections
+##  #' specified in \code{filter}; if \code{NULL} consider all sections.
+##  #' @param method A character strings; specifies the distance
+##  #' calculation method; possible arguments are "all", "nearest";
+##  #' default is "nearest".
+##  #' @param refPoint A character string; specifies the reference point
+##  #' for calculating relative distances; possible arguments are "ss"
+##  #' (start-start), "mm" (midpoint-midpoint), "se" (start-end), "es"
+##  #' (end-start), "ee" (end-end); default is "ss".
+##  #'
+##  #' @return List of upper and lower 95% confidence interval
+##  #' bounds for every bin value.
+##  #' 
+##  #' @export
+##  GetRelDist <- function(loc1,
+##                         loc2,
+##                         filter = NULL,
+##                         method = c("nearest", "all"),
+##                         refPoint = c("ss", "mm", "se", "es", "ee")) {
+##      CheckClass(loc1, "txLoc");
+##      CheckClass(loc2, "txLoc");
+##      CheckClassTxLocRef(loc1, loc2);
+##      refPoint <- match.arg(refPoint);
+##      method <- match.arg(method);
+##      id1 <- GetId(loc1);
+##      id2 <- GetId(loc2);
+##      refGenome <- GetRef(loc1);
+##      sec <- intersect(names(GetLoci(loc1)), names(GetLoci(loc2)));
+##      loc1 <- FilterTxLoc(loc1, sec);
+##      loc2 <- FilterTxLoc(loc2, sec);
+##      loc1 <- GetLoci(loc1);
+##      loc2 <- GetLoci(loc2);
+##      dist.list <- list();
+##      for (i in 1:length(loc1)) {
+##          txID <- intersect(loc1[[i]]$REFSEQ, loc2[[i]]$REFSEQ);
+##          if (length(txID) == 0) {
+##              dist.list[[length(dist.list)+1]] <- 0;
+##          } else {
+##              dist <- vector();
+##              for (j in 1:length(txID)) {
+##                  loc1.sel <- loc1[[i]][which(loc1[[i]]$REFSEQ == txID[j]), ];
+##                  loc2.sel <- loc2[[i]][which(loc2[[i]]$REFSEQ == txID[j]), ];
+##                  distMat <- switch(refPoint,
+##                                    "ss" = outer(loc1.sel$TXSTART,
+##                                        loc2.sel$TXSTART,
+##                                        "-"),
+##                                    "mm" = outer((loc1.sel$TXSTART + loc1.sel$TXEND) / 2,
+##                                        (loc2.sel$TXSTART + loc2.sel$TXEND) / 2,
+##                                        "-"),
+##                                    "se" = outer(loc1.sel$TXSTART,
+##                                        loc2.sel$TXEND,
+##                                        "-"),
+##                                    "es" = outer(loc1.sel$TXEND,
+##                                        loc2.sel$TXSTART,
+##                                        "-"),
+##                                    "ee" = outer(loc1.sel$TXEND,
+##                                        loc2.sel$TXEND,
+##                                        "-"));
+##                  if (method == "nearest") {
+##                      dist <- c(dist, apply(distMat, 1, function(x) x[which.min(abs(x))]));
+##                  } else {
+##                      dist <- c(dist, as.vector(distMat));
+##                  }
+##              }
+##              dist.list[[length(dist.list) + 1]] <- dist;
+##          }
+##      }
+##      names(dist.list) <- names(loc1);
+##      return(dist.list);
+##  }
 
 
 #' Calculate relative distances between loci from \code{txLoc}

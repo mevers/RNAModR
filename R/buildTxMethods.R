@@ -605,7 +605,7 @@ GetTxSeq <- function(txBySec,
 #' sanity checks.
 #'
 #' @import AnnotationDbi GenomeInfoDb GenomicRanges GenomicFeatures
-#' IRanges RSQLite
+#' RSQLite
 #'
 #' @export
 BuildTx <- function(genomeVersion = "hg38",

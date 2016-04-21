@@ -122,6 +122,8 @@ CheckClassTxLocConsistency <- function(obj1, obj2) {
     # Returns:
     #   TRUE
     CheckClassTxLocRef(obj1, obj2);
+    objName1 <- deparse(substitute(obj1));
+    objName2 <- deparse(substitute(obj2));
     matchSec <- intersect(names(GetLoci(obj1)), names(GetLoci(obj2)));
     if (!identical(names(GetLoci(obj1)),
                    names(GetLoci(obj2)))) {
@@ -208,39 +210,110 @@ FilterTxLoc <- function(locus, filter = NULL) {
 #' Convert a \code{txLoc} object to a \code{GRangesList} object.
 #'
 #' Convert a \code{txLoc} object to a \code{GRangesList} object.
+#' See 'Details'.
 #'
+#' The function converts a \code{txLoc} to a \code{GRangesList}
+#' object. Coordinates can be either genomic coordinates
+#' (\code{method = "gPos"}) or transcript section coordinates
+#' (\code{method = "tPos"}).
+#' 
 #' @param locus A \code{txLoc} object.
 #' @param filter A character vector; only keep transcript sections
 #' specified in \code{filter}; if \code{NULL} consider all sections.
+#' @param method A character string; specifies whether coordinates
+#' are genome (\code{method = "gPos"}) or transcriptome coordinates
+#' (\code{method = "tPos"}).
 #'
-#' @return A \code{GRangesList} object.
+#' @return A \code{GRangesList} object. See 'Details'.
 #'
-#' @import GenomicRanges
+#' @import GenomicRanges IRanges
 #'
-#' @keywords internal
-#' 
 #' @export
-TxLoc2GRangesList <- function(locus, filter = NULL) {
+TxLoc2GRangesList <- function(locus,
+                              filter = NULL,
+                              method = c("gPos", "tPos")) {
     CheckClass(locus, "txLoc");
+    method <- match.arg(method);
     id <- GetId(locus);
     locus <- GetLoci(locus);
     if (!is.null(filter)) {
         locus <- locus[which(names(locus) %in% filter)];
     }
     gr <- GRangesList();
+    options(warn = -1);
     for (i in 1:length(locus)) {
-        gr[[length(gr) + 1]] <- GRanges(
-            locus[[i]]$CHR,
-            IRanges(locus[[i]]$START, locus[[i]]$STOP),
-            locus[[i]]$STRAND,
-            type = id,
-            gene = locus[[i]]$REFSEQ,
-            section = locus[[i]]$GENE_REGION,
-            name = locus[[i]]$ID);
+        gr[[length(gr) + 1]] <- switch(
+            method,
+            "gPos" = GRanges(
+                locus[[i]]$CHR,
+                IRanges(locus[[i]]$START, locus[[i]]$STOP),
+                locus[[i]]$STRAND,
+                type = id,
+                gene = locus[[i]]$REFSEQ,
+                section = locus[[i]]$GENE_REGION,
+                name = locus[[i]]$ID),
+            "tPos" = GRanges(
+                paste(locus[[i]]$REFSEQ,
+                      locus[[i]]$GENE_REGION,
+                      sep = "_"),
+                IRanges(locus[[i]]$TXSTART, locus[[i]]$TXEND),
+                "+",
+                type = id,
+                gene = locus[[i]]$REFSEQ,
+                section = locus[[i]]$GENE_REGION,
+                names = locus[[i]]$ID));
     }
+    options(warn = 0);
     names(gr) <- names(locus);
     return(gr);
 }
+
+
+#' Return list of nearest distances between entries from two
+#' \code{GRangesList} objects.
+#'
+#' Return list of nearest distances between entries from two
+#' \code{GRangesList} objects. See 'Details'.
+#'
+#' The function uses \code{GenomicRanges::distanceToNearest}
+#' to calculate nearest distances between entries from two
+#' \code{GRangesList} objects. The return object is a list
+#' of distances, where every list element corresponds to
+#' a \code{GRangesList} element.
+#'
+#' @param gr1 A \code{GRangesList} object.
+#' @param gr2 A \code{GRangesList} object.
+#'
+#' @return A list of integer vectors. See 'Details'.
+#' 
+#' @import GenomicRanges
+#'
+#' @keywords internal
+#' 
+#' @export
+GetRelDistNearest <- function(gr1,
+                              gr2) {
+    CheckClass(gr1, "GRangesList");
+    CheckClass(gr2, "GRangesList");
+    filter <- intersect(names(gr1), names(gr2));
+    gr1 <- gr1[which(names(gr1) %in% filter)];
+    gr2 <- gr2[which(names(gr2) %in% filter)];
+    dist.list <- list();
+    for (i in 1:length(gr1)) {
+        options(warn = -1);
+        d <- as.data.frame(distanceToNearest(gr1[[i]], gr2[[i]]));
+        options(warn = 0);
+        idx1 <- d$queryHits;
+        idx2 <- d$subjectHits;
+        dist <- ifelse(end(gr1[[i]][idx1]) > start(gr2[[i]][idx2]),
+                       d$distance,
+                       -d$distance);
+        dist.list[[length(dist.list) + 1]] <- dist;
+    }
+    names(dist.list) <- names(gr1);
+    return(dist.list);
+}
+
 
 #' Calculate 95% confidence interval from data using empirical
 #' bootstrap.

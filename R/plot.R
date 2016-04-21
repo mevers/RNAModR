@@ -17,6 +17,8 @@
 #' boxplot; default is \code{FALSE}.
 #' @param ... Any additional parameters passed to \code{axis}.
 #'
+#' @import GenomicRanges IRanges
+#' 
 #' @export
 PlotTxSecLength <- function(txBySec,
                             asLog = TRUE,
@@ -108,6 +110,8 @@ PlotTxSecLength <- function(txBySec,
 #' @param ... Any additional parameters passed to \code{axis}.
 #'
 #' @keywords internal
+#'
+#' @import GenomicRanges IRanges
 #'
 #' @export
 PlotTxSecLength.bean <- function(txBySec,
@@ -965,7 +969,7 @@ PlotSeqLogo <- function(locus, flank = 5, filter = NULL) {
             subSeq <- DNAStringSet(substr(locus[[i]]$REGION_SEQ, x1, x2));
             subSeq <- subSeq[which(nchar(subSeq) == 2 * flank + 1)];
             mat <- consensusMatrix(subSeq, as.prob = TRUE)[1:4, ];
-# Keep this for any whiny biologists out there ...
+# Keep this for the whiny biologists out there ...
 #            if (giveMeUgly) {
 #                seqLogo(makePWM(mat));
 #            } else {
@@ -1008,100 +1012,234 @@ PlotSeqLogo <- function(locus, flank = 5, filter = NULL) {
 }
 
 
-#' Plot relative distance distribution of loci from \code{txLoc}
-#' object to splice sites.
+##  #' Plot relative distance distribution of loci from \code{txLoc}
+##  #' object to splice sites.
+##  #'
+##  #' Plot relative distance distribution of loci from \code{txLoc}
+##  #' object to splice sites.
+##  #'
+##  #' @param locus A \code{txLoc} object.
+##  #' @param ss A list of two \code{GRangesList} objects.
+##  #' @param flank An integer scalar; specifies the absolute maximum
+##  #' relative distance used as a cutoff; default is 1000.
+##  #' @param binWidth An integer scalar; specifies the spatial width
+##  #' by which distances will be binned; default is 20.
+##  #'
+##  #' @export
+##  PlotRelDistSSDistribution <- function(locus, ss, flank = 1000, binWidth = 20) {
+##      dist <- GetRelDistSS(locus, ss, flank);
+##      breaks <- seq(-flank, flank, by = binWidth);
+##      bwString <- sprintf("bw = %i nt", binWidth);
+##      h0 <- hist(dist, breaks = breaks, plot = FALSE);
+##      plot(h0$mids, h0$counts,
+##           type = "s",
+##           lwd = 2,
+##           xlab = "Relative distance from 1st CDS splice site [nt]",
+##           ylab = "Abundance",
+##           xlim = c(-1000, 1000),
+##           font.main = 1);
+##      CIFromBS <- EstimateCIFromBS(dist,
+##                                   breaks = breaks,
+##                                   nBS = 5000);
+##      x1 <- c(CIFromBS$x[1],
+##              rep(CIFromBS$x[-1], each = 2),
+##              CIFromBS$x[length(CIFromBS$x)]);
+##      CI <- cbind(c(x1,
+##                    rev(x1)),
+##                  c(rep(CIFromBS$y.low, each = 2),
+##                    rev(rep(CIFromBS$y.high, each = 2))));
+##      polygon(CI[, 1], CI[, 2], col = rgb(1, 0, 0, 0.2),
+##              lwd = 1, border = NA, lty = 1);
+##      # Loess smoothing of boostrap CI
+##      lines(lowess(CIFromBS$x, CIFromBS$y.low, f = 1/5),
+##            col = "red", lty = 2, lwd = 1);
+##      lines(lowess(CIFromBS$x, CIFromBS$y.high, f = 1/5),
+##            col = "red", lty = 2, lwd = 1);
+##      legend("topleft",
+##             c(sprintf("Abundance (%s)", bwString),
+##               "95%CI (empirical bootstrap)",
+##               "Lowess-smoothed 95%CI"),
+##             lwd = c(2, 5, 1),
+##             col = c("black", rgb(1, 0, 0, 0.2), "red"),
+##             lty = c(1, 1, 2),
+##             bty = "n");
+##  }
+##  
+##  #' Plot relative distance enrichment of sites from \code{locPos}
+##  #' and \code{locPos} to splice sites.
+##  #' 
+##  #' Plot relative distance enrichment of sites from \code{locPos}
+##  #' and \code{locPos} to splice sites.
+##  #'
+##  #' @param locPos A \code{txLoc} object; specifies the positive
+##  #' sites.
+##  #' @param locNeg A \code{txLoc} object; specifies the negative
+##  #' sites.
+##  #' @param ss A list of two \code{GRangesList} objects.
+##  #' @param flank An integer scalar; specifies the absolute maximum
+##  #' relative distance used as a cutoff; default is 1000.
+##  #' @param binWidth An integer scalar; specifies the spatial width
+##  #' by which distances will be binned; default is 20.
+##  #'
+##  #' @export
+##  PlotRelDistSSEnrichment <- function(locPos, locNeg, ss, flank = 1000, binWidth = 20) {
+##      idPos <- GetId(locPos);
+##      idNeg <- GetId(locNeg);
+##      distPos <- GetRelDistSS(locPos, ss, flank);
+##      distNeg <- GetRelDistSS(locNeg, ss, flank);
+##      breaks <- seq(-flank, flank, by = binWidth);
+##      ctsPos <- table(cut(distPos, breaks = breaks));
+##      ctsNeg <- table(cut(distNeg, breaks = breaks));
+##      ctsMat <- as.matrix(rbind(ctsPos, ctsNeg));
+##      rownames(ctsMat) <- c("pos", "neg");
+##      title <- sprintf("N(%s) = %i, N(%s) = %i\n(bw = %i nt)",
+##                       idPos, sum(ctsPos),
+##                       idNeg, sum(ctsNeg),
+##                       binWidth);
+##      tmp <- PlotEnrichment.Generic(ctsMat,
+##                                    title = title,
+##                                    x.las = 2, x.cex = 0.8, x.padj = 0.8);
+##  }
+
+
+#' Generic function for plotting abundances (histograms).
 #'
-#' Plot relative distance distribution of loci from \code{txLoc}
-#' object to splice sites.
+#' Generic function for plotting abundances (histograms).
 #'
-#' @param locus A \code{txLoc} object.
-#' @param ss A list of two \code{GRangesList} objects.
-#' @param flank An integer scalar; specifies the absolute maximum
-#' relative distance used as a cutoff; default is 1000.
-#' @param binWidth An integer scalar; specifies the spatial width
-#' by which distances will be binned; default is 20.
+#' @param data A vector of integers.
+#' @param xmin An integer scalar; default is \code{NULL}.
+#' @param xmax An integer scalar; default is \code{NULL}.
+#' @param binWidth An integer scalar; default is \code{NULL}. 
+#' @param plotType A single character; default is \code{"s"}.
+#' @param lwd An integer scalar; default is 2.
+#' @param title A character string; default is \code{""}.
+#' @param xlab A character string; default is \code{""}.
+#' @param ylab A character string; default is \code{""}.
+#' @param doBootstrap A logical scalar; default is \code{TRUE}.
+#' @param nBS An integer scalar; default is 5000.
+#'
+#' @keywords internal
 #'
 #' @export
-PlotRelDistSSDistribution <- function(locus, ss, flank = 1000, binWidth = 20) {
-    dist <- GetRelDistSS(locus, ss, flank);
-    breaks <- seq(-flank, flank, by = binWidth);
-    bwString <- sprintf("bw = %i nt", binWidth);
-    h0 <- hist(dist, breaks = breaks, plot = FALSE);
+PlotAbundance.generic <- function(data,
+                                  xmin = NULL,
+                                  xmax = NULL,
+                                  binWidth = NULL,
+                                  plotType = "s",
+                                  lwd = 2,
+                                  title = "",
+                                  xlab = "",
+                                  ylab = "Abundance",
+                                  doBootstrap = TRUE,
+                                  nBS = 5000,
+                                  doLowess = TRUE) {
+    if (!is.null(xmin) && !is.null(xmax) && !is.null(binWidth)) {
+        breaks <- seq(xmin, xmax, by = binWidth);
+    } else {
+        breaks <- seq(min(data), max(data), length.out = 50);
+    }
+    bwString <- sprintf("bw = %3.2f", binWidth);
+    h0 <- hist(data,
+               breaks = breaks,
+               plot = FALSE);
     plot(h0$mids, h0$counts,
-         type = "s",
-         lwd = 2,
-         xlab = "Relative distance from 1st CDS splice site [nt]",
-         ylab = "Abundance",
-         xlim = c(-1000, 1000),
+         type = plotType,
+         lwd = lwd,
+         xlab = xlab,
+         ylab = ylab,
+         main = title,
          font.main = 1);
-    CIFromBS <- EstimateCIFromBS(dist,
-                                 breaks = breaks,
-                                 nBS = 5000);
-    x1 <- c(CIFromBS$x[1],
-            rep(CIFromBS$x[-1], each = 2),
-            CIFromBS$x[length(CIFromBS$x)]);
-    CI <- cbind(c(x1,
-                  rev(x1)),
-                c(rep(CIFromBS$y.low, each = 2),
-                  rev(rep(CIFromBS$y.high, each = 2))));
-    polygon(CI[, 1], CI[, 2], col = rgb(1, 0, 0, 0.2),
-            lwd = 1, border = NA, lty = 1);
-    # Loess smoothing of boostrap CI
-    lines(lowess(CIFromBS$x, CIFromBS$y.low, f = 1/5),
-          col = "red", lty = 2, lwd = 1);
-    lines(lowess(CIFromBS$x, CIFromBS$y.high, f = 1/5),
-          col = "red", lty = 2, lwd = 1);
-    legend("topleft",
-           c(sprintf("Abundance (%s)", bwString),
-             "95%CI (empirical bootstrap)",
-             "Lowess-smoothed 95%CI"),
-           lwd = c(2, 5, 1),
-           col = c("black", rgb(1, 0, 0, 0.2), "red"),
-           lty = c(1, 1, 2),
-           bty = "n");
+    if (doBootstrap) {
+        CIFromBS <- EstimateCIFromBS(data,
+                                     breaks = breaks,
+                                     nBS = nBS);
+        x1 <- c(CIFromBS$x[1],
+                rep(CIFromBS$x[-1], each = 2),
+                CIFromBS$x[length(CIFromBS$x)]);
+        CI <- cbind(c(x1,
+                      rev(x1)),
+                    c(rep(CIFromBS$y.low, each = 2),
+                      rev(rep(CIFromBS$y.high, each = 2))));
+        polygon(CI[, 1], CI[, 2], col = rgb(1, 0, 0, 0.2),
+                lwd = 1, border = NA, lty = 1);
+        lblLegend <- c(sprintf("Abundance (%s)", bwString),
+                      "95%CI (empirical bootstrap)");
+        lwdLegend <- c(2, 5);
+        colLegend <- c("black", rgb(1, 0, 0, 0.2));
+        ltyLegend <- c(1, 1);
+        # Loess smoothing of boostrap CI
+        if (doLowess) {
+            lines(lowess(CIFromBS$x, CIFromBS$y.low, f = 1/5),
+                  col = "red", lty = 2, lwd = 1);
+            lines(lowess(CIFromBS$x, CIFromBS$y.high, f = 1/5),
+                  col = "red", lty = 2, lwd = 1);
+            lblLegend <- c(lblLegend,
+                           "Lowess-smoothed 95%CI");
+            lwdLegend <- c(lwdLegend, 1);
+            colLegend <- c(colLegend, "red");
+            ltyLegend <- c(ltyLegend, 2);
+        }
+        legend("topleft",
+               lblLegend,
+               lwd = lwdLegend,
+               col = colLegend,
+               lty = ltyLegend,
+               bty = "n");
+    }
 }
 
-#' Plot relative distance enrichment of sites from \code{locPos}
-#' and \code{locPos} to splice sites.
-#' 
-#' Plot relative distance enrichment of sites from \code{locPos}
-#' and \code{locPos} to splice sites.
-#'
-#' @param locPos A \code{txLoc} object; specifies the positive
-#' sites.
-#' @param locNeg A \code{txLoc} object; specifies the negative
-#' sites.
-#' @param ss A list of two \code{GRangesList} objects.
-#' @param flank An integer scalar; specifies the absolute maximum
-#' relative distance used as a cutoff; default is 1000.
-#' @param binWidth An integer scalar; specifies the spatial width
-#' by which distances will be binned; default is 20.
-#'
-#' @export
-PlotRelDistSSEnrichment <- function(locPos, locNeg, ss, flank = 1000, binWidth = 20) {
-    idPos <- GetId(locPos);
-    idNeg <- GetId(locNeg);
-    distPos <- GetRelDistSS(locPos, ss, flank);
-    distNeg <- GetRelDistSS(locNeg, ss, flank);
-    breaks <- seq(-flank, flank, by = binWidth);
-    ctsPos <- table(cut(distPos, breaks = breaks));
-    ctsNeg <- table(cut(distNeg, breaks = breaks));
-    ctsMat <- as.matrix(rbind(ctsPos, ctsNeg));
-    rownames(ctsMat) <- c("pos", "neg");
-    title <- sprintf("N(%s) = %i, N(%s) = %i\n(bw = %i nt)",
-                     idPos, sum(ctsPos),
-                     idNeg, sum(ctsNeg),
-                     binWidth);
-    tmp <- PlotEnrichment.Generic(ctsMat,
-                                  title = title,
-                                  x.las = 2, x.cex = 0.8, x.padj = 0.8);
-}
 
-#' Plot distribution of relative distances to exon-exon junctions.
+##  #' Plot distribution of relative distances to exon-exon junctions.
+##  #' 
+##  #' Plot distribution of relative distances to exon-exon junctions.
+##  #'
+##  #' @param dist A list of integer vectors.
+##  #' @param flank An integer scalar; specifies the absolute maximum
+##  #' relative distance used as a cutoff; default is 1000.
+##  #' @param binWidth An integer scalar; specifies the spatial width
+##  #' by which distances will be binned; default is 20.
+##  #' @param doBootstrap A logical scalar; if \code{YES} calculate
+##  #' 95% CI based on empirical bootstrap of sites within transcript
+##  #' region; default is \code{TRUE}.
+##  #' 
+##  #' @export
+##  PlotRelDistEEJDistribution <- function(dist,
+##                                         flank = 1000,
+##                                         binWidth = 20,
+##                                         doBootstrap = TRUE) {
+##      if (length(dist) < 4) {
+##          par(mfrow = c(1, length(dist)));
+##      } else {
+##          par(mfrow = c(ceiling(length(dist) / 2), 2));
+##      }
+##      breaks <- seq(-flank, flank, by = binWidth);
+##      bwString <- sprintf("bw = %3.2f", binWidth);
+##      for (i in 1:length(dist)) {
+##          if (flank > 0) {
+##              dist[[i]] <- dist[[i]][abs(dist[[i]]) <= flank];
+##          }
+##          title <- sprintf("%s (N=%i)",
+##                           names(dist)[i],
+##                           length(dist[[i]]));
+##          xlab <- "Relative distance to exon-exon junction [nt]";
+##          PlotAbundance.generic(dist[[i]],
+##                                xmin = -flank, xmax = flank,
+##                                binWidth = binWidth,
+##                                title = title,
+##                                xlab = xlab,
+##                                doBootstrap = doBootstrap);
+##      }
+##  }
+
+
+#' Plot distribution of relative distances between sites
+#' from two \code{txLoc} objects.
 #' 
-#' Plot distribution of relative distances to exon-exon junctions.
+#' Plot distribution of relative distances between sites
+#' from two \code{txLoc} objects.
 #'
-#' @param dist A list of integer vectors.
+#' @param loc1 A \code{txLoc} object.
+#' @param loc2 A \code{txLoc} object.
 #' @param flank An integer scalar; specifies the absolute maximum
 #' relative distance used as a cutoff; default is 1000.
 #' @param binWidth An integer scalar; specifies the spatial width
@@ -1111,10 +1249,24 @@ PlotRelDistSSEnrichment <- function(locPos, locNeg, ss, flank = 1000, binWidth =
 #' region; default is \code{TRUE}.
 #' 
 #' @export
-PlotRelDistEEJDistribution <- function(dist,
+PlotRelDistDistribution <- function(loc1,
+                                    loc2,
                                     flank = 1000,
                                     binWidth = 20,
                                     doBootstrap = TRUE) {
+    CheckClass(loc1, "txLoc");
+    CheckClass(loc2, "txLoc");
+    CheckClassTxLocRef(loc1, loc2);
+    id1 <- GetId(loc1);
+    id2 <- GetId(loc2);
+    refGenome <- GetRef(loc1);
+    gr1 <- TxLoc2GRangesList(loc1,
+                             filter = c("5'UTR", "CDS", "3'UTR"),
+                             method = "tPos");
+    gr2 <- TxLoc2GRangesList(loc2,
+                             filter = c("5'UTR", "CDS", "3'UTR"),
+                             method = "tPos");
+    dist <- GetRelDistNearest(gr1, gr2);
     if (length(dist) < 4) {
         par(mfrow = c(1, length(dist)));
     } else {
@@ -1126,52 +1278,111 @@ PlotRelDistEEJDistribution <- function(dist,
         if (flank > 0) {
             dist[[i]] <- dist[[i]][abs(dist[[i]]) <= flank];
         }
-        h0 <- hist(dist[[i]],
-                   breaks = breaks,
-                   plot = FALSE);
-        plot(h0$mids, h0$counts,
-             type = "s",
-             lwd = 2,
-             xlab = "Relative distance to exon-exon junction [nt]",
-             ylab = "Abundance",
-             main = sprintf("%s",
-                 names(dist)[i]),
-             font.main = 1);
-        if (doBootstrap) {
-            CIFromBS <- EstimateCIFromBS(dist[[i]],
-                                         breaks = breaks,
-                                         nBS = 5000);
-            x1 <- c(CIFromBS$x[1],
-                    rep(CIFromBS$x[-1], each = 2),
-                    CIFromBS$x[length(CIFromBS$x)]);
-            CI <- cbind(c(x1,
-                          rev(x1)),
-                        c(rep(CIFromBS$y.low, each = 2),
-                          rev(rep(CIFromBS$y.high, each = 2))));
-            polygon(CI[, 1], CI[, 2], col = rgb(1, 0, 0, 0.2),
-                    lwd = 1, border = NA, lty = 1);
-            # Loess smoothing of boostrap CI
-            lines(lowess(CIFromBS$x, CIFromBS$y.low, f = 1/5),
-                  col = "red", lty = 2, lwd = 1);
-            lines(lowess(CIFromBS$x, CIFromBS$y.high, f = 1/5),
-                  col = "red", lty = 2, lwd = 1);
-            legend("topleft",
-                   c(sprintf("Abundance (%s)", bwString),
-                     "95%CI (empirical bootstrap)",
-                     "Lowess-smoothed 95%CI"),
-                   lwd = c(2, 5, 1),
-                   col = c("black", rgb(1, 0, 0, 0.2), "red"),
-                   lty = c(1, 1, 2),
-                   bty = "n");
-        }
+        title <- sprintf("d(%s,%s) in %s (N=%i)",
+                         id1,
+                         id2,
+                         names(dist)[i],
+                         length(dist[[i]]));
+        xlab <- "Relative distance to exon-exon junction [nt]";
+        PlotAbundance.generic(dist[[i]],
+                              xmin = -flank, xmax = flank,
+                              binWidth = binWidth,
+                              title = title,
+                              xlab = xlab,
+                              doBootstrap = doBootstrap);
     }
 }
 
 
-PlotRelDistEEJEnrichment <- function(distPos,
-                                     distNeg,
-                                     flank = 1000,
-                                     binWidth = 20) {
+##  #' Perform and plot enrichment analysis of relative distances of
+##  #' "positive" and "negative" control sites to exon-exon junctions.
+##  #' 
+##  #' Perform and plot enrichment analysis of relative distances of
+##  #' positive and negative control sites to exon-exon junctions.
+##  #'
+##  #' @param distPos A list of integer vectors; specifies distances
+##  #' of "positive" sites to exon-exon junctions.
+##  #' @param distNeg A list of integer vectors; specifies distances
+##  #' of "negative" sites to exon-exon junctions.
+##  #' @param flank An integer scalar; specifies the absolute maximum
+##  #' relative distance used as a cutoff; default is 1000.
+##  #' @param binWidth An integer scalar; specifies the spatial width
+##  #' by which distances will be binned; default is 20.
+##  #' 
+##  #' @export
+##  PlotRelDistEEJEnrichment <- function(distPos,
+##                                       distNeg,
+##                                       flank = 1000,
+##                                       binWidth = 20) {
+##      if (length(distPos) < 4) {
+##          par(mfrow = c(1, length(distPos)));
+##      } else {
+##          par(mfrow = c(ceiling(length(distPos) / 2), 2));
+##      }
+##      breaks <- seq(-flank, flank, by = binWidth);
+##      bwString <- sprintf("bw = %3.2f", binWidth);
+##      for (i in 1:length(distPos)) {
+##          if (flank > 0) {
+##              distPos[[i]] <- distPos[[i]][abs(distPos[[i]]) <= flank];
+##              distNeg[[i]] <- distNeg[[i]][abs(distNeg[[i]]) <= flank];
+##          }
+##          ctsPos <- table(cut(distPos[[i]], breaks = breaks));
+##          ctsNeg <- table(cut(distNeg[[i]], breaks = breaks));
+##          ctsMat <- as.matrix(rbind(ctsPos, ctsNeg));
+##          rownames(ctsMat) <- c("pos", "neg");
+##          title <- sprintf("N(%s) = %i, N(%s) = %i\n(bw = %i nt)",
+##                           "pos", sum(ctsPos),
+##                           "neg", sum(ctsNeg),
+##                           binWidth);
+##          tmp <- PlotEnrichment.Generic(ctsMat,
+##                                        title = title,
+##                                        x.las = 2, x.cex = 0.8, x.padj = 0.8);
+##      }
+##  }
+
+
+#' Perform and plot enrichment analysis of relative distances of
+#' "positive" and "negative" control sites relative to "reference"
+#' sites.
+#' 
+#' Perform and plot enrichment analysis of relative distances of
+#' "positive" and "negative" control sites relative to "reference"
+#' sites.
+#' 
+#' @param locPos A \code{txLoc} object.
+#' @param locNeg A \code{txLoc} object.
+#' @param locRef A \code{txLoc} object.
+#' @param flank An integer scalar; specifies the absolute maximum
+#' relative distance used as a cutoff; default is 1000.
+#' @param binWidth An integer scalar; specifies the spatial width
+#' by which distances will be binned; default is 20.
+#' 
+#' @export
+PlotRelDistEnrichment <- function(locPos,
+                                  locNeg,
+                                  locRef,
+                                  flank = 1000,
+                                  binWidth = 20) {
+    CheckClass(locPos, "txLoc");
+    CheckClass(locNeg, "txLoc");
+    CheckClass(locRef, "txLoc");
+    CheckClassTxLocRef(locPos, locNeg);
+    CheckClassTxLocRef(locPos, locRef);
+    idPos <- GetId(locPos);
+    idNeg <- GetId(locPos);
+    idRef <- GetId(locRef);
+    refGenome <- GetRef(locPos);
+    grPos <- TxLoc2GRangesList(locPos,
+                               filter = c("5'UTR", "CDS", "3'UTR"),
+                               method = "tPos");
+    grNeg <- TxLoc2GRangesList(locNeg,
+                               filter = c("5'UTR", "CDS", "3'UTR"),
+                               method = "tPos");
+    grRef <- TxLoc2GRangesList(locRef,
+                               filter = c("5'UTR", "CDS", "3'UTR"),
+                               method = "tPos");
+    distPos <- GetRelDistNearest(grPos, grRef);
+    distNeg <- GetRelDistNearest(grNeg, grRef);
     if (length(distPos) < 4) {
         par(mfrow = c(1, length(distPos)));
     } else {
@@ -1188,13 +1399,12 @@ PlotRelDistEEJEnrichment <- function(distPos,
         ctsNeg <- table(cut(distNeg[[i]], breaks = breaks));
         ctsMat <- as.matrix(rbind(ctsPos, ctsNeg));
         rownames(ctsMat) <- c("pos", "neg");
-        title <- sprintf("N(%s) = %i, N(%s) = %i\n(bw = %i nt)",
-                         "pos", sum(ctsPos),
-                         "neg", sum(ctsNeg),
+        title <- sprintf("N(d(%s,%s)) = %i, N(d(%s,%s)) = %i\n(bw = %i nt)",
+                         idPos, idRef, sum(ctsPos),
+                         idNeg, idRef, sum(ctsNeg),
                          binWidth);
         tmp <- PlotEnrichment.Generic(ctsMat,
                                       title = title,
                                       x.las = 2, x.cex = 0.8, x.padj = 0.8);
     }
 }
-                                     

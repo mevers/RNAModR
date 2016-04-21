@@ -12,6 +12,8 @@
 #'                        "miCLIP_m6A_Linder2015_hg38.bed",
 #'                        package = "RNAModR");
 #' sites <- ReadBED(bedFile);
+#'
+#' @import GenomicRanges IRanges
 #' 
 #' @export
 ReadBED <- function(file) {
