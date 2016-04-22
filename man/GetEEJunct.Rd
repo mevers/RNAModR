@@ -10,6 +10,10 @@ GetEEJunct(refGenome = "hg38", filter = "CDS")
 \item{refGenome}{A character string; specifies a specific
 reference genome assembly version based on which the matching
 transcriptome is loaded; default is \code{"hg38"}.}
+
+\item{filter}{A character vector; only consider transcript
+sections specified in \code{filter}; \code{filter = NULL}
+corresponds to \code{filter = c("5'UTR", "CDS", "3'UTR")}.}
 }
 \value{
 A \code{txLoc} object. See 'Details'.

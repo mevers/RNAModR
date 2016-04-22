@@ -2,7 +2,7 @@
 # Reference: Squires et al., Nuc. Acids Res. 40, 5023 (2012) [PMID 22344696, DOI 10.1093/nar/gks144]
 # Data converted to BED from Supplementary table File009, conversion to hg38 using liftOver.
 #
-# Data is part of the RNA package RNAModR
+# Data is part of the R package RNAModR
 # Maintainer: Maurits Evers (maurits.evers@anu.edu.au)
 #
 chr1	631539	631540	Squires|id1	0	+

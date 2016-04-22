@@ -560,6 +560,9 @@ GetSpliceSites <- function(refGenome = "hg38", writeBED = FALSE) {
 #' @param refGenome A character string; specifies a specific
 #' reference genome assembly version based on which the matching
 #' transcriptome is loaded; default is \code{"hg38"}.
+#' @param filter A character vector; only consider transcript
+#' sections specified in \code{filter}; \code{filter = NULL}
+#' corresponds to \code{filter = c("5'UTR", "CDS", "3'UTR")}.
 #'
 #' @return A \code{txLoc} object. See 'Details'.
 #'

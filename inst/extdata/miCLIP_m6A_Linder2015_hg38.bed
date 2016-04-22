@@ -2,7 +2,7 @@
 # Reference: Linder et al., Nat. Methods 12, 767 (2015) [PMID 26121403, DOI 10.1038/nmeth.3453]
 # Data converted to BED from Supplementary tables S2 and S3, conversion to hg38 using liftOver.
 #
-# Data is part of the RNA package RNAModR
+# Data is part of the R package RNAModR
 # Maintainer: Maurits Evers (maurits.evers@anu.edu.au)
 #
 chr1	631479	631480	B045_1-4_chr1_f_c1[k=4][m=2]_CTACT;MIR6723;hsa-mir-6723;microRNAmir-6723	1	+

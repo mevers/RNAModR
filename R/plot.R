@@ -436,21 +436,32 @@ PlotEnrichment.Generic <- function(mat, title = "",
     #   A list of fisher.test return objects.
     log10pval.limit <- -12;
     ft <- list();
-    for (i in 1:ncol(mat)) {
-        redMat <- cbind(mat[, i], rowSums(mat[, -i]));
-        ft[[i]]<-fisher.test(redMat);
+    if (ncol(mat) > 2) {
+        for (i in 1:ncol(mat)) {
+            redMat <- cbind(mat[, i], rowSums(mat[, -i]));
+            ft[[i]] <- fisher.test(redMat);
+        }
+        names(ft) <- colnames(mat);
+    } else {
+        redMat <- mat;
+        ft[[1]] <- fisher.test(redMat);
+        names(ft) <- colnames(mat)[1];
     }
-    names(ft) <- colnames(mat);
     OR <- sapply(ft, function(x) x$estimate);
     OR[is.infinite(OR)] <- 1;
     OR <- log10(OR);
-    names(OR) <- colnames(mat);
     pval <- p.adjust(sapply(ft, function(x) x$p.value), method="BH");
-    names(pval) <- colnames(mat);
     pval[is.na(pval)] <- 1;
     pval <- log10(pval);
     pval.uncapped <- pval;
     pval[pval < log10pval.limit] <- log10pval.limit;
+    if (ncol(mat) > 2) {
+        names(OR) <- colnames(mat);
+        names(pval) <- colnames(mat);
+    } else {
+        names(OR) <- colnames(mat)[1];
+        names(pval) <- colnames(mat)[1];
+    }
     CI <- sapply(ft, function(x) x$conf.int);
     CI[CI == 0] <- 1.e-12;
     CI[is.infinite(CI)] <- 1e12;
@@ -855,7 +866,6 @@ PlotGC <- function(locPos, locNeg,
         ss <- sprintf("%s\nRunning CalculateGC(...) might fix that.",
                       ss);
         stop(ss);
-        
     }
     if (length(grep("GC", colnames(locNeg[[1]]))) < 1) {
         ss <- sprintf("Could not find GC content data in %s.",
@@ -906,7 +916,7 @@ PlotGC <- function(locPos, locNeg,
     }
     par(mar = c(7, 4, 4, 4) + 0.1, font.main = 1);
     beanplot(df[,1] ~ df[,2],
-             bw = "nrd0",
+             bw = 0.05,
              side = "both",
              border = NA,
              col = col,

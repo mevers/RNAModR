@@ -4,7 +4,7 @@
 # Strand information is missing in original reference, and was added using current
 # RefSeq annotation from NCBI and UCSC.
 #
-# Data is part of the RNA package RNAModR
+# Data is part of the R package RNAModR
 # Maintainer: Maurits Evers (maurits.evers@anu.edu.au)
 #
 chr1	17001	17002	NR_024540|ncRNA|HeLa	0	-
