@@ -4,7 +4,8 @@
 \alias{BuildTx}
 \title{Build a custom transcriptome.}
 \usage{
-BuildTx(genomeVersion = "hg38", force = FALSE, sanityCheck = FALSE)
+BuildTx(genomeVersion = c("hg38", "hg19", "mm10", "mm9"), force = FALSE,
+  sanityCheck = FALSE)
 }
 \arguments{
 \item{genomeVersion}{A character string; refers to a specific

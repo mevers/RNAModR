@@ -603,12 +603,14 @@ GetTxSeq <- function(txBySec,
 #' transcriptome; this will overwrite existing data.
 #' @param sanityCheck A logical scalar; if \code{TRUE} perform
 #' sanity checks.
-#'
+#' 
 #' @import AnnotationDbi GenomeInfoDb GenomicRanges GenomicFeatures
 #' RSQLite
 #'
 #' @export
-BuildTx <- function(genomeVersion = "hg38",
+BuildTx <- function(genomeVersion = c(
+                        "hg38", "hg19",
+                        "mm10", "mm9"),
                     force = FALSE,
                     sanityCheck = FALSE) {
     # Build a custom transcriptome.
@@ -618,6 +620,7 @@ BuildTx <- function(genomeVersion = "hg38",
     #
     # Returns:
     #   NULL
+    genomeVersion <- match.arg(genomeVersion);
     fn <- sprintf("tx_%s.RData", genomeVersion);
     if (file.exists(fn)) {
         cat("Found existing transcriptome data.\n");

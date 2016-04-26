@@ -417,7 +417,7 @@ GenerateNull <- function(locus,
 #' @import Biostrings
 #'
 #' @export
-CalculateGC <- function(locus, flank = 10) {
+GetGC <- function(locus, flank = 10) {
     # Calculate GC contents of region and within window around site.
     #
     # Args:
@@ -433,30 +433,27 @@ CalculateGC <- function(locus, flank = 10) {
     if (!SafeLoad("Biostrings")) {
         stop("Could not load library Biostrings.");
     }
+    freq.list <- list();
     for (i in 1:length(locus)) {
-            seq <- BStringSet(locus[[i]]$REGION_SEQ);
-            nucFreq <- letterFrequency(seq,
-                                       letters = c("A", "C", "G", "T"));
-            GC <- rowSums(nucFreq[, c(2, 3)]) / width(seq);
-            locus[[i]]$REGION_GC <- GC;
+        seq <- BStringSet(locus[[i]]$REGION_SEQ);
+        nucFreq <- letterFrequency(
+            seq,
+            letters = c("A", "C", "G", "T"));
+        sectionGC <- rowSums(nucFreq[, c(2, 3)]) / width(seq);
         if (is.numeric(locus[[i]]$TXSTART)) {
             x1 <- locus[[i]]$TXSTART - flank;
             x2 <- locus[[i]]$TXSTART + flank;
             subSeq <- BStringSet(substr(locus[[i]]$REGION_SEQ, x1, x2));
             nucFreq <- letterFrequency(subSeq,
                                        letters = c("A", "C", "G", "T"));
-            GC <- rowSums(nucFreq[, c(2, 3)]) / nchar(subSeq);
-            locus[[i]]$SITE_GC <- GC;
+            siteGC <- rowSums(nucFreq[, c(2, 3)]) / nchar(subSeq);
         } else {
-            locus[[i]]$SITE_GC <- rep(NA, nrow(locus[[i]]));
+            siteGC <- rep(NA, nrow(locus[[i]]));
         }
+        freq.list[[length(freq.list) + 1]] <- cbind(sectionGC, siteGC);
     }
-    obj <- new("txLoc",
-               loci = locus,
-               id = id,
-               refGenome = refGenome,
-               version  = as.character(Sys.Date()));
-    return(obj);
+    names(freq.list) <- names(locus);
+    return(freq.list);
 }
 
 

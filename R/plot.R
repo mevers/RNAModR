@@ -851,42 +851,26 @@ PlotGC <- function(locPos, locNeg,
     # Returns:
     #   NULL
     CheckClassTxLocConsistency(locPos, locNeg);
+    locPos <- FilterTxLoc(locPos, filter);
+    locNeg <- FilterTxLoc(locNeg, filter);
     idPos <- GetId(locPos);
     idNeg <- GetId(locNeg);
     refGenome <- GetRef(locPos);
-    locPos <- GetLoci(locPos);
-    locNeg <- GetLoci(locNeg);
-    if (!is.null(filter)) {
-        locPos <- locPos[which(names(locPos) %in% filter)];
-        locNeg <- locNeg[which(names(locNeg) %in% filter)];
-    }
-    if (length(grep("GC", colnames(locPos[[1]]))) < 1) {
-        ss <- sprintf("Could not find GC content data in %s.",
-                      idPos);
-        ss <- sprintf("%s\nRunning CalculateGC(...) might fix that.",
-                      ss);
-        stop(ss);
-    }
-    if (length(grep("GC", colnames(locNeg[[1]]))) < 1) {
-        ss <- sprintf("Could not find GC content data in %s.",
-                      idNeg);
-        ss <- sprintf("%s\nRunning CalculateGC(...) might fix that.",
-                      ss);
-        stop(ss);
-    }
+    gcPos <- GetGC(locPos);
+    gcNeg <- GetGC(locNeg);
     df <- data.frame();
     namesBean <- vector();
-    for (i in 1:length(locPos)) {
-        GC1 <- locPos[[i]]$SITE_GC;
-        GC2 <- locNeg[[i]]$SITE_GC;
+    for (i in 1:length(gcPos)) {
+        GC1 <- gcPos[[i]][, "siteGC"];
+        GC2 <- gcNeg[[i]][, "siteGC"];
         if (geneNorm) {
-            GC1 <- GC1 / locPos[[i]]$REGION_GC;
-            GC2 <- GC2 / locNeg[[i]]$REGION_GC;
+            GC1 <- GC1 / gcPos[[i]][, "sectionGC"];
+            GC2 <- GC2 / gcNeg[[i]][, "sectionGC"];
         }
         ttest <- t.test(GC1, GC2);
         wtest <- wilcox.test(GC1, GC2);
         lbl <- sprintf("%s (%i,%i)\ndiff=%4.3f\n95%%CI=(%4.3f,%4.3f)\np=%4.3e",
-                       names(locPos)[i],
+                       names(gcPos)[i],
                        length(GC1), length(GC2),
                        ttest$estimate[1] - ttest$estimate[2],
                        min(ttest$conf.int),
@@ -896,8 +880,8 @@ PlotGC <- function(locPos, locNeg,
         namesBean <- c(namesBean, lbl);
         df <- rbind(df, cbind.data.frame(
             c(GC1, GC2),
-            c(rep(sprintf("%s %s", names(locPos)[i], idPos), length(GC1)),
-              rep(sprintf("%s %s", names(locNeg)[i], idNeg), length(GC2))),
+            c(rep(sprintf("%s %s", names(gcPos)[i], idPos), length(GC1)),
+              rep(sprintf("%s %s", names(gcNeg)[i], idNeg), length(GC2))),
             stringsAsFactors = FALSE));
     }
     levels <- unique(df[, 2]);
@@ -926,7 +910,7 @@ PlotGC <- function(locPos, locNeg,
              font.main = 1,
              method = "jitter");
     axis(1,
-         at = seq(1, length(locPos)),
+         at = seq(1, length(gcPos)),
          labels = namesBean,
          padj = 1,
          las = 1);

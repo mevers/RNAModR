@@ -331,7 +331,7 @@ GetRelDistNearest <- function(gr1,
 #' @keywords internal
 #' 
 #' @export
-EstimateCIFromBS <- function(x, breaks, nBS = 5000) {
+EstimateCIrFomBS <- function(x, breaks, nBS = 5000) {
     # Estimate 95% CI from empirical bootstrap
     #
     # Args:
