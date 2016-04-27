@@ -506,9 +506,21 @@ PlotEnrichment.Generic <- function(mat, title = "",
         labels = names(OR);
     }
     x <- mp;
-    axis(1, at = x,
-         labels = labels,
-         las = x.las, padj = x.padj, cex.axis = x.cex);
+#    if (length(labels) > 10 && all(grepl("\\(.+\\]", labels))) {
+#        absXmin <- as.numeric(gsub("(\\(|,.+)", "",
+#                                   labels[1]));
+#        absXmax <- as.numeric(gsub("(\\(.+,|\\])", "",
+#                                   labels[length(labels)]));
+#        idx <- round(seq(1, nrow(x), length.out = 5));
+#        axis(1, at = x[idx, ],
+#             labels = seq(absXmin, absXmax, length.out = 5),
+#             las = x.las, padj = x.padj, cex.axis = x.cex);
+#        mtext("x-axis label", side = 1, line = 3);
+#    } else {
+        axis(1, at = x,
+             labels = labels,
+             las = x.las, padj = x.padj, cex.axis = x.cex);
+#    }
     axis(4, at = seq(ymin, ymax));
     mtext("log10(p-value)", side = 4, line = 2.5);
     # Draw significance labels
