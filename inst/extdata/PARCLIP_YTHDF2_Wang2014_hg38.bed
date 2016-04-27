@@ -1,5 +1,5 @@
 # PARCLIP-based transcriptome-wide map of YTHDF2 targets [hg38 coordinates]
-# Reference: Wang et al., Nature 505, 117 (2014) [PMID, DOI 10.1038/nature12730]
+# Reference: Wang et al., Nature 505, 117 (2014) [PMID 24284625, DOI 10.1038/nature12730]
 # Data extracted and converted to BED from Excel sheet available from GSE49339.
 # Conversion to hg38 using liftOver.
 # 
