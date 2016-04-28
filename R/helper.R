@@ -308,6 +308,7 @@ GetRelDistNearest <- function(gr1,
         dist <- ifelse(end(gr1[[i]][idx1]) > start(gr2[[i]][idx2]),
                        d$distance,
                        -d$distance);
+        names(dist) <- (gr1[[i]][idx1])$names;
         dist.list[[length(dist.list) + 1]] <- dist;
     }
     names(dist.list) <- names(gr1);
@@ -331,7 +332,7 @@ GetRelDistNearest <- function(gr1,
 #' @keywords internal
 #' 
 #' @export
-EstimateCIrFomBS <- function(x, breaks, nBS = 5000) {
+EstimateCIFromBS <- function(x, breaks, nBS = 5000) {
     # Estimate 95% CI from empirical bootstrap
     #
     # Args:

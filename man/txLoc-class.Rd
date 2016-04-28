@@ -2,20 +2,54 @@
 % Please edit documentation in R/classes.R
 \docType{class}
 \name{txLoc-class}
+\alias{GetId}
+\alias{GetId,txLoc-method}
+\alias{GetId,txLoc-methods}
+\alias{GetLoci}
+\alias{GetLoci,txLoc-method}
+\alias{GetLoci,txLoc-methods}
 \alias{GetNumberOfLoci}
 \alias{GetNumberOfLoci,txLoc-method}
+\alias{GetNumberOfLoci,txLoc-methods}
+\alias{GetRef}
+\alias{GetRef,txLoc-method}
+\alias{GetRef,txLoc-methods}
+\alias{GetVersion}
+\alias{GetVersion,txLoc-method}
+\alias{GetVersion,txLoc-methods}
+\alias{head}
 \alias{head,txLoc-method}
+\alias{head,txLoc-methods}
 \alias{info}
 \alias{info,txLoc-method}
+\alias{info,txLoc-methods}
 \alias{txLoc-class}
 \title{txLoc object.
 The S4 object stores information about mapped loci per transcript
 section. Meta-data such as an identifier and the reference genome
 are stored in separate slots.}
 \usage{
+GetLoci(x)
+
+\S4method{GetLoci}{txLoc}(x)
+
+GetId(x)
+
+\S4method{GetId}{txLoc}(x)
+
+GetRef(x)
+
+\S4method{GetRef}{txLoc}(x)
+
+GetVersion(x)
+
+\S4method{GetVersion}{txLoc}(x)
+
 info(x)
 
 \S4method{info}{txLoc}(x)
+
+head(x, ...)
 
 \S4method{head}{txLoc}(x, n = 6L, ...)
 
@@ -26,13 +60,22 @@ GetNumberOfLoci(x)
 \arguments{
 \item{x}{A \code{txLoc} object.}
 
-\item{n}{Number of rows to be printed.}
-
 \item{...}{Additional parameters passed to \code{head}.}
 
-\item{x}{A \code{txLoc} object.}
+\item{n}{A scalar integer.}
 }
 \value{
+A list of dataframes with loci for
+every transcript section.
+
+A string.
+
+A string.
+
+#' @name txLoc-class
+
+A string.
+
 A named integer vector with the number of sites per
 transcript section.
 }
@@ -42,13 +85,18 @@ The S4 object stores information about mapped loci per transcript
 section. Meta-data such as an identifier and the reference genome
 are stored in separate slots.
 
-Generic method "info" for S4 object txLoc.
+Get the loci of a \code{txLoc} object
+as a list of dataframes.
+
+Get the id string of a \code{txLoc} object.
+
+Get the reference genome string of a \code{txLoc} object.
+
+Get the version string of a \code{txLoc} object.
 
 Print general information of a \code{txLoc} object.
 
 Method "head" for S4 object txLoc.
-
-Generic method "GetNumberOfLoci" for S4 object txLoc.
 
 Get the number of loci of a \code{txLoc} object in every
 transcript section.

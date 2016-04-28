@@ -16,8 +16,11 @@
 #' upon which transcriptome-derived positions are based.
 #' @slot version A character string; can be used to flag specific
 #' version, e.g. using the current system time & date.
+#'
+#' @name txLoc-class
+#' @rdname txLoc-class
 #' 
-#' @export
+#' @exportClass txLoc
 setClass("txLoc",
          representation(loci = "list",
                         id = "character",
@@ -34,15 +37,6 @@ setClass("txLoc",
 #################### GENERAL CLASS SLOT ACCESSORS #########################
 ###########################################################################
 
-#' Generic method "GetLoci" for S4 object txLoc.
-#' 
-#' @keywords internal
-#' 
-#' @export
-setGeneric(name = "GetLoci",
-           def = function(x) {
-               standardGeneric("GetLoci");
-           });
 
 
 #' Method "GetLoci" for S4 object txLoc.
@@ -53,9 +47,16 @@ setGeneric(name = "GetLoci",
 #' @return A list of dataframes with loci for
 #' every transcript section.
 #'
-#' @keywords internal
+#' @param x A \code{txLoc} object.
 #' 
-#' @export
+# #' @name txLoc-class
+#' @rdname txLoc-class
+#' 
+#' @exportMethod GetLoci
+setGeneric("GetLoci", function(x) standardGeneric("GetLoci"));
+
+#' @rdname txLoc-class
+#' @aliases GetLoci,txLoc-methods
 setMethod("GetLoci",
           signature = "txLoc",
           definition = function(x) {
@@ -64,26 +65,20 @@ setMethod("GetLoci",
           });
 
 
-#' Generic method "GetId" for S4 object txLoc.
-#' 
-#' @keywords internal
-#' 
-#' @export
-setGeneric(name = "GetId",
-           def = function(x) {
-               standardGeneric("GetId");
-           });
-
-
 #' Method "GetId" for S4 object txLoc.
 #'
 #' Get the id string of a \code{txLoc} object.
 #'
 #' @return A string.
 #'
-#' @keywords internal
+# #' @name txLoc-class
+#' @rdname txLoc-class
 #' 
-#' @export
+#' @exportMethod GetId
+setGeneric("GetId", function(x) standardGeneric("GetId"));
+
+#' @rdname txLoc-class
+#' @aliases GetId,txLoc-methods
 setMethod("GetId",
           signature = "txLoc",
           definition = function(x) {
@@ -92,26 +87,20 @@ setMethod("GetId",
           });
 
 
-#' Generic method "GetRef" for S4 object txLoc.
-#' 
-#' @keywords internal
-#' 
-#' @export
-setGeneric(name = "GetRef",
-           def = function(x) {
-               standardGeneric("GetRef");
-           });
-
-
 #' Method "GetRef" for S4 object txLoc.
 #'
 #' Get the reference genome string of a \code{txLoc} object.
 #'
 #' @return A string.
 #'
-#' @keywords internal
+#' #' @name txLoc-class
+#' @rdname txLoc-class
 #' 
-#' @export
+#' @exportMethod GetRef
+setGeneric("GetRef", function(x) standardGeneric("GetRef"));
+
+#' @rdname txLoc-class
+#' @aliases GetRef,txLoc-methods
 setMethod("GetRef",
           signature = "txLoc",
           definition = function(x) {
@@ -120,26 +109,20 @@ setMethod("GetRef",
           });
 
 
-#' Generic method "GetVersion" for S4 object txLoc.
-#' 
-#' @keywords internal
-#' 
-#' @export
-setGeneric(name = "GetVersion",
-           def = function(x) {
-               standardGeneric("GetVersion");
-           });
-
-
 #' Method "GetVersion" for S4 object txLoc.
 #'
 #' Get the version string of a \code{txLoc} object.
 #'
 #' @return A string.
 #'
-#' @keywords internal
+# #' @name txLoc-class
+#' @rdname txLoc-class
 #' 
-#' @export
+#' @exportMethod GetVersion
+setGeneric("GetVersion", function(x) standardGeneric("GetVersion"));
+
+#' @rdname txLoc-class
+#' @aliases GetVersion,txLoc-methods
 setMethod("GetVersion",
           signature = "txLoc",
           definition = function(x) {
@@ -152,22 +135,9 @@ setMethod("GetVersion",
 ###################### SPECIFIC CLASS ACCESSORS ###########################
 ###########################################################################
 
-#' Generic method "info" for S4 object txLoc.
-#' 
-#' @rdname txLoc-class
-#'
-#' @export
-setGeneric(name = "info",
-           def = function(x) {
-               standardGeneric("info");
-           });
-
-
 #' Method "info" for S4 object txLoc.
 #'
 #' Print general information of a \code{txLoc} object.
-#'
-#' @rdname txLoc-class
 #'
 #' @examples
 #' \dontrun{
@@ -178,8 +148,15 @@ setGeneric(name = "info",
 #' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
 #' info(posSites);
 #' }
-#' 
-#' @export
+#'
+# #' @name txLoc-class
+#' @rdname txLoc-class
+#'
+#' @exportMethod info
+setGeneric("info", function(x) standardGeneric("info"));
+
+#' @rdname txLoc-class
+#' @aliases info,txLoc-methods
 setMethod("info",
           signature = "txLoc",
           definition = function(x) {
@@ -204,19 +181,19 @@ setMethod("info",
           });
 
 
-#' Generic method "head" for S4 object \code{txLoc}.
-setGeneric("head");
-
-
 #' Method "head" for S4 object txLoc.
 #'
-#' @rdname txLoc-class
-#'
-#' @param x A \code{txLoc} object.
-#' @param n Number of rows to be printed.
+#' @param n A scalar integer.
 #' @param ... Additional parameters passed to \code{head}.
 #' 
-#' @export
+# #' @name txLoc-class
+#' @rdname txLoc-class
+#' 
+#' @exportMethod head
+setGeneric("head", function(x) standardGeneric("head"));
+
+#' @rdname txLoc-class
+#' @aliases head,txLoc-methods
 setMethod("head",
           signature = "txLoc",
           definition = function(x, n = 6L, ...) {
@@ -235,30 +212,22 @@ setMethod("head",
           });
 
 
-#' Generic method "GetNumberOfLoci" for S4 object txLoc.
-#'
-#' @rdname txLoc-class
-#' 
-#' @export
-setGeneric(name = "GetNumberOfLoci",
-           def = function(x) {
-               standardGeneric("GetNumberOfLoci");
-           });
-
-
 #' Method "GetNumberOfLoci" for S4 object txLoc.
 #'
 #' Get the number of loci of a \code{txLoc} object in every
 #' transcript section.
 #'
-#' @rdname txLoc-class
-#'
-#' @param x A \code{txLoc} object.
-#'
 #' @return A named integer vector with the number of sites per
 #' transcript section.
 #'
-#' @export
+# #' @name txLoc-class
+#' @rdname txLoc-class
+#'
+#' @exportMethod GetNumberOfLoci
+setGeneric("GetNumberOfLoci", function(x) standardGeneric("GetNumberOfLoci"));
+
+#' @rdname txLoc-class
+#' @aliases GetNumberOfLoci,txLoc-methods
 setMethod("GetNumberOfLoci",
           signature = "txLoc",
           definition = function(x) {

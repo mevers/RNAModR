@@ -1225,7 +1225,8 @@ PlotRelDistEnrichment <- function(locPos,
         ctsNeg <- table(cut(distNeg[[i]], breaks = breaks));
         ctsMat <- as.matrix(rbind(ctsPos, ctsNeg));
         rownames(ctsMat) <- c("pos", "neg");
-        title <- sprintf("N(d(%s,%s)) = %i, N(d(%s,%s)) = %i\n(bw = %i nt)",
+        title <- sprintf("%\nN(d(%s,%s)) = %i, N(d(%s,%s)) = %i\n(bw = %i nt)",
+                         names(distPos)[i],
                          idPos, idRef, sum(ctsPos),
                          idNeg, idRef, sum(ctsNeg),
                          binWidth);

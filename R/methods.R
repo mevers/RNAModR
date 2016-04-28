@@ -450,7 +450,9 @@ GetGC <- function(locus, flank = 10) {
         } else {
             siteGC <- rep(NA, nrow(locus[[i]]));
         }
-        freq.list[[length(freq.list) + 1]] <- cbind(sectionGC, siteGC);
+        dfGC <- cbind(sectionGC, siteGC);
+        rownames(dfGC) <- locus[[i]]$ID;
+        freq.list[[length(freq.list) + 1]] <- dfGC;
     }
     names(freq.list) <- names(locus);
     return(freq.list);
