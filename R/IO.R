@@ -31,7 +31,7 @@ ReadBED <- function(file) {
     if (ncol(bed) < 6) {
         stop("Need at least 6 columns in BED file.");
     }
-    if (all(!grepl("chr", bed[, 1]))) {
+    if (all(!grepl("chr", bed[, 1], ignore.case = TRUE))) {
         bed[, 1] <- sprintf("chr%s", bed[, 1]);
     }
     bed[, 1] <- gsub("chrMT", "chrM", bed[, 1]);

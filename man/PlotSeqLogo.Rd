@@ -4,7 +4,7 @@
 \alias{PlotSeqLogo}
 \title{Plot sequence logo.}
 \usage{
-PlotSeqLogo(locus, flank = 5, filter = NULL)
+PlotSeqLogo(locus, flank = 5, filter = NULL, ylim = c(0, 2))
 }
 \arguments{
 \item{locus}{A \code{txLoc} object.}
@@ -14,6 +14,10 @@ PlotSeqLogo(locus, flank = 5, filter = NULL)
 \item{filter}{A character vector; only plot sequence logos
 of sections specified in \code{filter}; if \code{NULL} plot
 all sections; default is NULL.}
+
+\item{ylim}{An integer vector; specifies limits for the
+y-axis; automatically determined if \code{ymin = NULL};
+default is \code{c(0, 2)}.}
 }
 \description{
 Plot sequence logo.

@@ -294,32 +294,36 @@ DedupeBasedOnNearestRef <- function(query, ref, showPb = FALSE) {
     query <- query[which(names(query) %in% names(ref))];
     query <- query[order(names(query), -sum(width(query)))];
     dupes <- which(duplicated(names(query)));
-    dupeID <- unique(names(query[dupes]));
-    rem <- vector();
-    if (showPb) {
-        pb <- txtProgressBar(min = 0,
-                             max = length(dupeID),
-                             width = 80,
-                             style = 3);
-    }
-    for (i in 1:length(dupeID)) {
-        idxQuery <- which(names(query) == dupeID[i]);
-        idxRef <- which(names(ref) == dupeID[i]);
-        if (length(idxQuery) > 1) {
-            dist <- distance(
-                GenomicRanges::unlist(range(query[idxQuery])),
-                range(ref[[idxRef]]));
-            idxMinDist <- which.min(dist);
-            rem <- c(rem, idxQuery[-idxMinDist]);
-            if (showPb) {
-                setTxtProgressBar(pb, i);
+    if (length(dupes) > 0) {
+        dupeID <- unique(names(query[dupes]));
+        rem <- vector();
+        if (showPb) {
+            pb <- txtProgressBar(min = 0,
+                                 max = length(dupeID),
+                                 width = 80,
+                                 style = 3);
+        }
+        for (i in 1:length(dupeID)) {
+            idxQuery <- which(names(query) == dupeID[i]);
+            idxRef <- which(names(ref) == dupeID[i]);
+            if (length(idxQuery) > 1) {
+                dist <- distance(
+                    GenomicRanges::unlist(range(query[idxQuery])),
+                    range(ref[[idxRef]]));
+                idxMinDist <- which.min(dist);
+                rem <- c(rem, idxQuery[-idxMinDist]);
+                if (showPb) {
+                    setTxtProgressBar(pb, i);
+                }
             }
         }
+        if (showPb) {
+            close(pb);
+        }
+        return(query[-rem]);
+    } else {
+        return(query);
     }
-    if (showPb) {
-        close(pb);
-    }
-    return(query[-rem]);
 }
 
 

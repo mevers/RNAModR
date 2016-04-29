@@ -298,6 +298,13 @@ GetRelDistNearest <- function(gr1,
     filter <- intersect(names(gr1), names(gr2));
     gr1 <- gr1[which(names(gr1) %in% filter)];
     gr2 <- gr2[which(names(gr2) %in% filter)];
+    if (!identical(names(gr1), names(gr2))) {
+        ss <- sprintf("Transcript sections do not match:\n");
+        ss <- sprintf(" %s != %s\n",
+                      paste(names(gr1), collapse = " "),
+                      paste(names(gr2), collapse = " "));
+        stop(ss);
+    }
     dist.list <- list();
     for (i in 1:length(gr1)) {
         options(warn = -1);

@@ -933,91 +933,6 @@ PlotGC <- function(locPos, locNeg,
 }
 
 
-#' Plot sequence logo.
-#'
-#' Plot sequence logo.
-#'
-#' The function determines the sequence logo within a window
-#' defined by extending sites from \code{locus} upstream and
-#' downstream by \code{flank} nucleotides. By default logos
-#' are shown for every transcript section from \code{locus}.
-#' Use \code{filter} to specify specific transcript sections.
-#' 
-#' @param locus A \code{txLoc} object.
-#' @param flank An integer scalar; see 'Details'.
-#' @param filter A character vector; only plot sequence logos
-#' of sections specified in \code{filter}; if \code{NULL} plot
-#' all sections; default is NULL.
-# @param giveMeUgly A logical scalar; explanation withheld.
-#'
-#' @import Biostrings
-#' 
-#' @export
-PlotSeqLogo <- function(locus, flank = 5, filter = NULL) {
-#PlotSeqLogo <- function(locus, flank = 5, filter = NULL, giveMeUgly = FALSE) {
-    CheckClass(locus, "txLoc");
-    id <- GetId(locus);
-    refGenome <- GetRef(locus);
-    locus <- GetLoci(locus);
-    if (!is.null(filter)) {
-        locus <- locus[which(names(locus) %in% filter)];
-    }
-    if (length(locus) < 4) {
-        par(mfrow = c(1, length(locus)));
-    } else {
-        par(mfrow = c(ceiling(length(locus) / 2), 2));
-    }
-    for (i in 1:length(locus)) {
-        if (is.numeric(locus[[i]]$TXSTART) &
-            !IsEmptyChar(locus[[i]]$REGION_SEQ)) {
-            x1 <- locus[[i]]$TXSTART - flank;
-            x2 <- locus[[i]]$TXSTART + flank;
-            subSeq <- DNAStringSet(substr(locus[[i]]$REGION_SEQ, x1, x2));
-            subSeq <- subSeq[which(nchar(subSeq) == 2 * flank + 1)];
-            mat <- consensusMatrix(subSeq, as.prob = TRUE)[1:4, ];
-# Keep this for the whiny biologists out there ...
-#            if (giveMeUgly) {
-#                seqLogo(makePWM(mat));
-#            } else {
-            freqdf <- as.data.frame(t(mat));
-            freqdf$pos <- seq(-flank, flank);
-            freqdf$height <- apply(freqdf[, c("A", "C", "G", "T")],
-                                   MARGIN=1,
-                                   FUN=function(x){
-                                       x[which(x == 0)] = 1.e-7;
-                                       2 + sum(x * log2(x))});
-            logodf <- data.frame(A = freqdf$A * freqdf$height,
-                                 C = freqdf$C * freqdf$height,
-                                 G = freqdf$G*freqdf$height,
-                                 T = freqdf$T*freqdf$height, 
-                                 pos = freqdf$pos);
-            title <- sprintf("%s, N(%s)=%i\nSequence logo in %i nt window",
-                             names(locus)[i],
-                             id,
-                             nrow(locus[[i]]),
-                             2 * flank + 1);
-            mp <- barplot(t(logodf[ ,1:4]),
-                          col = GetColPal("google", 4),
-                          ylim = c(0, 2),
-                          ylab = "Information content [bits]",
-                          main = title,
-                          font.main = 1);
-            axis(1, at = mp, labels = logodf[, ncol(logodf)]);
-            mtext("Relative position [nt]", 1, padj = 4);
-            legend("topright",
-                   fill = GetColPal("google", 4),
-                   legend = c("A", "C", "G", "T"),
-                   bty = "n");
-#            }
-        } else {
-            ss <- sprintf("Skip %s: No position or sequence information.",
-                          names(locus)[i]);
-            warning(ss);
-        }
-    }
-}
-
-
 #' Generic function for plotting abundances (histograms).
 #'
 #' Generic function for plotting abundances (histograms).
@@ -1225,7 +1140,7 @@ PlotRelDistEnrichment <- function(locPos,
         ctsNeg <- table(cut(distNeg[[i]], breaks = breaks));
         ctsMat <- as.matrix(rbind(ctsPos, ctsNeg));
         rownames(ctsMat) <- c("pos", "neg");
-        title <- sprintf("%\nN(d(%s,%s)) = %i, N(d(%s,%s)) = %i\n(bw = %i nt)",
+        title <- sprintf("%s\nN(d(%s,%s)) = %i, N(d(%s,%s)) = %i\n(bw = %i nt)",
                          names(distPos)[i],
                          idPos, idRef, sum(ctsPos),
                          idNeg, idRef, sum(ctsNeg),
@@ -1234,4 +1149,137 @@ PlotRelDistEnrichment <- function(locPos,
                                       title = title,
                                       x.las = 2, x.cex = 0.8, x.padj = 0.8);
     }
+}
+
+
+#' Plot sequence logo.
+#'
+#' Plot sequence logo.
+#'
+#' The function determines the sequence logo within a window
+#' defined by extending sites from \code{locus} upstream and
+#' downstream by \code{flank} nucleotides. By default logos
+#' are shown for every transcript section from \code{locus}.
+#' Use \code{filter} to specify specific transcript sections.
+#' 
+#' @param locus A \code{txLoc} object.
+#' @param flank An integer scalar; see 'Details'.
+#' @param filter A character vector; only plot sequence logos
+#' of sections specified in \code{filter}; if \code{NULL} plot
+#' all sections; default is NULL.
+#' @param ylim An integer vector; specifies limits for the
+#' y-axis; automatically determined if \code{ymin = NULL};
+#' default is \code{c(0, 2)}.
+# @param giveMeUgly A logical scalar; explanation withheld.
+#'
+#' @import Biostrings
+#' 
+#' @export
+PlotSeqLogo <- function(locus, flank = 5, filter = NULL, ylim = c(0, 2)) {
+#PlotSeqLogo <- function(locus, flank = 5, filter = NULL, giveMeUgly = FALSE) {
+    CheckClass(locus, "txLoc");
+    id <- GetId(locus);
+    refGenome <- GetRef(locus);
+    locus <- GetLoci(locus);
+    if (!is.null(filter)) {
+        locus <- locus[which(names(locus) %in% filter)];
+    }
+    if (length(locus) < 4) {
+        par(mfrow = c(1, length(locus)));
+    } else {
+        par(mfrow = c(ceiling(length(locus) / 2), 2));
+    }
+    for (i in 1:length(locus)) {
+        if (is.numeric(locus[[i]]$TXSTART) &
+            !IsEmptyChar(locus[[i]]$REGION_SEQ)) {
+            x1 <- locus[[i]]$TXSTART - flank;
+            x2 <- locus[[i]]$TXSTART + flank;
+            subSeq <- DNAStringSet(substr(locus[[i]]$REGION_SEQ, x1, x2));
+            subSeq <- subSeq[which(nchar(subSeq) == 2 * flank + 1)];
+            mat <- consensusMatrix(subSeq, as.prob = TRUE)[1:4, ];
+# Keep this for the whiny biologists out there ...
+#            if (giveMeUgly) {
+#                seqLogo(makePWM(mat));
+#            } else {
+            freqdf <- as.data.frame(t(mat));
+            freqdf$pos <- seq(-flank, flank);
+            freqdf$height <- apply(freqdf[, c("A", "C", "G", "T")],
+                                   MARGIN=1,
+                                   FUN=function(x){
+                                       x[which(x == 0)] = 1.e-7;
+                                       2 + sum(x * log2(x))});
+            logodf <- data.frame(A = freqdf$A * freqdf$height,
+                                 C = freqdf$C * freqdf$height,
+                                 G = freqdf$G*freqdf$height,
+                                 T = freqdf$T*freqdf$height, 
+                                 pos = freqdf$pos);
+            title <- sprintf("%s, N(%s)=%i\nSequence logo in %i nt window",
+                             names(locus)[i],
+                             id,
+                             nrow(locus[[i]]),
+                             2 * flank + 1);
+            mp <- barplot(t(logodf[ ,1:4]),
+                          col = GetColPal("google", 4),
+                          ylim = ylim,
+                          ylab = "Information content [bits]",
+                          main = title,
+                          font.main = 1);
+            axis(1, at = mp, labels = logodf[, ncol(logodf)]);
+            mtext("Relative position [nt]", 1, padj = 4);
+            legend("topright",
+                   fill = GetColPal("google", 4),
+                   legend = c("A", "C", "G", "T"),
+                   bty = "n");
+#            }
+        } else {
+            ss <- sprintf("Skip %s: No position or sequence information.",
+                          names(locus)[i]);
+            warning(ss);
+        }
+    }
+}
+
+#' Experimental motif search
+#'
+#' Experimental motif search
+#'
+#' @param locus A \code{txLoc} object.
+#' @param flank An integer scalar; see 'Details'.
+#' @param filter A character vector; only plot sequence logos
+#' of sections specified in \code{filter}; if \code{NULL} plot
+#' all sections; default is NULL.
+#' @param maxMM An integer scalar; specifies the maximum number
+#' of mismatch(es) allowed during the motif search; default is 1.
+#'
+#' @import Biostrings
+#' 
+#' @export
+test.MotifSearch <- function(locus, flank = 20, filter = NULL, maxMM = 1) {
+    CheckClass(locus, "txLoc");
+    id <- GetId(locus);
+    refGenome <- GetRef(locus);
+    locus <- GetLoci(locus);
+    if (!is.null(filter)) {
+        locus <- locus[which(names(locus) %in% filter)];
+    }
+    p1 <- c("GGACT");
+    dist.list <- list();
+    for (i in 1:length(locus)) {
+        if (is.numeric(locus[[i]]$TXSTART) &
+            !IsEmptyChar(locus[[i]]$REGION_SEQ)) {
+            x1 <- locus[[i]]$TXSTART - flank;
+            x2 <- locus[[i]]$TXSTART + flank;
+            subSeq <- DNAStringSet(substr(locus[[i]]$REGION_SEQ, x1, x2));
+            subSeq <- subSeq[which(nchar(subSeq) == 2 * flank + 1)];
+            match <- vmatchPattern(p1, subSeq, max.mismatch = maxMM);
+            dist <- start(unlist(match)) - flank;
+        } else {
+            ss <- sprintf("Skip %s: No position or sequence information.",
+                          names(locus)[i]);
+            warning(ss);
+            dist <- 0;
+        }
+        dist.list[[length(dist.list) + 1]] <- dist;
+    }
+    names(dist.list) <- names(locus);
 }
