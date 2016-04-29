@@ -1254,7 +1254,7 @@ PlotSeqLogo <- function(locus, flank = 5, filter = NULL, ylim = c(0, 2)) {
 #' @import Biostrings
 #' 
 #' @export
-test.MotifSearch <- function(locus, flank = 20, filter = NULL, maxMM = 1) {
+test.MotifSearch <- function(locus, flank = 100, filter = NULL, maxMM = 1) {
     CheckClass(locus, "txLoc");
     id <- GetId(locus);
     refGenome <- GetRef(locus);
@@ -1262,7 +1262,10 @@ test.MotifSearch <- function(locus, flank = 20, filter = NULL, maxMM = 1) {
     if (!is.null(filter)) {
         locus <- locus[which(names(locus) %in% filter)];
     }
-    p1 <- c("GGACT");
+    motif <- c("AATAAA", "ATTAAA", "AGTAAA",
+               "TATAAA", "AAGAAA", "AATACA",
+               "AATATA", "CATAAA", "AATGAA",
+               "GATAAA", "ACTAAA", "AATAGA");
     dist.list <- list();
     for (i in 1:length(locus)) {
         if (is.numeric(locus[[i]]$TXSTART) &
@@ -1271,8 +1274,12 @@ test.MotifSearch <- function(locus, flank = 20, filter = NULL, maxMM = 1) {
             x2 <- locus[[i]]$TXSTART + flank;
             subSeq <- DNAStringSet(substr(locus[[i]]$REGION_SEQ, x1, x2));
             subSeq <- subSeq[which(nchar(subSeq) == 2 * flank + 1)];
-            match <- vmatchPattern(p1, subSeq, max.mismatch = maxMM);
-            dist <- start(unlist(match)) - flank;
+            dist <- vector();
+            for (j in 1:length(motif)) {
+                m <- vmatchPattern(motif[j], subSeq, max.mismatch = maxMM);
+                # TODO: Only keep minimum distance per entry from posSites
+                dist <- c(dist, start(unlist(m)) - flank);
+            }
         } else {
             ss <- sprintf("Skip %s: No position or sequence information.",
                           names(locus)[i]);
@@ -1282,4 +1289,5 @@ test.MotifSearch <- function(locus, flank = 20, filter = NULL, maxMM = 1) {
         dist.list[[length(dist.list) + 1]] <- dist;
     }
     names(dist.list) <- names(locus);
+    return(dist.list);
 }
