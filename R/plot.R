@@ -363,6 +363,10 @@ PlotSpatialDistribution <- function(locus,
                      length(pos[[j]])),
                  font.main = 1,
                  ...);
+            lblLegend <- c(sprintf("Abundance (%s)", bwString));
+            lwdLegend <- c(2);
+            colLegend <- c("black");
+            ltyLegend <- c(1);
             if (doBootstrap) {
                 CIFromBS <- EstimateCIFromBS(pos[[j]],
                                              breaks = breaks,
@@ -381,15 +385,19 @@ PlotSpatialDistribution <- function(locus,
                       col = "red", lty = 2, lwd = 1);
                 lines(lowess(CIFromBS$x, CIFromBS$y.high, f = 1/5),
                       col = "red", lty = 2, lwd = 1);
-                legend("topleft",
-                       c(sprintf("Abundance (%s)", bwString),
-                         "95%CI (empirical bootstrap)",
-                         "Lowess-smoothed 95%CI"),
-                       lwd = c(2, 5, 1),
-                       col = c("black", rgb(1, 0, 0, 0.2), "red"),
-                       lty = c(1, 1, 2),
-                       bty = "n");
+                lblLegend <- c(lblLegend,
+                               "95%CI (empirical bootstrap)",
+                               "Lowess-smoothed 95%CI");
+                lwdLegend <- c(lwdLegend, 5, 1);
+                colLegend <- c(colLegend, rgb(1, 0, 0, 0.2), "red");
+                ltyLegend <- c(ltyLegend, 1, 2);
             }
+            legend("topleft",
+                   lblLegend,
+                   lwd = lwdLegend,
+                   col = colLegend,
+                   lty = ltyLegend,
+                   bty = "n");
         }
     }
 }
