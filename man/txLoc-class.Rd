@@ -104,7 +104,7 @@ transcript section.
 \section{Slots}{
 
 \describe{
-\item{\code{loci}}{A \code{list} of \code{GRangesList} objects; specifies
+\item{\code{loci}}{A \code{list} of \code{dataframe} objects; specifies
 the list of loci per transcript section.}
 
 \item{\code{id}}{A character string; identifier for loci in \code{txLoc}

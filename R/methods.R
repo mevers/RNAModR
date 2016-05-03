@@ -80,33 +80,33 @@ SmartMap.ToTx <- function(locus,
 #        dataID <-  geneXID[match(dataMap[, 1], geneXID[, 1]), ];
         locusInTx <- GenomicRanges::as.data.frame(gr)[, 1:4];
         colnames(locusInTx) <- c("REFSEQ", "TXSTART", "TXEND", "TXWIDTH");
-        dataFromQuery <- GenomicRanges::as.data.frame(locus[idxLoc]);
-        colnames(dataFromQuery) <- c("CHR", "START", "STOP", "WIDTH",
-                                     "STRAND", "SCORE", "ID");
-        dataFromRef <- GenomicRanges::as.data.frame(
+        dataQuery <- GenomicRanges::as.data.frame(locus[idxLoc]);
+        colnames(dataQuery) <- c("CHR", "START", "STOP", "WIDTH",
+                                 "STRAND", "SCORE", "ID");
+        dataRef <- GenomicRanges::as.data.frame(
             range(txBySec[[i]][idxTx]))[, -1];
         idxSeq <- which(names(txBySec)[i] == names(seqBySec));
         if (length(idxSeq) > 0) {
             dataSeq <- as.character(seqBySec[[idxSeq]][match(
-                dataFromRef[, 1],
+                dataRef[, 1],
                 names(seqBySec[[idxSeq]]))]);
         } else {
-            dataSeq <- rep("", nrow(dataFromRef));
+            dataSeq <- rep("", nrow(dataRef));
         }
-        dataFromRef <- cbind(rep(names(txBySec)[i], nrow(dataFromRef)),
-                             dataFromRef[, 1],
-                             geneXID[match(dataFromRef[, 1] ,geneXID[, 1]), ][, -1],
-                             dataFromRef[, 2:ncol(dataFromRef)],
+        dataRef <- cbind(rep(names(txBySec)[i], nrow(dataRef)),
+                             dataRef[, 1],
+                             geneXID[match(dataRef[, 1], geneXID[, 1]), ][, -1],
+                             dataRef[, 2:ncol(dataRef)],
                              sum(width(txBySec[[i]][idxTx])),
                              dataSeq);
-        colnames(dataFromRef) <- c("GENE_REGION", "GENE_REFSEQ", "GENE_ENTREZ",
-                                   "GENE_SYMBOL", "GENE_ENSEMBL", "GENE_UNIGENE",
-                                   "GENE_NAME", "GENE_CHR", "GENE_START",
-                                   "GENE_STOP", "GENE_WIDTH", "GENE_STRAND",
-                                   "REGION_TXWIDTH", "REGION_SEQ");
+        colnames(dataRef) <- c("GENE_REGION", "GENE_REFSEQ", "GENE_ENTREZ",
+                               "GENE_SYMBOL", "GENE_ENSEMBL", "GENE_UNIGENE",
+                               "GENE_NAME", "GENE_CHR", "GENE_START",
+                               "GENE_STOP", "GENE_WIDTH", "GENE_STRAND",
+                               "REGION_TXWIDTH", "REGION_SEQ");
         locusInTx <- cbind(locusInTx,
-                           dataFromQuery,
-                           dataFromRef);
+                           dataQuery,
+                           dataRef);
         if (noFactors) {
             locusInTx <- Unfactor(locusInTx);
         }
@@ -207,6 +207,63 @@ SmartMap <- function(locus,
                refGenome = refGenome,
                version = as.character(Sys.Date()));
     return(obj);
+}
+
+#' Construct \code{txLoc}-suitable \code{dataframe} object from
+#' mapping transcript loci to genomic loci.
+#' 
+#' Construct \code{txLoc}-suitable \code{dataframe} object from
+#' mapping transcript loci to genomic loci.
+#'
+#' @param gr A \code{GRanges} object; specifies transcript loci.
+#' @param ref A \code{GRanges} object; the reference transcripts.
+#' @param seq A \code{DNAStringSet}; the reference transcript
+#' sequences.
+#' @param section A character scalar; specifies the transcript
+#' section.
+#' @param geneXID A \code{data.frame}; output of function
+#' \code{GetGeneIds} providing gene IDs from different gene
+#' annotations.
+#' 
+#' @return A \code{dataframe} object.
+#'
+#' @import Biostrings GenomicRanges IRanges
+#'
+#' @keywords internal
+#' 
+#' @export
+GetLocus.MapFromTranscripts <- function(gr, ref, seq, section, geneXID) {
+    genomePos <- mapFromTranscripts(gr, ref);
+    idxQuery <- mcols(genomePos)$xHits;
+    idxRef <- mcols(genomePos)$transcriptsHits;
+    dataRef <- ref[idxRef];
+    idxSeq <- match(names(genomePos), names(seq));
+    dataSeq <- seq[idxSeq];
+    locus <- cbind.data.frame(
+        names(genomePos),
+        start(gr[idxQuery]), end(gr[idxQuery]), width(gr[idxQuery]),
+        as.character(seqnames(genomePos)),
+        start(genomePos), end(genomePos), width(genomePos),
+        as.character(strand(genomePos)),
+        rep(0, length(genomePos)),
+        mcols(gr[idxQuery])$id,
+        rep(section, length(genomePos)),
+        geneXID[match(names(genomePos), geneXID$REFSEQ), ],
+        as.character(seqnames(unlist(range(dataRef)))),
+        start(unlist(range(dataRef))), end(unlist(range(dataRef))),
+        width(unlist(range(dataRef))),
+        as.character(strand(unlist(range(dataRef)))),
+        sum(width(dataRef)),
+        as.character(dataSeq));
+    colnames(locus) <- c("REFSEQ", "TXSTART", "TXEND", "TXWIDTH",
+                         "CHR", "START", "STOP", "WIDTH",
+                         "STRAND", "SCORE", "ID",
+                         "GENE_REGION", "GENE_REFSEQ", "GENE_ENTREZ",
+                         "GENE_SYMBOL", "GENE_ENSEMBL", "GENE_UNIGENE",
+                         "GENE_NAME", "GENE_CHR", "GENE_START",
+                         "GENE_STOP", "GENE_WIDTH", "GENE_STRAND",
+                         "REGION_TXWIDTH", "REGION_SEQ");
+    return(locus);
 }
 
 
@@ -536,5 +593,94 @@ GetEEJunct <- function(refGenome = "hg38", filter = "CDS") {
 }
 
 
+#' Get loci of motif(s) from transcriptome.
+#'
+#' Get loci of motif(s) from transcriptome.
+#'
+#' This function returns a \code{txLoc} object of loci of
+#' the specified motif(s) within transcript sections. Motif
+#' sequence matching allows for mismatches through the
+#' parameter \code{maxMM}.
+#'
+#' @param motif A character vector; specifies the motif(s)
+#' that will be matched against the transcriptome.
+#' @param refGenome A character string; specifies the reference
+#' genome version; default is \code{"hg38"}.
+#' @param maxMM An integer scalar; specifies the maximum number
+#' of mismatches that are allowed during the motif matching;
+#' default is 0.
+#' @param filter A character vector; only consider transcript
+#' sections specified in \code{filter}; \code{filter = NULL}
+#' corresponds to \code{filter = c("5'UTR", "CDS", "3'UTR")}.
+#' @param showPb A logical scalar; if \code{TRUE} show a progress
+#' bar; default is \code{TRUE}.
 
-
+#' @import GenomicRanges IRanges
+#' @importFrom Biostrings vmatchPattern
+#'
+#' @export
+GetMotifLoc <- function(motif, refGenome = "hg38", maxMM = 0, filter = NULL, showPb = TRUE) {
+    refTx <- sprintf("tx_%s.RData", refGenome);
+    if (!file.exists(refTx)) {
+        ss <- sprintf("Reference transcriptome for %s not found.", refGenome);
+        ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
+                      ss, refGenome);
+        stop(ss);
+    }
+    load(refTx);
+    requiredObj <- c("geneXID", "seqBySec", "txBySec");
+    if (!all(requiredObj %in% ls())) {
+        ss <- sprintf("Mandatory transcript objects not found.");
+        ss <- sprintf("%s\nNeed all of the following: %s",
+                      ss, paste0(requiredObj, collapse = ", "));
+        ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
+                      ss, refGenome);
+        stop(ss);
+    }
+    geneXID <- get("geneXID");
+    seqBySec <- get("seqBySec");
+    txBySec <- get("txBySec");
+    if (is.null(filter)) {
+        filter <- c("5'UTR", "CDS", "3'UTR");
+    }
+    sel <- which(names(txBySec) %in% filter);
+    locus.list <- list();
+    if (showPb == TRUE)
+        pb <- txtProgressBar(max = length(sel), style = 3, width = 60);
+    for (i in 1:length(sel)) {
+        if (!IsEmptyChar(seqBySec[[sel[i]]])) {
+# Disable warnings to get rid of messages of the form "Each of the
+# 2 combined objects has sequence levels not in the other" when
+# appending to GRanges object. Ugly! Is there a cleaner solution?
+# Works for now, fix later.
+            options(warn = -1);
+            gr <- GRanges();
+            for (j in 1:length(motif)) {
+                m <- vmatchPattern(motif[j],
+                                   seqBySec[[sel[i]]],
+                                   max.mismatch = maxMM);
+                m <- unlist(m);
+                grMotif <- GRanges(names(m), m,
+                                   id = rep(motif[j], length(m)));
+                gr <- append(gr, grMotif);
+            }
+            options(warn = 0);
+            locus <- GetLocus.MapFromTranscripts(
+                gr,
+                txBySec[[sel[i]]],
+                seqBySec[[sel[i]]],
+                names(txBySec)[sel[i]],
+                geneXID);
+            locus.list[[length(locus.list) + 1]] <- locus;
+            if (showPb) setTxtProgressBar(pb, i);
+        }
+    }
+    if (showPb) close(pb);
+    names(locus.list) <- names(seqBySec)[sel];
+    obj <- new("txLoc",
+               loci = locus.list,
+               id = "motifs",
+               refGenome = refGenome,
+               version = as.character(Sys.Date()));
+    return(obj);
+}

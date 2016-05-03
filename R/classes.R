@@ -8,7 +8,7 @@
 #' section. Meta-data such as an identifier and the reference genome
 #' are stored in separate slots.
 #' 
-#' @slot loci A \code{list} of \code{GRangesList} objects; specifies
+#' @slot loci A \code{list} of \code{dataframe} objects; specifies
 #' the list of loci per transcript section.
 #' @slot id A character string; identifier for loci in \code{txLoc}
 #' object.
