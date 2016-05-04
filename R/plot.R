@@ -1278,7 +1278,7 @@ PlotOverlap <- function(loc1, loc2) {
         overlap <- length(m[m > 0]);
         grps <- list(
             seq(1, length(gr1[[i]])),
-            seq(length(gr1[[i]]) - overlap, length(gr2[[i]])));
+            seq(length(gr1[[i]]) - overlap + 1, length.out = length(gr2[[i]])));
         names(grps) <- c(sprintf("%s (%3.2f%%)",
                                  id1, overlap / length(gr1[[i]]) * 100),
                          sprintf("%s (%3.2f%%)",

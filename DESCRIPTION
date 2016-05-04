@@ -5,7 +5,7 @@ Version: 0.1.0
 Author: Maurits Evers <maurits.evers@anu.edu.au>
 Maintainer: Maurits Evers <maurits.evers@anu.edu.au>
 Description: Transcriptome-wide analysis of RNA modifications.
-Imports: AnnotationDbi, beanplot, Biostrings, GenomeInfoDb, methods, RSQLite, rtracklayer
+Imports: AnnotationDbi, beanplot, Biostrings, GenomeInfoDb, gplots, methods, RSQLite, rtracklayer
 Depends: GenomicRanges, GenomicFeatures, IRanges
 Suggests: knitr, testthat
 License: GPL-3 | file LICENSE
