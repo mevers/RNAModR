@@ -1247,55 +1247,43 @@ PlotSeqLogo <- function(locus, flank = 5, filter = NULL, ylim = c(0, 2)) {
     }
 }
 
-#' Experimental motif search
+
+#' Plot overlap of two txLoc objects.
 #'
-#' Experimental motif search
+#' Plot overlap of two txLoc objects.
 #'
-#' @param locus A \code{txLoc} object.
-#' @param flank An integer scalar; see 'Details'.
-#' @param filter A character vector; only plot sequence logos
-#' of sections specified in \code{filter}; if \code{NULL} plot
-#' all sections; default is NULL.
-#' @param maxMM An integer scalar; specifies the maximum number
-#' of mismatch(es) allowed during the motif search; default is 1.
+#' This function plots the overlap of entries from two
+#' \code{txLoc} objects as Venn diagrams.
 #'
-#' @import Biostrings
+#' @param loc1 A \code{txLoc} object.
+#' @param loc2 A \code{txLoc} object.
+#'
+#' @import GenomicRanges IRanges
+#' @importFrom gplots venn
 #' 
 #' @export
-test.MotifSearch <- function(locus, flank = 100, filter = NULL, maxMM = 1) {
-    CheckClass(locus, "txLoc");
-    id <- GetId(locus);
-    refGenome <- GetRef(locus);
-    locus <- GetLoci(locus);
-    if (!is.null(filter)) {
-        locus <- locus[which(names(locus) %in% filter)];
+PlotOverlap <- function(loc1, loc2) {
+    CheckClassTxLocConsistency(loc1, loc2);
+    id1 <- GetId(loc1);
+    id2 <- GetId(loc2);
+    gr1 <- TxLoc2GRangesList(loc1);
+    gr2 <- TxLoc2GRangesList(loc2);
+    if (length(gr1) < 4) {
+        par(mfrow = c(1, length(gr1)));
+    } else {
+        par(mfrow = c(ceiling(length(gr1) / 2), 2));
     }
-    motif <- c("AATAAA", "ATTAAA", "AGTAAA",
-               "TATAAA", "AAGAAA", "AATACA",
-               "AATATA", "CATAAA", "AATGAA",
-               "GATAAA", "ACTAAA", "AATAGA");
-    dist.list <- list();
-    for (i in 1:length(locus)) {
-        if (is.numeric(locus[[i]]$TXSTART) &
-            !IsEmptyChar(locus[[i]]$REGION_SEQ)) {
-            x1 <- locus[[i]]$TXSTART - flank;
-            x2 <- locus[[i]]$TXSTART + flank;
-            subSeq <- DNAStringSet(substr(locus[[i]]$REGION_SEQ, x1, x2));
-            subSeq <- subSeq[which(nchar(subSeq) == 2 * flank + 1)];
-            dist <- vector();
-            for (j in 1:length(motif)) {
-                m <- vmatchPattern(motif[j], subSeq, max.mismatch = maxMM);
-                # TODO: Only keep minimum distance per entry from posSites
-                dist <- c(dist, start(unlist(m)) - flank);
-            }
-        } else {
-            ss <- sprintf("Skip %s: No position or sequence information.",
-                          names(locus)[i]);
-            warning(ss);
-            dist <- 0;
-        }
-        dist.list[[length(dist.list) + 1]] <- dist;
+    for (i in 1:length(gr1)) {
+        m <- countOverlaps(gr1[[i]], gr2[[i]]);
+        overlap <- length(m[m > 0]);
+        grps <- list(
+            seq(1, length(gr1[[i]])),
+            seq(length(gr1[[i]]) - overlap, length(gr2[[i]])));
+        names(grps) <- c(sprintf("%s (%3.2f%%)",
+                                 id1, overlap / length(gr1[[i]]) * 100),
+                         sprintf("%s (%3.2f%%)",
+                                 id2, overlap / length(gr2[[i]]) * 100));
+        venn(grps);
+        mtext(names(gr1)[i]);
     }
-    names(dist.list) <- names(locus);
-    return(dist.list);
 }

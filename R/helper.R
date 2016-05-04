@@ -81,13 +81,17 @@ CheckClass <- function(object, classType = NULL, classType2 = NULL) {
 #' 
 #' @export
 CheckClassTxLocRef <- function(obj1, obj2) {
+    CheckClass(obj1, "txLoc");
+    CheckClass(obj2, "txLoc");
+    obj1Name <- deparse(substitute(obj1));
+    obj2Name <- deparse(substitute(obj2));
     ref1 <- GetRef(obj1);
     ref2 <- GetRef(obj2);
-    objName1 <- deparse(substitute(obj1));
-    objName2 <- deparse(substitute(obj2));
     if (ref1 != ref2) {
-        ss <- sprintf("%s and %s are not based on the same reference genome: %s != %s.",
-                      objName1, objName2, ref1, ref2);
+        ss <- sprintf("%s and %s are not based on the same reference genome.",
+                      obj1Name, obj2Name);
+        ss <- sprintf("%s\n  %s: %s", ss, obj1Name, ref1);
+        ss <- sprintf("%s\n  %s: %s", ss, obj2Name, ref2);
         stop(ss);
     }
     return(TRUE);
@@ -122,13 +126,18 @@ CheckClassTxLocConsistency <- function(obj1, obj2) {
     # Returns:
     #   TRUE
     CheckClassTxLocRef(obj1, obj2);
-    objName1 <- deparse(substitute(obj1));
-    objName2 <- deparse(substitute(obj2));
-    matchSec <- intersect(names(GetLoci(obj1)), names(GetLoci(obj2)));
-    if (!identical(names(GetLoci(obj1)),
-                   names(GetLoci(obj2)))) {
-        ss <- sprintf("Transcript regions in %s and %s do not match.",
-             objName1, objName2);
+    obj1Name <- deparse(substitute(obj1));
+    obj2Name <- deparse(substitute(obj2));
+    sec1 <- names(GetLoci(obj1));
+    sec2 <- names(GetLoci(obj2));
+    matchSec <- intersect(sec1, sec2);
+    if (!identical(sec1, sec2)) {
+        ss <- sprintf("Transcript sections in %s and %s do not match.",
+             obj1Name, obj2Name);
+        ss <- sprintf("%s\n  %s: %s",
+                      ss, obj1Name, paste(sec1, collapse = ", "));
+        ss <- sprintf("%s\n  %s: %s",
+                      ss, obj2Name, paste(sec2, collapse = ", "));
         stop(ss);
     }
     return(TRUE);

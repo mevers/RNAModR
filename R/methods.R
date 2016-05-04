@@ -620,6 +620,10 @@ GetEEJunct <- function(refGenome = "hg38", filter = "CDS") {
 #'
 #' @export
 GetMotifLoc <- function(motif, refGenome = "hg38", maxMM = 0, filter = NULL, showPb = TRUE) {
+    PASmotif <- c("AATAAA", "ATTAAA", "AGTAAA",
+                  "TATAAA", "AAGAAA", "AATACA",
+                  "AATATA", "CATAAA", "AATGAA",
+                  "GATAAA", "ACTAAA", "AATAGA");
     refTx <- sprintf("tx_%s.RData", refGenome);
     if (!file.exists(refTx)) {
         ss <- sprintf("Reference transcriptome for %s not found.", refGenome);
@@ -684,3 +688,4 @@ GetMotifLoc <- function(motif, refGenome = "hg38", maxMM = 0, filter = NULL, sho
                version = as.character(Sys.Date()));
     return(obj);
 }
+
