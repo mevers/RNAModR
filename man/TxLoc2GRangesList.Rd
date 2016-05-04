@@ -29,4 +29,7 @@ object. Coordinates can be either genomic coordinates
 (\code{method = "gPos"}) or transcript section coordinates
 (\code{method = "tPos"}).
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 

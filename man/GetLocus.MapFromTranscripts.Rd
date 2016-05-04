@@ -29,5 +29,8 @@ A \code{dataframe} object.
 Construct \code{txLoc}-suitable \code{dataframe} object from
 mapping transcript loci to genomic loci.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 \keyword{internal}
 

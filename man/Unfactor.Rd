@@ -15,5 +15,8 @@ A \code{data.frame} object.
 \description{
 Unfactor entries in a \code{data.frame}.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 \keyword{internal}
 

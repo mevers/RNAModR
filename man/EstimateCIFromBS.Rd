@@ -22,5 +22,8 @@ bounds for every bin value.
 Calculate 95% confidence interval from data using empirical
 bootstrap.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 \keyword{internal}
 

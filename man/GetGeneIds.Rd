@@ -40,5 +40,8 @@ the following columns:
   \item GENENAME: Gene name
 }
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 \keyword{internal}
 

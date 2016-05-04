@@ -8,6 +8,7 @@
 #'
 #' @param lib A character string; package to be loaded.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #' 
 #' @return A logical scalar.
@@ -36,6 +37,7 @@ SafeLoad <- function(lib) {
 #'
 #' @return Logical. \code{TRUE} if object is of class classType.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #' 
 #' @export
@@ -77,6 +79,7 @@ CheckClass <- function(object, classType = NULL, classType2 = NULL) {
 #'
 #' @return A logical scalar.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #' 
 #' @export
@@ -112,6 +115,7 @@ CheckClassTxLocRef <- function(obj1, obj2) {
 #'
 #' @return A logical scalar.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #' 
 #' @export
@@ -157,6 +161,7 @@ CheckClassTxLocConsistency <- function(obj1, obj2) {
 #' @param env An \code{environment} object; default is the user's
 #' workspace, i.e. \code{env = .GlobalEnv}.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #' 
 #' @export
@@ -195,6 +200,7 @@ LoadRefTx <- function(refGenome = "hg38", env = .GlobalEnv) {
 #' @param filter A character vector; only keep transcript sections
 #' specified in \code{filter}; if \code{NULL} consider all sections.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @return A \code{txLoc} object.
 #' 
 #' @export
@@ -235,6 +241,7 @@ FilterTxLoc <- function(locus, filter = NULL) {
 #'
 #' @return A \code{GRangesList} object. See 'Details'.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @import GenomicRanges IRanges
 #'
 #' @export
@@ -260,11 +267,9 @@ TxLoc2GRangesList <- function(locus,
                 type = id,
                 gene = locus[[i]]$REFSEQ,
                 section = locus[[i]]$GENE_REGION,
-                name = locus[[i]]$ID),
+                names = locus[[i]]$ID),
             "tPos" = GRanges(
-                paste(locus[[i]]$REFSEQ,
-                      locus[[i]]$GENE_REGION,
-                      sep = "_"),
+                locus[[i]]$REFSEQ,
                 IRanges(locus[[i]]$TXSTART, locus[[i]]$TXEND),
                 "+",
                 type = id,
@@ -297,6 +302,7 @@ TxLoc2GRangesList <- function(locus,
 #' 
 #' @import GenomicRanges
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #' 
 #' @export
@@ -345,6 +351,7 @@ GetRelDistNearest <- function(gr1,
 #' @return List of upper and lower 95% confidence interval
 #' bounds for every bin value.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #' 
 #' @export
@@ -385,6 +392,7 @@ EstimateCIFromBS <- function(x, breaks, nBS = 5000) {
 #' @param alpha A real scalar; specifies the transparency; default
 #' is \code{alpha = 0.5}.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #' 
 #' @export
@@ -410,6 +418,7 @@ AddAlpha <- function(hexList, alpha = 0.5) {
 #'
 #' @return A logical scalar.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #'
 #' @export
@@ -428,6 +437,7 @@ IsEmptyChar <- function(v) {
 #'
 #' @return A character vector.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #'
 #' @export
@@ -464,6 +474,7 @@ GetColPal <- function(pal = c("apple", "google"), n = NULL, alpha = 1.0) {
 #'
 #' @return A \code{data.frame} object.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #'
 #' @export

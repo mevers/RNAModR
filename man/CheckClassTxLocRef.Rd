@@ -19,5 +19,8 @@ A logical scalar.
 Check if entries of two \code{txLoc} objects are based on the
 same reference genome.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 \keyword{internal}
 

@@ -26,5 +26,8 @@ to calculate nearest distances between entries from two
 of distances, where every list element corresponds to
 a \code{GRangesList} element.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 \keyword{internal}
 

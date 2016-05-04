@@ -26,5 +26,8 @@ Get sequences for transcript segments.
 This is a low-level function that is being called from
 \code{BuildTx}.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 \keyword{internal}
 

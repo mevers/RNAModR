@@ -20,5 +20,8 @@ The function calls \code{require} to load a package.
 If the package can be loaded it returns \code{TRUE},
 else \code{FALSE}.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 \keyword{internal}
 

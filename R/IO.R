@@ -13,6 +13,7 @@
 #'                        package = "RNAModR");
 #' sites <- ReadBED(bedFile);
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @import GenomicRanges IRanges
 #' 
 #' @export
@@ -56,6 +57,8 @@ ReadBED <- function(file) {
 #'
 #' @param txFeatures A \code{list} of \code{GRangesList} objects.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' 
 #' @importFrom rtracklayer export
 #' 
 #' @export
@@ -73,17 +76,24 @@ WriteFeatToBED <- function(txFeatures) {
 }
 
 
-#' Write txLoc object to BED file.
+#' Write \code{txLoc} object to a BED file.
 #'
-#' Write a txLoc object to a/multiple BED file(s).
+#' Write \code{txLoc} object to a BED file.
+#'
+#' This function writes entries from a \code{txLoc} object to a BED file.
+#' This process is not "splice-aware", i.e. if an entry spans an intron
+#' the BED entry gives the left and right-most genomic coordinate of the
+#' feature.
 #' 
 #' @param locus A \code{txLoc} object.
 #' @param file Filename of output BED file. If NULL then file = "sites.bed".
 #' @param formatChr Set output format of chromosome column. Default is
 #' "noChrName".
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' 
 #' @export
-WriteLocusToBED <- function(locus,
+WriteTxLocToBED <- function(locus,
                             file = NULL,
                             formatChr = "noChrName") {
     # Save transcript features in BED file.
@@ -117,7 +127,6 @@ WriteLocusToBED <- function(locus,
             ss <- sprintf("Skipping %s.\n", names(locus)[i]);
             warning(ss);
         }
-        
     }
     BED <- BED[order(BED[, 1], BED[, 2]), ];
     if (is.null(file)) {
@@ -125,7 +134,6 @@ WriteLocusToBED <- function(locus,
             file <- sprintf("sites_%s.bed", id);
         } else {
             file <- "sites.bed";
-            
         }
     }
     write.table(BED, file = file,
@@ -143,6 +151,8 @@ WriteLocusToBED <- function(locus,
 #' @param withSeq If TRUE then include full sequence. Default is FALSE.
 #' @param withGC If TRUE then include GC content. Default is FALSE.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' 
 #' @export
 WriteLocusToCSV <- function(locus,
                             file = NULL, 

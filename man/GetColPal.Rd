@@ -19,5 +19,8 @@ A character vector.
 \description{
 Return specific colour palette.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 \keyword{internal}
 

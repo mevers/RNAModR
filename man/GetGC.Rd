@@ -22,4 +22,7 @@ transcript locus from a \code{txLoc} object. The window is defined
 by extending the position of every transcript locus upstream and
 downstream by \code{flank} nucleotides (if possible).
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 

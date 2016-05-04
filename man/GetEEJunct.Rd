@@ -25,4 +25,7 @@ Get exon-exon junctions from transcriptome. See 'Details'.
 This function extracts exon-exon junction positions from a
 reference transcriptome, and returns a \code{txLoc} object.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 

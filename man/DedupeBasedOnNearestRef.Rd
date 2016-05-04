@@ -29,5 +29,8 @@ For two \code{GRangesList} objects select entries from
 multiple entries with the same name from \code{query} based
 on the minimum distance to the single entry from \code{ref}.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 \keyword{internal}
 

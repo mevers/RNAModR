@@ -21,5 +21,8 @@ Load reference transcriptome. See 'Details'.
 The function loads transcriptome data stored in a \code{.RData}
 file, and makes the objects assessible in the user's workspace.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 \keyword{internal}
 

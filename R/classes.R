@@ -19,6 +19,8 @@
 #'
 #' @name txLoc-class
 #' @rdname txLoc-class
+#'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' 
 #' @exportClass txLoc
 setClass("txLoc",
@@ -49,14 +51,12 @@ setClass("txLoc",
 #'
 #' @param x A \code{txLoc} object.
 #' 
-# #' @name txLoc-class
-#' @rdname txLoc-class
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' 
 #' @exportMethod GetLoci
 setGeneric("GetLoci", function(x) standardGeneric("GetLoci"));
 
-#' @rdname txLoc-class
-#' @aliases GetLoci,txLoc-methods
+#' @rdname GetLoci
 setMethod("GetLoci",
           signature = "txLoc",
           definition = function(x) {
@@ -69,16 +69,16 @@ setMethod("GetLoci",
 #'
 #' Get the id string of a \code{txLoc} object.
 #'
+#' @param x A \code{txLoc} object.
+#' 
 #' @return A string.
 #'
-# #' @name txLoc-class
-#' @rdname txLoc-class
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' 
 #' @exportMethod GetId
 setGeneric("GetId", function(x) standardGeneric("GetId"));
 
-#' @rdname txLoc-class
-#' @aliases GetId,txLoc-methods
+#' @rdname GetId
 setMethod("GetId",
           signature = "txLoc",
           definition = function(x) {
@@ -91,16 +91,16 @@ setMethod("GetId",
 #'
 #' Get the reference genome string of a \code{txLoc} object.
 #'
+#' @param x A \code{txLoc} object.
+#' 
 #' @return A string.
 #'
-#' #' @name txLoc-class
-#' @rdname txLoc-class
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' 
 #' @exportMethod GetRef
 setGeneric("GetRef", function(x) standardGeneric("GetRef"));
 
-#' @rdname txLoc-class
-#' @aliases GetRef,txLoc-methods
+#' @rdname GetRef
 setMethod("GetRef",
           signature = "txLoc",
           definition = function(x) {
@@ -113,16 +113,16 @@ setMethod("GetRef",
 #'
 #' Get the version string of a \code{txLoc} object.
 #'
+#' @param x A \code{txLoc} object.
+#' 
 #' @return A string.
 #'
-# #' @name txLoc-class
-#' @rdname txLoc-class
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' 
 #' @exportMethod GetVersion
 setGeneric("GetVersion", function(x) standardGeneric("GetVersion"));
 
-#' @rdname txLoc-class
-#' @aliases GetVersion,txLoc-methods
+#' @rdname GetVersion
 setMethod("GetVersion",
           signature = "txLoc",
           definition = function(x) {
@@ -135,10 +135,12 @@ setMethod("GetVersion",
 ###################### SPECIFIC CLASS ACCESSORS ###########################
 ###########################################################################
 
-#' Method "info" for S4 object txLoc.
+#' Method "Info" for S4 object txLoc.
 #'
 #' Print general information of a \code{txLoc} object.
 #'
+#' @param x A \code{txLoc} object.
+#' 
 #' @examples
 #' \dontrun{
 #' bedFile <- system.file("extdata",
@@ -146,18 +148,16 @@ setMethod("GetVersion",
 #'                        package = "RNAModR");
 #' sites <- ReadBED(bedFile);
 #' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
-#' info(posSites);
+#' Info(posSites);
 #' }
 #'
-# #' @name txLoc-class
-#' @rdname txLoc-class
-#'
-#' @exportMethod info
-setGeneric("info", function(x) standardGeneric("info"));
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' 
+#' @exportMethod Info
+setGeneric("Info", function(x) standardGeneric("Info"));
 
-#' @rdname txLoc-class
-#' @aliases info,txLoc-methods
-setMethod("info",
+#' @rdname Info
+setMethod("Info",
           signature = "txLoc",
           definition = function(x) {
               cat("Object of class \"txLoc\".\n");
@@ -181,53 +181,22 @@ setMethod("info",
           });
 
 
-#' Method "head" for S4 object txLoc.
-#'
-#' @param n A scalar integer.
-#' @param ... Additional parameters passed to \code{head}.
-#' 
-# #' @name txLoc-class
-#' @rdname txLoc-class
-#' 
-#' @exportMethod head
-setGeneric("head", function(x) standardGeneric("head"));
-
-#' @rdname txLoc-class
-#' @aliases head,txLoc-methods
-setMethod("head",
-          signature = "txLoc",
-          definition = function(x, n = 6L, ...) {
-              loc <- slot(x, "loci");
-              nSec <- length(loc);
-              for (i in 1:nSec) {
-                  cat(sprintf("$%s\n", names(loc)[i]));
-                  locPrint <- loc[[i]];
-                  locPrint[, "REGION_SEQ"] <- sprintf(
-                      "%s... (truncated, total length = %i)",
-                      substr(locPrint[, ncol(locPrint)], 1, 5),
-                      nchar(locPrint[, ncol(locPrint)]));
-                  print(head(locPrint, n = n));
-                  cat(sprintf("\n", names(loc)[i]));
-              }
-          });
-
-
 #' Method "GetNumberOfLoci" for S4 object txLoc.
 #'
 #' Get the number of loci of a \code{txLoc} object in every
 #' transcript section.
 #'
+#' @param x A \code{txLoc} object.
+#' 
 #' @return A named integer vector with the number of sites per
 #' transcript section.
 #'
-# #' @name txLoc-class
-#' @rdname txLoc-class
-#'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' 
 #' @exportMethod GetNumberOfLoci
 setGeneric("GetNumberOfLoci", function(x) standardGeneric("GetNumberOfLoci"));
 
-#' @rdname txLoc-class
-#' @aliases GetNumberOfLoci,txLoc-methods
+#' @rdname GetNumberOfLoci
 setMethod("GetNumberOfLoci",
           signature = "txLoc",
           definition = function(x) {

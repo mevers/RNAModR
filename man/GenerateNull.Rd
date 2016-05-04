@@ -64,4 +64,7 @@ negSites <- GenerateSNMNull(posSites, method = "permutation");
 }
 
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 

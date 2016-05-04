@@ -36,6 +36,7 @@
 #'
 #' @return A \code{TxDb} object. See 'Details'.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au} 
 #' @keywords internal
 #'
 #' @examples
@@ -116,6 +117,7 @@ GetTxDb <- function(genomeVersion = "hg38",
 #'
 #' @return A \code{data.frame}. See 'Details'.
 #' 
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #'
 #' @export
@@ -197,6 +199,7 @@ GetGeneIds <- function(txdb) {
 #'
 #' @return A \code{list} of \code{GRangesList} objects
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #'
 #' @export
@@ -286,6 +289,7 @@ GetTxBySec <- function(txdb,
 #'
 #' @return A \code{GRangesList} object.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #'
 #' @export
@@ -355,6 +359,7 @@ DedupeBasedOnNearestRef <- function(query, ref, showPb = FALSE) {
 #'
 #' @return A \code{list} of \code{GRangesList} objects
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #'
 #' @export
@@ -471,6 +476,7 @@ CollapseTxBySec <- function(txBySec,
 #' @param txBySec A \code{list} of \code{GRangesList} objects;
 #' output of function \code{GetTxBySec} or \code{CollapseTxBySec}.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #'
 #' @export
@@ -518,6 +524,7 @@ PerformSanityCheck <- function(txBySec) {
 #'
 #' @return A \code{list} of \code{DNAStringSet} objects.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #'
 #' @export
@@ -607,6 +614,8 @@ GetTxSeq <- function(txBySec,
 #' transcriptome; this will overwrite existing data.
 #' @param sanityCheck A logical scalar; if \code{TRUE} perform
 #' sanity checks.
+#' 
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' 
 #' @import AnnotationDbi GenomeInfoDb GenomicRanges GenomicFeatures
 #' RSQLite

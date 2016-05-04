@@ -41,5 +41,8 @@ number and names of \code{sections}. Entries in every
 transcript RefSeq ID. Note that multiple entries with
 identical RefSeq ID exist.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 \keyword{internal}
 

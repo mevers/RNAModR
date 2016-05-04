@@ -31,6 +31,7 @@
 #' @return A \code{list} of \code{data.frame} objects. See
 #' 'Details'.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #' 
 #' @export
@@ -144,6 +145,8 @@ SmartMap.ToTx <- function(locus,
 #'
 #' @return A \code{txLoc} object. See 'Details'.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' 
 #' @import GenomicFeatures GenomicRanges methods
 #' 
 #' @examples
@@ -227,6 +230,8 @@ SmartMap <- function(locus,
 #' 
 #' @return A \code{dataframe} object.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' 
 #' @import Biostrings GenomicRanges IRanges
 #'
 #' @keywords internal
@@ -310,6 +315,8 @@ GetLocus.MapFromTranscripts <- function(gr, ref, seq, section, geneXID) {
 #'
 #' @return A \code{txLoc} object. See 'Details'.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' 
 #' @import GenomicRanges IRanges
 #' 
 #' @examples
@@ -471,6 +478,8 @@ GenerateNull <- function(locus,
 #' @param locus A \code{txLoc} object.
 #' @param flank An integer scalar; see 'Details'.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' 
 #' @import Biostrings
 #'
 #' @export
@@ -532,6 +541,8 @@ GetGC <- function(locus, flank = 10) {
 #'
 #' @return A \code{txLoc} object. See 'Details'.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' 
 #' @import GenomicRanges IRanges
 #'
 #' @export
@@ -615,6 +626,8 @@ GetEEJunct <- function(refGenome = "hg38", filter = "CDS") {
 #' @param showPb A logical scalar; if \code{TRUE} show a progress
 #' bar; default is \code{TRUE}.
 
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' 
 #' @import GenomicRanges IRanges
 #' @importFrom Biostrings vmatchPattern
 #'

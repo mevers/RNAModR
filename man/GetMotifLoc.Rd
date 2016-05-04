@@ -34,4 +34,7 @@ the specified motif(s) within transcript sections. Motif
 sequence matching allows for mismatches through the
 parameter \code{maxMM}.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 

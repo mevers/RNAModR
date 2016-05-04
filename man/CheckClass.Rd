@@ -19,5 +19,8 @@ Logical. \code{TRUE} if object is of class classType.
 \description{
 Check if object has class classType.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 \keyword{internal}
 

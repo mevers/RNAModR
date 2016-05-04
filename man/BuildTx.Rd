@@ -28,4 +28,7 @@ with the longest CDS, and adjoining upstream/downstream longest
 UTRs. Transcript segments are stored per transcript section, and
 written to a \code{.RData} file.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 

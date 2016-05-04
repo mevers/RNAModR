@@ -13,4 +13,7 @@ WriteFeatToBED(txFeatures)
 Write a \code{list} of \code{GRangesList} to a BED file.
 One file per transcript region is generated.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 

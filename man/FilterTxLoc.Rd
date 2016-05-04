@@ -18,4 +18,7 @@ A \code{txLoc} object.
 \description{
 Filter sections of a \code{txLoc} object.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 

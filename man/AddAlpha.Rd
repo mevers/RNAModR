@@ -15,5 +15,8 @@ is \code{alpha = 0.5}.}
 \description{
 Add transparency to a list of colors
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 \keyword{internal}
 

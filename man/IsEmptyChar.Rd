@@ -15,5 +15,8 @@ A logical scalar.
 \description{
 Check if all entries in a character vector are empty.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 \keyword{internal}
 
