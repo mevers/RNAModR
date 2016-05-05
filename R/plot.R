@@ -848,8 +848,16 @@ PlotSpatialRatio <- function(locPos, locNeg,
 #'
 #' Plot GC content.
 #'
+#' The function calculates GC contents within a region around every
+#' site from two \code{txLoc} objects. The window is defined
+#' by extending the position of every transcript locus upstream and
+#' downstream by \code{flank} nucleotides (if possible).
+#' The means of resulting GC content distributions are compared and
+#' assessed using a two-tailed t-test.
+#' 
 #' @param locPos A \code{txLoc} object.
 #' @param locNeg A \code{txLoc} object.
+#' @param flank An integer scalar; see 'Details'.
 #' @param filter A logical scalar; only consider loci in transcript
 #' regions specified in filter; Default is \code{NULL}.
 #' @param geneNorm A logical scalar; if \code{TRUE} normalise GC
@@ -860,6 +868,7 @@ PlotSpatialRatio <- function(locPos, locNeg,
 #' 
 #' @export
 PlotGC <- function(locPos, locNeg,
+                   flank = 10,
                    filter = NULL,
                    geneNorm = FALSE) {
     # Plot and compare GC content.
@@ -876,8 +885,8 @@ PlotGC <- function(locPos, locNeg,
     idPos <- GetId(locPos);
     idNeg <- GetId(locNeg);
     refGenome <- GetRef(locPos);
-    gcPos <- GetGC(locPos);
-    gcNeg <- GetGC(locNeg);
+    gcPos <- GetGC(locPos, flank = flank);
+    gcNeg <- GetGC(locNeg, flank = flank);
     df <- data.frame();
     namesBean <- vector();
     for (i in 1:length(gcPos)) {

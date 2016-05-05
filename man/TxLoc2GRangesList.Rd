@@ -4,7 +4,7 @@
 \alias{TxLoc2GRangesList}
 \title{Convert a \code{txLoc} object to a \code{GRangesList} object.}
 \usage{
-TxLoc2GRangesList(locus, filter = NULL, method = c("gPos", "tPos"))
+TxLoc2GRangesList(locus, filter = NULL, method = c("tPos", "gPos"))
 }
 \arguments{
 \item{locus}{A \code{txLoc} object.}
