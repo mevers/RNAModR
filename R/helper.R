@@ -247,7 +247,7 @@ FilterTxLoc <- function(locus, filter = NULL) {
 #' @export
 TxLoc2GRangesList <- function(locus,
                               filter = NULL,
-                              method = c("gPos", "tPos")) {
+                              method = c("tPos", "gPos")) {
     CheckClass(locus, "txLoc");
     method <- match.arg(method);
     id <- GetId(locus);
@@ -271,7 +271,7 @@ TxLoc2GRangesList <- function(locus,
             "tPos" = GRanges(
                 locus[[i]]$REFSEQ,
                 IRanges(locus[[i]]$TXSTART, locus[[i]]$TXEND),
-                "+",
+                "*",
                 type = id,
                 gene = locus[[i]]$REFSEQ,
                 section = locus[[i]]$GENE_REGION,
