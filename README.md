@@ -17,6 +17,8 @@ transcript sections makes a simple position permutation approach inappropriate f
 generating null sites.
 
 ### Installing RNAModR from Github (requires the [devtools](https://github.com/hadley/devtools) package)
+1. Open an R terminal
+2. Within R, type
 ```{r}
 if (!require("devtools")) install.packages("devtools")
 devtools::install_github("mevers/RNAModR", build_vignettes = FALSE)
