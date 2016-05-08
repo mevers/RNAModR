@@ -35,10 +35,10 @@ setClass("txLoc",
              version = ""),
          );
 
+
 ###########################################################################
 #################### GENERAL CLASS SLOT ACCESSORS #########################
 ###########################################################################
-
 
 
 #' Method "GetLoci" for S4 object txLoc.
@@ -202,4 +202,28 @@ setMethod("GetNumberOfLoci",
           definition = function(x) {
               loc <- slot(x, "loci");
               return(sapply(loc, nrow));
+          });
+
+
+###########################################################################
+#################### GENERAL CLASS SLOT MUTATORS ##########################
+###########################################################################
+
+#' Method "SetId" for S4 object txLoc.
+#'
+#' Set the id string of a \code{txLoc} object.
+#'
+#' @param x A \code{txLoc} object.
+#' @param id A character string.
+#'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' 
+#' @exportMethod SetId
+setGeneric("SetId", function(x) standardGeneric("SetId"));
+
+#' @rdname GetId
+setMethod("SetId",
+          signature = "txLoc",
+          definition = function(x, id) {
+              slot(x, "id") <- id;
           });

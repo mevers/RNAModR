@@ -29,8 +29,8 @@
 #' @param standardChrOnly A logical scalar; if \code{TRUE} and a
 #' new db is created, keep only fully assembled chromosomes;
 #' default is \code{TRUE}.
-#' @param forceDownload A logical scalar; if \code{TRUE} force
-#' download and overwrite existing db file; default is \code{FALSE}.
+#' @param force A logical scalar; if \code{TRUE} force download
+#' and overwrite existing db file; default is \code{FALSE}.
 #' @param verbose A logical scalar; print additional information
 #' about db; default is \code{FALSE}.
 #'
@@ -48,7 +48,7 @@
 #' @export
 GetTxDb <- function(genomeVersion = "hg38",
                     standardChrOnly = TRUE,
-                    forceDownload = FALSE,
+                    force = FALSE,
                     verbose = FALSE) {
     # Download or load (if file exists) sqlite transcript database based on
     # RefSeq annotation from UCSC. Store database as sqlite file.
@@ -56,14 +56,14 @@ GetTxDb <- function(genomeVersion = "hg38",
     # Args:
     #   genomeVersion: Genome assembly version. Default is "hg38".
     #   standardChrOnly: As it says. Default is TRUE.
-    #   forceDownload: Force re-downloading transcript database from UCSC.
-    #                  Default is FALSE.
+    #   force: Force re-downloading transcript database from UCSC.
+    #          Default is FALSE.
     #   verbose: Print additional output. Default is FALSE.
     #
     # Returns:
     #   TxDb object.
     sqliteFile <- sprintf("txdb_%s.sqlite", genomeVersion);
-    if ((!file.exists(sqliteFile)) || (forceDownload)) {
+    if ((!file.exists(sqliteFile)) || (force == TRUE)) {
         txdb <- makeTxDbFromUCSC(genome = genomeVersion,
                                  tablename = "refGene");
         saveDb(txdb, file = sqliteFile);
@@ -640,10 +640,10 @@ BuildTx <- function(genomeVersion = c(
         cat("To rebuild run with force = TRUE.\n");
     } else if (!file.exists(fn) || (force == TRUE)) {
         cat("Building the transcriptome. This will take a few minutes.\n");
-        cat("This should only need to be done once.\n");
+        cat("Note that this step should only be done once.\n");
         cat(sprintf("%s Stage 1/5: Getting transcripts and gene annotations.\n",
                     format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
-        txdb <- GetTxDb(genomeVersion = genomeVersion);
+        txdb <- GetTxDb(genomeVersion = genomeVersion, force = force);
         geneXID <- GetGeneIds(txdb);
         cat(sprintf("%s Stage 2/5: Splitting transcript by section.\n",
                     format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
