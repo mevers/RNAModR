@@ -312,6 +312,8 @@ GetLocus.MapFromTranscripts <- function(gr, ref, seq, section, geneXID) {
 #' region; default is \code{"ntAbund"}.
 #' @param nt A single character; if \code{method == "ntAbund"},
 #' use \code{nt} to derive distribution of null sites.
+#' @param showPb A logical scalar; if \code{TRUE} show a progress
+#' bar; default is \code{TRUE}.
 #'
 #' @return A \code{txLoc} object. See 'Details'.
 #'
@@ -333,7 +335,8 @@ GetLocus.MapFromTranscripts <- function(gr, ref, seq, section, geneXID) {
 GenerateNull <- function(locus,
                          id = NULL,
                          method = c("ntAbund", "perm"),
-                         nt = "C")  {
+                         nt = "C",
+                         showPb = TRUE)  {
     # Generate null distribuion of SNM's across different transcript regions.
     #
     # Args:
@@ -347,6 +350,7 @@ GenerateNull <- function(locus,
     #           within transcript region. Default is "ntAbund".
     #   nt: Nucleotide to be used for deriving a list of null sites,
     #               if method == "ntAbund"
+    #   showPb: If TRUE, show progress bar
     #
     # Returns:
     #    A txLoc object. Note that genome coordinates are not available for
@@ -383,7 +387,10 @@ GenerateNull <- function(locus,
         seqBySec <- get("seqBySec");
         txBySec <- get("txBySec");
     }
+    if (showPb == TRUE)
+        pb <- txtProgressBar(max = length(txBySec), style = 3, width = 60);
     for (i in 1:length(locus)) {
+        if (showPb) setTxtProgressBar(pb, i);
         if (method == "ntAbund") {
             seqData <- locus[[i]][!duplicated(locus[[i]][, 1]),
                                   c("REFSEQ", "GENE_CHR", "GENE_START",
@@ -454,6 +461,7 @@ GenerateNull <- function(locus,
         }
         locusNull.list[[length(locusNull.list) + 1]] <- locusNull;
     }
+    if (showPb) close(pb);
     names(locusNull.list) <- names(locus);
     obj <- new("txLoc",
                loci = locusNull.list,

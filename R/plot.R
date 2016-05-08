@@ -929,6 +929,7 @@ PlotGC <- function(locPos, locNeg,
     }
     par(mar = c(7, 4, 4, 4) + 0.1, font.main = 1);
     beanplot(df[,1] ~ df[,2],
+             ll = 0.04,
              bw = 0.05,
              side = "both",
              border = NA,
