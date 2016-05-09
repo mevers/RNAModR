@@ -222,6 +222,39 @@ FilterTxLoc <- function(locus, filter = NULL) {
 }
 
 
+#' Subsample from a \code{txLoc} object.
+#'
+#' Subsample from a \code{txLoc} object.
+#'
+#' @param locus A \code{txLoc} object.
+#' @param fraction A float scalar;
+#'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' @return A \code{txLoc} object.
+#' 
+#' @export
+SubsampleTxLoc <- function(locus, fraction = 0) {
+    CheckClass(locus, "txLoc");
+    id <- GetId(locus);
+    refGenome <- GetRef(locus);
+    version <- GetVersion(locus);
+    locus <- GetLoci(locus);
+    size <- lapply(GetNumberOfLoci(posSites), 
+                   function(x) sample(x, fraction * x));
+    if (fraction > 0) {
+        for (i in 1:length(locus)) {
+            locus[[i]] <- locus[[i]][size[[i]], ];
+        }
+    }
+    obj <- new("txLoc",
+               loci = locus,
+               id = id,
+               refGenome = refGenome,
+               version = version);
+    return(obj);
+}
+
+
 #' Convert a \code{txLoc} object to a \code{GRangesList} object.
 #'
 #' Convert a \code{txLoc} object to a \code{GRangesList} object.
@@ -389,7 +422,7 @@ EstimateCIFromBS <- function(x, breaks, nBS = 5000) {
 #' Add transparency to a list of colors
 #'
 #' @param hexList A vector or list of character strings.
-#' @param alpha A real scalar; specifies the transparency; default
+#' @param alpha A float scalar; specifies the transparency; default
 #' is \code{alpha = 0.5}.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
@@ -433,7 +466,7 @@ IsEmptyChar <- function(v) {
 #'
 #' @param pal A character string.
 #' @param n An integer scalar.
-#' @param alpha A real scalar.
+#' @param alpha A float scalar.
 #'
 #' @return A character vector.
 #'
