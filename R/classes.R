@@ -219,7 +219,7 @@ setMethod("GetNumberOfLoci",
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' 
 #' @exportMethod SetId
-setGeneric("SetId", function(x) standardGeneric("SetId"));
+setGeneric("SetId", function(x, id) standardGeneric("SetId"));
 
 #' @rdname SetId
 setMethod("SetId",
@@ -234,12 +234,12 @@ setMethod("SetId",
 #' Set the version string of a \code{txLoc} object.
 #'
 #' @param x A \code{txLoc} object.
-#' @param id A character string.
+#' @param version A character string.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' 
 #' @exportMethod SetVersion
-setGeneric("SetVersion", function(x) standardGeneric("SetVersion"));
+setGeneric("SetVersion", function(x, version) standardGeneric("SetVersion"));
 
 #' @rdname SetVersion
 setMethod("SetVersion",

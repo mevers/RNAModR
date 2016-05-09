@@ -238,9 +238,9 @@ SubsampleTxLoc <- function(locus, fraction = 0) {
     id <- GetId(locus);
     refGenome <- GetRef(locus);
     version <- GetVersion(locus);
-    locus <- GetLoci(locus);
-    size <- lapply(GetNumberOfLoci(posSites), 
+    size <- lapply(GetNumberOfLoci(locus), 
                    function(x) sample(x, fraction * x));
+    locus <- GetLoci(locus);
     if (fraction > 0) {
         for (i in 1:length(locus)) {
             locus[[i]] <- locus[[i]][size[[i]], ];

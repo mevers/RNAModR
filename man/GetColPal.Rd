@@ -11,7 +11,7 @@ GetColPal(pal = c("apple", "google"), n = NULL, alpha = 1)
 
 \item{n}{An integer scalar.}
 
-\item{alpha}{A real scalar.}
+\item{alpha}{A float scalar.}
 }
 \value{
 A character vector.

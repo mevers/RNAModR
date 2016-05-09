@@ -9,7 +9,7 @@ AddAlpha(hexList, alpha = 0.5)
 \arguments{
 \item{hexList}{A vector or list of character strings.}
 
-\item{alpha}{A real scalar; specifies the transparency; default
+\item{alpha}{A float scalar; specifies the transparency; default
 is \code{alpha = 0.5}.}
 }
 \description{

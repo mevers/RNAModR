@@ -4,8 +4,8 @@
 \alias{GetTxDb}
 \title{Download a new or load an existing reference transcriptome.}
 \usage{
-GetTxDb(genomeVersion = "hg38", standardChrOnly = TRUE,
-  forceDownload = FALSE, verbose = FALSE)
+GetTxDb(genomeVersion = "hg38", standardChrOnly = TRUE, force = FALSE,
+  verbose = FALSE)
 }
 \arguments{
 \item{genomeVersion}{A character string; refers to a specific
@@ -15,8 +15,8 @@ reference genome assembly version; default is \code{"hg38"}.}
 new db is created, keep only fully assembled chromosomes;
 default is \code{TRUE}.}
 
-\item{forceDownload}{A logical scalar; if \code{TRUE} force
-download and overwrite existing db file; default is \code{FALSE}.}
+\item{force}{A logical scalar; if \code{TRUE} force download
+and overwrite existing db file; default is \code{FALSE}.}
 
 \item{verbose}{A logical scalar; print additional information
 about db; default is \code{FALSE}.}

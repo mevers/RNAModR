@@ -4,7 +4,8 @@
 \alias{GenerateNull}
 \title{Generate a null distribution of transcript sites.}
 \usage{
-GenerateNull(locus, id = NULL, method = c("ntAbund", "perm"), nt = "C")
+GenerateNull(locus, id = NULL, method = c("ntAbund", "perm"), nt = "C",
+  showPb = TRUE)
 }
 \arguments{
 \item{locus}{A \code{txLoc} object.}
@@ -22,6 +23,9 @@ region; default is \code{"ntAbund"}.}
 
 \item{nt}{A single character; if \code{method == "ntAbund"},
 use \code{nt} to derive distribution of null sites.}
+
+\item{showPb}{A logical scalar; if \code{TRUE} show a progress
+bar; default is \code{TRUE}.}
 }
 \value{
 A \code{txLoc} object. See 'Details'.
