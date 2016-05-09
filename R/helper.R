@@ -236,6 +236,7 @@ FilterTxLoc <- function(locus, filter = NULL) {
 SubsampleTxLoc <- function(locus, fraction = 0) {
     CheckClass(locus, "txLoc");
     id <- GetId(locus);
+    id <- sprintf("%s_subsampled", id);
     refGenome <- GetRef(locus);
     version <- GetVersion(locus);
     size <- lapply(GetNumberOfLoci(locus), 

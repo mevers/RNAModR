@@ -209,41 +209,41 @@ setMethod("GetNumberOfLoci",
 #################### GENERAL CLASS SLOT MUTATORS ##########################
 ###########################################################################
 
-#' Method "SetId" for S4 object txLoc.
-#'
-#' Set the id string of a \code{txLoc} object.
-#'
-#' @param x A \code{txLoc} object.
-#' @param id A character string.
-#'
-#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
-#' 
-#' @exportMethod SetId
-setGeneric("SetId", function(x, id) standardGeneric("SetId"));
-
-#' @rdname SetId
-setMethod("SetId",
-          signature = "txLoc",
-          definition = function(x, id) {
-              slot(x, "id") <- id;
-          });
-
-
-#' Method "SetVersion" for S4 object txLoc.
-#'
-#' Set the version string of a \code{txLoc} object.
-#'
-#' @param x A \code{txLoc} object.
-#' @param version A character string.
-#'
-#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
-#' 
-#' @exportMethod SetVersion
-setGeneric("SetVersion", function(x, version) standardGeneric("SetVersion"));
-
-#' @rdname SetVersion
-setMethod("SetVersion",
-          signature = "txLoc",
-          definition = function(x, version) {
-              slot(x, "version") <- version;
-          });
+##   #' Method "SetId" for S4 object txLoc.
+##   #'
+##   #' Set the id string of a \code{txLoc} object.
+##   #'
+##   #' @param x A \code{txLoc} object.
+##   #' @param id A character string.
+##   #'
+##   #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+##   #' 
+##   #' @exportMethod SetId
+##   setGeneric("SetId", function(x, id) standardGeneric("SetId"));
+##   
+##   #' @rdname SetId
+##   setMethod("SetId",
+##             signature = "txLoc",
+##             definition = function(x, id) {
+##                 slot(x, "id") <- id;
+##             });
+##   
+##   
+##   #' Method "SetVersion" for S4 object txLoc.
+##   #'
+##   #' Set the version string of a \code{txLoc} object.
+##   #'
+##   #' @param x A \code{txLoc} object.
+##   #' @param version A character string.
+##   #'
+##   #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+##   #' 
+##   #' @exportMethod SetVersion
+##   setGeneric("SetVersion", function(x, version) standardGeneric("SetVersion"));
+##   
+##   #' @rdname SetVersion
+##   setMethod("SetVersion",
+##             signature = "txLoc",
+##             definition = function(x, version) {
+##                 slot(x, "version") <- version;
+##             });
