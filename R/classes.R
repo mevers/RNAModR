@@ -52,6 +52,7 @@ setClass("txLoc",
 #' @param x A \code{txLoc} object.
 #' 
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' @keywords internal
 #' 
 #' @exportMethod GetLoci
 setGeneric("GetLoci", function(x) standardGeneric("GetLoci"));
@@ -74,6 +75,7 @@ setMethod("GetLoci",
 #' @return A string.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' @keywords internal
 #' 
 #' @exportMethod GetId
 setGeneric("GetId", function(x) standardGeneric("GetId"));
@@ -96,6 +98,7 @@ setMethod("GetId",
 #' @return A string.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' @keywords internal
 #' 
 #' @exportMethod GetRef
 setGeneric("GetRef", function(x) standardGeneric("GetRef"));
@@ -118,6 +121,7 @@ setMethod("GetRef",
 #' @return A string.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' @keywords internal
 #' 
 #' @exportMethod GetVersion
 setGeneric("GetVersion", function(x) standardGeneric("GetVersion"));

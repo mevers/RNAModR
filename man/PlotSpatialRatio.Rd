@@ -36,4 +36,8 @@ PlotSpatialRatio(posSites, negSites, c("3'UTR", "CDS", "5'UTR"));
 }
 
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
+\keyword{internal}
 

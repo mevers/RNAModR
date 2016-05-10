@@ -14,6 +14,7 @@
 #' sites <- ReadBED(bedFile);
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#'
 #' @import GenomicRanges IRanges
 #' 
 #' @export
@@ -58,6 +59,7 @@ ReadBED <- function(file) {
 #' @param txFeatures A \code{list} of \code{GRangesList} objects.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' @keywords internal
 #' 
 #' @importFrom rtracklayer export
 #' 
@@ -152,6 +154,7 @@ WriteTxLocToBED <- function(locus,
 #' @param withGC If TRUE then include GC content. Default is FALSE.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' @keywords internal
 #' 
 #' @export
 WriteLocusToCSV <- function(locus,

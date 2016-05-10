@@ -200,8 +200,10 @@ LoadRefTx <- function(refGenome = "hg38", env = .GlobalEnv) {
 #' @param filter A character vector; only keep transcript sections
 #' specified in \code{filter}; if \code{NULL} consider all sections.
 #'
-#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @return A \code{txLoc} object.
+#' 
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' @keywords internal
 #' 
 #' @export
 FilterTxLoc <- function(locus, filter = NULL) {
@@ -229,8 +231,10 @@ FilterTxLoc <- function(locus, filter = NULL) {
 #' @param locus A \code{txLoc} object.
 #' @param fraction A float scalar;
 #'
-#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @return A \code{txLoc} object.
+#' 
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' @keywords internal
 #' 
 #' @export
 SubsampleTxLoc <- function(locus, fraction = 0) {
@@ -276,6 +280,8 @@ SubsampleTxLoc <- function(locus, fraction = 0) {
 #' @return A \code{GRangesList} object. See 'Details'.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' @keywords internal
+#' 
 #' @import GenomicRanges IRanges
 #'
 #' @export
@@ -334,11 +340,11 @@ TxLoc2GRangesList <- function(locus,
 #'
 #' @return A list of integer vectors. See 'Details'.
 #' 
-#' @import GenomicRanges
-#'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #' 
+#' @import GenomicRanges
+#'
 #' @export
 GetRelDistNearest <- function(gr1,
                               gr2) {

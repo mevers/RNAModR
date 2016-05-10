@@ -35,5 +35,8 @@ Multiple hypothesis testing correction is applied following the method of
 Bejamini and Hochberg.
 Note: This function should not be invoked directly by the user.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 \keyword{internal}
 

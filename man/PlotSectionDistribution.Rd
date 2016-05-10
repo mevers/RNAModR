@@ -26,4 +26,7 @@ PlotSectionDistribution(posSites);
 }
 
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 

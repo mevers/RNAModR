@@ -328,7 +328,7 @@ GetLocus.MapFromTranscripts <- function(gr, ref, seq, section, geneXID) {
 #'                        package = "RNAModR");
 #' sites <- ReadBED(bedFile);
 #' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
-#' negSites <- GenerateSNMNull(posSites, method = "permutation");
+#' negSites <- GenerateNull(posSites, method = "ntAbund", nt = "A");
 #' }
 #'
 #' @export
@@ -487,6 +487,7 @@ GenerateNull <- function(locus,
 #' @param flank An integer scalar; see 'Details'.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' @keywords internal
 #' 
 #' @import Biostrings
 #'

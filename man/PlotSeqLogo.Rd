@@ -29,4 +29,7 @@ downstream by \code{flank} nucleotides. By default logos
 are shown for every transcript section from \code{locus}.
 Use \code{filter} to specify specific transcript sections.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 

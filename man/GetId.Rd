@@ -22,4 +22,5 @@ Get the id string of a \code{txLoc} object.
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
+\keyword{internal}
 

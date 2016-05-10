@@ -37,4 +37,7 @@ downstream by \code{flank} nucleotides (if possible).
 The means of resulting GC content distributions are compared and
 assessed using a two-tailed t-test.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 

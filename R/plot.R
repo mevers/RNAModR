@@ -17,6 +17,9 @@
 #' boxplot; default is \code{FALSE}.
 #' @param ... Any additional parameters passed to \code{axis}.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' @keywords internal
+#'
 #' @import GenomicRanges IRanges
 #' 
 #' @export
@@ -109,6 +112,7 @@ PlotTxSecLength <- function(txBySec,
 #' is \code{NULL}.
 #' @param ... Any additional parameters passed to \code{axis}.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #'
 #' @import GenomicRanges IRanges
@@ -202,6 +206,8 @@ PlotTxSecLength.bean <- function(txBySec,
 #' @param filter A character vector; only consider transcript sections
 #' specified in \code{filter}; if \code{NULL} consider all sections. 
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#'
 #' @examples
 #' \dontrun{
 #' bedFile <- system.file("extdata",
@@ -252,6 +258,8 @@ PlotSectionDistribution <- function(locus, filter = NULL) {
 #' @param doBootstrap Calculate 95% CI based on empirical bootstrap of
 #' sites within transcript region. Default is \code{TRUE}.
 #' @param ... Additional parameters passed to plot.
+#'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #'
 #' @examples
 #' \dontrun{
@@ -420,6 +428,7 @@ PlotSpatialDistribution <- function(locus,
 #' @param reverseXaxis Reverse the order of values from \code{mat}.
 #' @param withExtendedAxisLabel Print extended axis label.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #' 
 #' @return A list of \code{fisher.test} return objects and \code{mat}
@@ -578,6 +587,8 @@ PlotEnrichment.Generic <- function(mat, title = "",
 #' @param filter Only plot loci in transcript regions specified in filter.  Default is NULL.
 #' @param withExtendedAxisLabel Plot extended axis labels. Default is 2. See ??? for details.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#'
 #' @examples
 #' \dontrun{
 #' bedFile <- system.file("extdata",
@@ -641,6 +652,8 @@ PlotSectionEnrichment <- function(locPos,
 #' @param binWidth Spatial bin width. Default is 20 nt.
 #' @param posMax Evaluate enrichment within a window given by \code{posMax}.
 #' Default is 1000 nt.
+#'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #'
 #' @examples
 #' \dontrun{
@@ -728,6 +741,9 @@ PlotSpatialEnrichment <- function(locPos,
 #' @param posMax If \code{absolute == TRUE}, show spatial distribution
 #' within a window given by \code{posMax} from the 5'/3' position of
 #' the transcript feature. Default is 1000 nt.
+#'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' @keywords internal
 #'
 #' @examples
 #' \dontrun{
@@ -868,6 +884,8 @@ PlotSpatialRatio <- function(locPos, locNeg,
 #' size is dynamically determined based on the total number of sites
 #' in \code{locPos}; default is \code{TRUE}.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#'
 #' @importFrom beanplot beanplot
 #' 
 #' @export
@@ -977,6 +995,7 @@ PlotGC <- function(locPos, locNeg,
 #' @param doBootstrap A logical scalar; default is \code{TRUE}.
 #' @param nBS An integer scalar; default is 5000.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #'
 #' @export
@@ -1064,6 +1083,8 @@ PlotAbundance.generic <- function(data,
 #' 95% CI based on empirical bootstrap of sites within transcript
 #' region; default is \code{TRUE}.
 #' 
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' 
 #' @export
 PlotRelDistDistribution <- function(loc1,
                                     loc2,
@@ -1125,6 +1146,8 @@ PlotRelDistDistribution <- function(loc1,
 #' relative distance used as a cutoff; default is 1000.
 #' @param binWidth An integer scalar; specifies the spatial width
 #' by which distances will be binned; default is 20.
+#' 
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' 
 #' @export
 PlotRelDistEnrichment <- function(locPos,
@@ -1200,6 +1223,8 @@ PlotRelDistEnrichment <- function(locPos,
 #' default is \code{c(0, 2)}.
 # @param giveMeUgly A logical scalar; explanation withheld.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' 
 #' @import Biostrings
 #' 
 #' @export
@@ -1278,6 +1303,8 @@ PlotSeqLogo <- function(locus, flank = 5, filter = NULL, ylim = c(0, 2)) {
 #' @param loc1 A \code{txLoc} object.
 #' @param loc2 A \code{txLoc} object.
 #'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' 
 #' @import GenomicRanges IRanges
 #' @importFrom gplots venn
 #' 

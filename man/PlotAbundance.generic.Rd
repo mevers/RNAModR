@@ -34,5 +34,8 @@ PlotAbundance.generic(data, xmin = NULL, xmax = NULL, binWidth = NULL,
 \description{
 Generic function for plotting abundances (histograms).
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 \keyword{internal}
 

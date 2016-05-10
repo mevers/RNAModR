@@ -32,4 +32,5 @@ object. Coordinates can be either genomic coordinates
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
+\keyword{internal}
 

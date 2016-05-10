@@ -31,4 +31,8 @@ boxplot; default is \code{FALSE}.}
 Plot length distribution of transcript sections from list of
 GRangesList transcript features.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
+\keyword{internal}
 

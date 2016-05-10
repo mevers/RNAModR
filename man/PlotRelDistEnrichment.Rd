@@ -26,4 +26,7 @@ Perform and plot enrichment analysis of relative distances of
 "positive" and "negative" control sites relative to "reference"
 sites.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 

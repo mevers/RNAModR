@@ -25,4 +25,5 @@ downstream by \code{flank} nucleotides (if possible).
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
+\keyword{internal}
 

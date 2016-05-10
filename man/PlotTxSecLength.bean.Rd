@@ -26,5 +26,8 @@ is \code{NULL}.}
 \description{
 Plot length distribution of transcript sections.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 \keyword{internal}
 

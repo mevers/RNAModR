@@ -27,4 +27,7 @@ region; default is \code{TRUE}.}
 Plot distribution of relative distances between sites
 from two \code{txLoc} objects.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 

@@ -18,4 +18,7 @@ Plot overlap of two txLoc objects.
 This function plots the overlap of entries from two
 \code{txLoc} objects as Venn diagrams.
 }
+\author{
+Maurits Evers, \email{maurits.evers@anu.edu.au}
+}
 
