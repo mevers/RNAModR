@@ -388,7 +388,7 @@ GenerateNull <- function(locus,
         txBySec <- get("txBySec");
     }
     if (showPb == TRUE)
-        pb <- txtProgressBar(max = length(txBySec), style = 3, width = 60);
+        pb <- txtProgressBar(max = length(locus), style = 3, width = 60);
     for (i in 1:length(locus)) {
         if (showPb) setTxtProgressBar(pb, i);
         if (method == "ntAbund") {

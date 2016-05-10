@@ -863,6 +863,10 @@ PlotSpatialRatio <- function(locPos, locNeg,
 #' @param geneNorm A logical scalar; if \code{TRUE} normalise GC
 #' content in window to GC content of transcript section; default
 #' is \code{FALSE}.
+#' @param subsample A logical scalar; if \code{TRUE} a subsample
+#' of \code{locNeg} is used instead of the full set; the subsample 
+#' size is dynamically determined based on the total number of sites
+#' in \code{locPos}; default is \code{TRUE}.
 #'
 #' @importFrom beanplot beanplot
 #' 
@@ -870,7 +874,8 @@ PlotSpatialRatio <- function(locPos, locNeg,
 PlotGC <- function(locPos, locNeg,
                    flank = 10,
                    filter = NULL,
-                   geneNorm = FALSE) {
+                   geneNorm = FALSE,
+                   subsample = TRUE) {
     # Plot and compare GC content.
     #
     # Args:
@@ -885,6 +890,11 @@ PlotGC <- function(locPos, locNeg,
     idPos <- GetId(locPos);
     idNeg <- GetId(locNeg);
     refGenome <- GetRef(locPos);
+    if (subsample == TRUE) {
+      sizePos <- sum(GetNumberOfLoci(locPos));
+      sizeNeg <- sum(GetNumberOfLoci(locNeg));
+      locNeg <- SubsampleTxLoc(locNeg, sizePos / sizeNeg);
+    }
     gcPos <- GetGC(locPos, flank = flank);
     gcNeg <- GetGC(locNeg, flank = flank);
     df <- data.frame();
