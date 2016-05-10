@@ -669,3 +669,54 @@ BuildTx <- function(genomeVersion = c(
                     format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
     }
 }
+
+
+#' Build a test transcriptome.
+#'
+#' Build a test transcriptome. See 'Details'.
+#'
+#' The function builds a transcriptome for testing purposes.
+#' 
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' @keywords internal
+#' 
+#' @import GenomicRanges GenomicFeatures RSQLite
+#'
+#' @export
+BuildTxTest <- function() {
+# Generate txBySec
+    sections <- c("5'UTR", "CDS", "3'UTR");
+    tx <- data.frame(tx_id = seq(1,3),
+                     tx_name=sprintf("tx%i",seq(1,3)),
+                     tx_chrom="chr1",
+                     tx_strand=c("-", "+", "+"),
+                     tx_start=c(1, 2001, 3001),
+                     tx_end=c(999, 2199, 5199));
+    splice <-  data.frame(tx_id = c(1L, 2L, 2L, 2L, 3L, 3L),
+                          exon_rank=c(1, 1, 2, 3, 1, 2),
+                          exon_start=c(1, 2001, 2101, 2131, 3001, 4001),
+                          exon_end=c(999, 2085, 2144, 2199, 3601, 5199),
+                          cds_start=c(1, 2022, 2101, 2131, 3201, 4001),
+                          cds_end=c(999, 2085, 2144, 2193, 3601, 4501));
+    genes <- cbind.data.frame(tx_name = sprintf("tx%i", seq(1,3)), 
+                              gene_id = sprintf("gene%i", seq(1,3)));
+    chrominfo <- cbind.data.frame(chrom = "chr1", length = 5199, is_circular = FALSE);
+    txdb <- makeTxDb(tx, splice, genes = genes, chrominfo = chrominfo);
+    txBySec <- list(fiveUTRsByTranscript(txdb, use.names = TRUE),
+                    cdsBy(txdb, by = "tx", use.names = TRUE),
+                    threeUTRsByTranscript(txdb, use.names = TRUE));
+    names(txBySec) <- sections;
+# Generate genome
+    bases <- c("A", "C", "G", "T");
+    genome <- DNAString(paste(sample(bases, 5199, replace = TRUE), collapse = ""));
+# Generate seqBySec
+    seqBySec <- lapply(txBySec, function(x) extractTranscriptSeqs(genome, ranges(x)));
+# Generate geneXID
+    geneXID <- cbind.data.frame(REFSEQ = sprintf("tx%i", seq(1, 3)),
+                                ENTREZID = seq(1000, 3000, length.out = 3),
+                                SYMBOL = sprintf("gene%i", seq(1, 3)),
+                                ENSEMBL = sprintf("ENSEMBL%i", seq(1, 3)),
+                                UNIGENE = sprintf("UNIGENE%i", seq(1,3)),
+                                GENENAME = sprintf("name%i", seq(1,3)));
+    save(geneXID, txBySec, seqBySec, file = "tx_test.RData", compress = "gzip");
+}

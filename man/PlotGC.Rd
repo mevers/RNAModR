@@ -4,7 +4,8 @@
 \alias{PlotGC}
 \title{Plot GC content.}
 \usage{
-PlotGC(locPos, locNeg, flank = 10, filter = NULL, geneNorm = FALSE)
+PlotGC(locPos, locNeg, flank = 10, filter = NULL, geneNorm = FALSE,
+  subsample = TRUE)
 }
 \arguments{
 \item{locPos}{A \code{txLoc} object.}
@@ -19,6 +20,11 @@ regions specified in filter; Default is \code{NULL}.}
 \item{geneNorm}{A logical scalar; if \code{TRUE} normalise GC
 content in window to GC content of transcript section; default
 is \code{FALSE}.}
+
+\item{subsample}{A logical scalar; if \code{TRUE} a subsample
+of \code{locNeg} is used instead of the full set; the subsample 
+size is dynamically determined based on the total number of sites
+in \code{locPos}; default is \code{TRUE}.}
 }
 \description{
 Plot GC content.

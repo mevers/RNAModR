@@ -2,6 +2,7 @@
 
 export(AddAlpha)
 export(BuildTx)
+export(BuildTxTest)
 export(CheckClass)
 export(CheckClassTxLocConsistency)
 export(CheckClassTxLocRef)
