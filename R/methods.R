@@ -674,6 +674,7 @@ GetMotifLoc <- function(motif, refGenome = "hg38", maxMM = 0, filter = NULL, sho
     if (showPb == TRUE)
         pb <- txtProgressBar(max = length(sel), style = 3, width = 60);
     for (i in 1:length(sel)) {
+        if (showPb) setTxtProgressBar(pb, i);
         if (!IsEmptyChar(seqBySec[[sel[i]]])) {
 # Disable warnings to get rid of messages of the form "Each of the
 # 2 combined objects has sequence levels not in the other" when
@@ -698,7 +699,6 @@ GetMotifLoc <- function(motif, refGenome = "hg38", maxMM = 0, filter = NULL, sho
                 names(txBySec)[sel[i]],
                 geneXID);
             locus.list[[length(locus.list) + 1]] <- locus;
-            if (showPb) setTxtProgressBar(pb, i);
         }
     }
     if (showPb) close(pb);
