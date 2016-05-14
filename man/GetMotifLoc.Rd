@@ -4,7 +4,7 @@
 \alias{GetMotifLoc}
 \title{Get loci of motif(s) from transcriptome.}
 \usage{
-GetMotifLoc(motif, refGenome = "hg38", maxMM = 0, filter = NULL,
+GetMotifLoc(motif, refGenome = "hg38", filter = NULL, maxMM = 0,
   showPb = TRUE)
 }
 \arguments{
@@ -14,25 +14,30 @@ that will be matched against the transcriptome.}
 \item{refGenome}{A character string; specifies the reference
 genome version; default is \code{"hg38"}.}
 
-\item{maxMM}{An integer scalar; specifies the maximum number
-of mismatches that are allowed during the motif matching;
-default is 0.}
-
 \item{filter}{A character vector; only consider transcript
 sections specified in \code{filter}; \code{filter = NULL}
 corresponds to \code{filter = c("5'UTR", "CDS", "3'UTR")}.}
+
+\item{maxMM}{An integer scalar; specifies the maximum number
+of mismatches that are allowed during the motif matching;
+default is 0.}
 
 \item{showPb}{A logical scalar; if \code{TRUE} show a progress
 bar; default is \code{TRUE}.}
 }
 \description{
-Get loci of motif(s) from transcriptome.
+Get loci of motif(s) from transcriptome. See 'Details'.
 }
 \details{
-This function returns a \code{txLoc} object of loci of
-the specified motif(s) within transcript sections. Motif
-sequence matching allows for mismatches through the
-parameter \code{maxMM}.
+The function searches for one or multiple motifs within
+sequences of a reference transcriptome, and returns a
+\code{txLoc} object of the motif loci within transcript
+the different sections. The maximum number of mismatches 
+allowed in the motif search can be adjusted through
+\code{maxMM}. By default a text progressbar is shown
+\code{showPb = TRUE}.
+Note that the motif search may take a few minutes, depending
+on the size of the transcriptome and number of motifs.
 }
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}

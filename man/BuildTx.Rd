@@ -18,15 +18,36 @@ transcriptome; this will overwrite existing data.}
 sanity checks.}
 }
 \description{
-Build a custom transcriptome. See 'Details'.
+Build a custom, organism-specific transcriptome. See 'Details'.
 }
 \details{
-The function builds a custom transcriptome that consists of
-one transcript per unique Entrez ID; the transcript is
-determined from all RefSeq-based isoforms as the transcript
-with the longest CDS, and adjoining upstream/downstream longest
+The function builds an organism-specific transcriptome containing 
+one transcript per unique Entrez ID; the transcript is selected
+from all UCSC RefSeq annotation-based isoforms as the transcript
+with the longest CDS, and longest upstream/downstream adjoining
 UTRs. Transcript segments are stored per transcript section, and
-written to a \code{.RData} file.
+written into a \code{.RData} file.
+For most operations, the user will run this function once, and
+continue with further downstream analyses. Various RNAModR 
+routines will automatically load the transcriptome data to e.g. 
+map sites to and from the transcriptome.
+Currently, RNAModR supports analyses of human and mouse data,
+based on different reference genome versions (human: hg38, hg19;
+mouse: mm10, mm9).
+Reconstruction of existing transcriptome data can be achieved
+by running \code{BuildTx} with \code{force = TRUE}. Note that
+this will overwrite the existing RData file.
+Running \code{BuildTx} with \code{sanityCheck = TRUE} performs
+additional checks of the various transcriptome components, and
+is intended for debugging purposes only. It is usually safe to
+run with the default \code{sanityCheck = FALSE}.
+}
+\examples{
+\dontrun{
+# Build the human hg38-based reference transcriptome
+BuildTx("hg38");
+}
+
 }
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}

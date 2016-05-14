@@ -22,8 +22,10 @@ A \code{txLoc} object. See 'Details'.
 Get exon-exon junctions from transcriptome. See 'Details'.
 }
 \details{
-This function extracts exon-exon junction positions from a
+The function extracts exon-exon junction positions from a
 reference transcriptome, and returns a \code{txLoc} object.
+Here an exon-exon junction corresponds to the position of the
+3'-last nucleotide of the preceding exon.
 }
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}
