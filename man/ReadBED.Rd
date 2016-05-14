@@ -4,10 +4,14 @@
 \alias{ReadBED}
 \title{Read BED-formatted file.}
 \usage{
-ReadBED(file)
+ReadBED(file, collapseRange = FALSE)
 }
 \arguments{
 \item{file}{A character string; specifies the input BED file.}
+
+\item{collapseRange}{A logical scalar; if \code{TRUE} loci
+spanning more than one nucleotide are collapsed to a single
+nucleotide locus corresponding to the midpoint of the range.}
 }
 \value{
 A \code{GRanges} object.

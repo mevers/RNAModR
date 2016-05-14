@@ -4,6 +4,9 @@
 #' features in a \code{GRanges} object.
 #'
 #' @param file A character string; specifies the input BED file.
+#' @param collapseRange A logical scalar; if \code{TRUE} loci
+#' spanning more than one nucleotide are collapsed to a single
+#' nucleotide locus corresponding to the midpoint of the range.
 #'
 #' @return A \code{GRanges} object.
 #' 
@@ -18,7 +21,7 @@
 #' @import GenomicRanges IRanges
 #' 
 #' @export
-ReadBED <- function(file) {
+ReadBED <- function(file, collapseRange = FALSE) {
     # Read BED file and convert to GRanges object.
     #
     # Args:
@@ -43,6 +46,10 @@ ReadBED <- function(file) {
         warning(sprintf(
             "BED file %s contains entries without strand information.",
             file));
+    }
+    if (collapseRange == TRUE) {
+        bed[, 2] <- round(0.5 * (bed[, 2] + bed[, 3]));
+        bed[, 3] <- bed[, 2] + 1;
     }
     colnames(bed) <- c("chr", "start", "end", "id", "score", "strand");
     gr <- GRanges(bed$chr, IRanges(bed$start + 1,bed$end), bed$strand,
