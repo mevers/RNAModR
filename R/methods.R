@@ -482,6 +482,146 @@ GenerateNull <- function(locus,
 }
 
 
+GenerateNull.new <- function(locus,
+                            id = NULL,
+                            method = c("ntAbund", "perm"),
+                            nt = "C",
+                            showPb = TRUE)  {
+    # Generate null distribuion of SNM's across different transcript regions.
+    #
+    # Args:
+    #   locus: List of dataframes with mapped SNM's across different
+    #          transcript regions.
+    #   method: Method used to generate null distribution.
+    #           If method == "ntAbund" then the distribution of all
+    #           nucleotides specified by nucleotide will be used as null sites.
+    #           If method == "perm" then null sites will be generated
+    #           by uniformly randomly permuting candidate positions from locus
+    #           within transcript region. Default is "ntAbund".
+    #   nt: Nucleotide to be used for deriving a list of null sites,
+    #               if method == "ntAbund"
+    #   showPb: If TRUE, show progress bar
+    #
+    # Returns:
+    #    A txLoc object. Note that genome coordinates are not available for
+    #    null sites.
+    CheckClass(locus, "txLoc");
+    method <- match.arg(method);
+    refGenome <- GetRef(locus);
+    if (is.null(id)) {
+        id <- sprintf("null_%s", GetId(locus));
+    }
+    locus <- GetLoci(locus);
+    locusNull.list <- list();
+    if (method == "ntAbund") {
+# FIX THIS!!!
+#            LoadRefTx(refGenome, geneXID, seqBySec, txBySec);
+        refTx <- sprintf("tx_%s.RData", refGenome);
+        if (!file.exists(refTx)) {
+            ss <- sprintf("Reference transcriptome for %s not found.", refGenome);
+            ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
+                          ss, refGenome);
+            stop(ss);
+        }
+        load(refTx);
+        requiredObj <- c("geneXID", "seqBySec", "txBySec");
+        if (!all(requiredObj %in% ls())) {
+            ss <- sprintf("Mandatory transcript objects not found.");
+            ss <- sprintf("%s\nNeed all of the following: %s",
+                          ss, paste0(requiredObj, collapse = ", "));
+            ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
+                          ss, refGenome);
+            stop(ss);
+        }
+        geneXID <- get("geneXID");
+        seqBySec <- get("seqBySec");
+        txBySec <- get("txBySec");
+    }
+    if (showPb == TRUE)
+        pb <- txtProgressBar(max = length(locus), style = 3, width = 60);
+    for (i in 1:length(locus)) {
+        if (showPb) setTxtProgressBar(pb, i);
+        if (method == "ntAbund") {
+            seqData <- locus[[i]][!duplicated(locus[[i]][, 1]),
+                                  c("REFSEQ", "GENE_CHR", "GENE_START",
+                                    "GENE_STOP", "STRAND", "REGION_SEQ")];
+            if (all(grepl("\\w+", seqData$REGION_SEQ))) {
+                # Positive sites that should be excluded from null
+                exclude <- locus[[i]][, c("REFSEQ", "TXSTART")];
+                # All sites of a specific nucleotide
+                txPos <- gregexpr(nt, seqData$REGION_SEQ);
+                names(txPos) <- seqData$REFSEQ;
+                txPos <- data.frame(
+                    ID = rep(names(txPos), sapply(txPos, length)),
+                    x = unlist(txPos), stringsAsFactors = FALSE);
+                # Exclude positive sites
+                txPos <- rbind(txPos, setNames(exclude, names(txPos)));
+                txPos <- txPos[!duplicated(txPos, fromLast = FALSE) &
+                               !duplicated(txPos, fromLast = TRUE), ];
+                rownames(txPos) <- seq(1, nrow(txPos));
+                # Map sites back to genome
+                gr <- GRanges(txPos$ID, IRanges(txPos$x, txPos$x));
+                idxSec <- which(names(locus)[i] == names(txBySec));
+                genomePos <- mapFromTranscripts(gr, txBySec[[idxSec]]);
+                genomePos <- as.data.frame(genomePos);           
+            } else {
+                sec <- names(locus)[i];
+                ss <- sprintf("Cannot generate null for %s", sec);
+                ss <- sprintf("%s: Missing sequence information.", ss);
+                ss <- sprintf("%s\nEither exclude %s from downstream analysis",
+                              ss, sec);
+                ss <- sprintf("%s, or use different null.", ss);
+                warning(ss);
+                txPos <- cbind.data.frame(
+                    ID = seqData$REFSEQ,
+                    x = rep("*", nrow(seqData)));
+                genomePos <- cbind.data.frame(
+                    start = rep("*", nrow(seqData)),
+                    end = rep("*", nrow(seqData)),
+                    width = rep(1, nrow(seqData)));
+            }
+            idxSeq <- match(txPos$ID, seqData$REFSEQ);
+            idxLoc <- match(txPos$ID, locus[[i]]$GENE_REFSEQ);
+            locusNull <- cbind.data.frame(
+                txPos, txPos$x, rep(1, nrow(txPos)),
+                seqData$GENE_CHR[idxSeq],
+                genomePos$start,
+                genomePos$end,
+                genomePos$width,
+                seqData$STRAND[idxSeq],
+                rep(0, nrow(txPos)),
+                rep(sprintf("nucl_%s", nt), nrow(txPos)),
+                locus[[i]][idxLoc, 12:ncol(locus[[i]])]);      
+            colnames(locusNull) <- colnames(locus[[i]]);
+            locusNull <- Unfactor(locusNull);
+        } else if (method == "perm") {
+            locusNull <- locus[[i]];
+            locusNull$TXSTART <- apply(
+                locusNull, 1, function(x) {
+                    round(runif(1,
+                                min = 1,
+                                max = as.numeric(x["REGION_TXWIDTH"]) - 1))});
+            locusNull$TXEND <- locusNull$TXSTART;
+            locusNull[, c("CHR", "START", "STOP",
+                          "WIDTH", "STRAND", "SCORE")] <- matrix(
+                              "*",
+                              nrow = nrow(locusNull),
+                              ncol = 6);
+            locusNull$ID <- "unif_perm";
+        }
+        locusNull.list[[length(locusNull.list) + 1]] <- locusNull;
+    }
+    if (showPb) close(pb);
+    names(locusNull.list) <- names(locus);
+    obj <- new("txLoc",
+               loci = locusNull.list,
+               id = id,
+               refGenome = refGenome,
+               version = as.character(Sys.Date()));
+    return(obj);
+}
+
+
 #' Calculate GC content within window around loci from a \code{txLoc}
 #' object.
 #'
@@ -544,21 +684,23 @@ GetGC <- function(locus, flank = 10) {
 }
 
 
-#' Get exon-exon junctions from transcriptome.
+#' Get exon-exon junctions.
 #'
 #' Get exon-exon junctions from transcriptome. See 'Details'.
 #'
 #' The function extracts exon-exon junction positions from a
-#' reference transcriptome, and returns a \code{txLoc} object.
-#' Here an exon-exon junction corresponds to the position of the
-#' 3'-last nucleotide of the preceding exon. 
+#' reference transcriptome specified by \code{refGenome}, and 
+#' returns a \code{txLoc} object of exon-exon junctions.
+#' The position of an exon-exon junction is defined as the 
+#' position of the 3'-last nucleotide of an exon followed by
+#' an intron. 
 #'
 #' @param refGenome A character string; specifies a specific
 #' reference genome assembly version based on which the matching
 #' transcriptome is loaded; default is \code{"hg38"}.
 #' @param filter A character vector; only consider transcript
-#' sections specified in \code{filter}; \code{filter = NULL}
-#' corresponds to \code{filter = c("5'UTR", "CDS", "3'UTR")}.
+#' sections specified in \code{filter}; default is 
+#' \code{"CDS"}.
 #'
 #' @return A \code{txLoc} object. See 'Details'.
 #'
@@ -625,17 +767,17 @@ GetEEJunct <- function(refGenome = "hg38", filter = "CDS") {
 }
 
 
-#' Get loci of motif(s) from transcriptome.
+#' Get loci of motif(s).
 #'
 #' Get loci of motif(s) from transcriptome. See 'Details'.
 #'
 #' The function searches for one or multiple motifs within
-#' sequences of a reference transcriptome, and returns a
-#' \code{txLoc} object of the motif loci within transcript
-#' the different sections. The maximum number of mismatches 
-#' allowed in the motif search can be adjusted through
-#' \code{maxMM}. By default a text progressbar is shown
-#' \code{showPb = TRUE}.
+#' sequences of a reference transcriptome specified by 
+#' \code{refGenome}, and returns a \code{txLoc} object of the 
+#' motif loci within different transcript sections. 
+#' The maximum number of mismatches allowed in the motif search 
+#' can be adjusted through \code{maxMM}. By default a text 
+#' progressbar is shown \code{showPb = TRUE}.
 #' Note that the motif search may take a few minutes, depending
 #' on the size of the transcriptome and number of motifs.  
 #'
@@ -644,8 +786,8 @@ GetEEJunct <- function(refGenome = "hg38", filter = "CDS") {
 #' @param refGenome A character string; specifies the reference
 #' genome version; default is \code{"hg38"}.
 #' @param filter A character vector; only consider transcript
-#' sections specified in \code{filter}; \code{filter = NULL}
-#' corresponds to \code{filter = c("5'UTR", "CDS", "3'UTR")}.
+#' sections specified in \code{filter}; default is 
+#' \code{c("5'UTR", "CDS", "3'UTR")}.
 #' @param maxMM An integer scalar; specifies the maximum number
 #' of mismatches that are allowed during the motif matching;
 #' default is 0.
@@ -660,7 +802,7 @@ GetEEJunct <- function(refGenome = "hg38", filter = "CDS") {
 #' @export
 GetMotifLoc <- function(motif, 
                         refGenome = "hg38", 
-                        filter = NULL, 
+                        filter = c("5'UTR", "CDS", "3'UTR"), 
                         maxMM = 0, 
                         showPb = TRUE) {
     PASmotif <- c("AATAAA", "ATTAAA", "AGTAAA",

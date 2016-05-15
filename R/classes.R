@@ -141,7 +141,7 @@ setMethod("GetVersion",
 
 #' Method "Info" for S4 object txLoc.
 #'
-#' Print general information of a \code{txLoc} object.
+#' Print summary information about \code{txLoc} object.
 #'
 #' @param x A \code{txLoc} object.
 #' 
