@@ -2,7 +2,7 @@
 % Please edit documentation in R/methods.R
 \name{GetEEJunct}
 \alias{GetEEJunct}
-\title{Get exon-exon junctions from transcriptome.}
+\title{Get exon-exon junctions.}
 \usage{
 GetEEJunct(refGenome = "hg38", filter = "CDS")
 }
@@ -12,8 +12,8 @@ reference genome assembly version based on which the matching
 transcriptome is loaded; default is \code{"hg38"}.}
 
 \item{filter}{A character vector; only consider transcript
-sections specified in \code{filter}; \code{filter = NULL}
-corresponds to \code{filter = c("5'UTR", "CDS", "3'UTR")}.}
+sections specified in \code{filter}; default is 
+\code{"CDS"}.}
 }
 \value{
 A \code{txLoc} object. See 'Details'.
@@ -23,9 +23,11 @@ Get exon-exon junctions from transcriptome. See 'Details'.
 }
 \details{
 The function extracts exon-exon junction positions from a
-reference transcriptome, and returns a \code{txLoc} object.
-Here an exon-exon junction corresponds to the position of the
-3'-last nucleotide of the preceding exon.
+reference transcriptome specified by \code{refGenome}, and 
+returns a \code{txLoc} object of exon-exon junctions.
+The position of an exon-exon junction is defined as the 
+position of the 3'-last nucleotide of an exon followed by
+an intron.
 }
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}

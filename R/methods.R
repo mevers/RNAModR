@@ -514,25 +514,7 @@ GenerateNull.new <- function(locus,
     locus <- GetLoci(locus);
     locusNull.list <- list();
     if (method == "ntAbund") {
-# FIX THIS!!!
-#            LoadRefTx(refGenome, geneXID, seqBySec, txBySec);
-        refTx <- sprintf("tx_%s.RData", refGenome);
-        if (!file.exists(refTx)) {
-            ss <- sprintf("Reference transcriptome for %s not found.", refGenome);
-            ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
-                          ss, refGenome);
-            stop(ss);
-        }
-        load(refTx);
-        requiredObj <- c("geneXID", "seqBySec", "txBySec");
-        if (!all(requiredObj %in% ls())) {
-            ss <- sprintf("Mandatory transcript objects not found.");
-            ss <- sprintf("%s\nNeed all of the following: %s",
-                          ss, paste0(requiredObj, collapse = ", "));
-            ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
-                          ss, refGenome);
-            stop(ss);
-        }
+        LoadRefTx(refGenome);
         geneXID <- get("geneXID");
         seqBySec <- get("seqBySec");
         txBySec <- get("txBySec");

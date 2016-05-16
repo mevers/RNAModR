@@ -14,7 +14,7 @@ Info(x)
 \item{x}{A \code{txLoc} object.}
 }
 \description{
-Print general information of a \code{txLoc} object.
+Print summary information about \code{txLoc} object.
 }
 \examples{
 \dontrun{

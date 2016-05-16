@@ -156,17 +156,19 @@ GetGeneIds <- function(txdb) {
                       keys = tx$tx_name,
                       columns="GENEID",
                       keytype = "TXNAME");
+    geneXID <- geneXID[!duplicated(geneXID[, 1]), ];
     colnames(geneXID)[1:2] <- c("REFSEQ", "ENTREZID");
-    identifier <- c("SYMBOL", "ENSEMBL", "UNIGENE", "GENENAME");
-    for (i in 1:length(identifier)) {
-        geneXID[, ncol(geneXID) + 1] <- mapIds(refDb,
-                                               keys = geneXID[, 2],
-                                               column = identifier[i],
-                                               keytype = "ENTREZID",
-                                               multiVals = "first");
-    }
-    colnames(geneXID)[3:6] <- identifier;
-    geneXID<-geneXID[!duplicated(geneXID[, 1]), ];
+    identifier <- c("ENTREZID", "SYMBOL", "ENSEMBL", "UNIGENE", "GENENAME");
+    ids <- sapply(identifier, function(x) {
+        mapIds(refDb,
+               keys = geneXID[, 2],
+               column = x,
+               keytype = "ENTREZID")});
+    ids <- as.data.frame(apply(ids, 2, unlist),
+                         stringsAsFactors = FALSE);
+    colnames(ids) <- identifier;
+    geneXID <- cbind.data.frame(geneXID,
+                                ids[match(geneXID[, 2], ids[, 1]), -1]);
     return(geneXID);
 }
 
@@ -655,7 +657,7 @@ BuildTx <- function(genomeVersion = c(
     #   NULL
     genomeVersion <- match.arg(genomeVersion);
     fn <- sprintf("tx_%s.RData", genomeVersion);
-    if (file.exists(fn)) {
+    if (file.exists(fn) && (force == FALSE)) {
         cat("Found existing transcriptome data.\n");
         cat("To rebuild run with force = TRUE.\n");
     } else if (!file.exists(fn) || (force == TRUE)) {
