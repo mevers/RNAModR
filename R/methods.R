@@ -647,9 +647,17 @@ GetGC <- function(locus, flank = 10) {
             seq,
             letters = c("A", "C", "G", "T"));
         sectionGC <- rowSums(nucFreq[, c(2, 3)]) / width(seq);
-        if (is.numeric(locus[[i]]$TXSTART)) {
-            x1 <- locus[[i]]$TXSTART - flank;
-            x2 <- locus[[i]]$TXSTART + flank;
+        xLoc <- locus[[i]]$TXSTART;
+        if (is.numeric(xLoc)) {
+            x1 <- xLoc - flank;
+            x2 <- xLoc + flank;
+            # Make sure we're still within transcript coordinates
+            sel1 <- which(x1 <= 0);
+            x1[sel1] <- 1;
+            x2[sel1] <- 2 * xLoc[sel1] - 1;
+            sel2 <- which(x2 > locus[[i]]$REGION_TXWIDTH);
+            x2[sel2] <- locus[[i]]$REGION_TXWIDTH[sel2];
+            x1[sel2] <- 2 * xLoc[sel2] - (locus[[i]]$REGION_TXWIDTH)[sel2];
             subSeq <- BStringSet(substr(locus[[i]]$REGION_SEQ, x1, x2));
             nucFreq <- letterFrequency(subSeq,
                                        letters = c("A", "C", "G", "T"));
@@ -657,8 +665,11 @@ GetGC <- function(locus, flank = 10) {
         } else {
             siteGC <- rep(NA, nrow(locus[[i]]));
         }
-        dfGC <- cbind(sectionGC, siteGC);
-        rownames(dfGC) <- locus[[i]]$ID;
+        dfGC <- cbind.data.frame("id" = locus[[i]]$ID,
+                                 "sectionGC" = sectionGC,
+                                 "siteGC" = siteGC,
+                                 "siteSeq" = as.character(subSeq),
+                                 stringsAsFactors = FALSE);
         freq.list[[length(freq.list) + 1]] <- dfGC;
     }
     names(freq.list) <- names(locus);
