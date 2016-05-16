@@ -84,6 +84,11 @@ posSites <- FilterTxLoc(posSites, filter = c("5'UTR", "CDS", "3'UTR"));
 PlotSectionDistribution(posSites);
 ```
 
+## Documentation
+
+The RNAModR manual can be downloaded [here](doc/RNAModR-manual.pdf).
+
+
 ## Contributors
 
 Please contact [Maurits Evers](mailto:maurits.evers@anu.edu.au "Email Maurits Evers") in case of questions/suggestions.
