@@ -164,7 +164,7 @@ WriteTxLocToBED <- function(locus,
 #' @keywords internal
 #' 
 #' @export
-WriteLocusToCSV <- function(locus,
+WriteTxLocToCSV <- function(locus,
                             file = NULL, 
                             withSeq = FALSE, 
                             withGC = FALSE) {
@@ -182,9 +182,9 @@ WriteLocusToCSV <- function(locus,
     CheckClass(locus, "txLoc");
     locus <- GetLoci(locus);
     CSV <- vector();
-    selCol <- c("GENE_REGION", "GENE_REFSEQ", "GENE_ENTREZ",
-                "GENE_SYMBOL", "GENE_ENSEMBL", "GENE_UNIGENE",
-                "ID", "CHR", "START", "STOP", "STRAND");
+    selCol <- c("GENE_REGION", "REGION_TXWIDTH", "GENE_REFSEQ",
+                "GENE_ENTREZ", "GENE_SYMBOL", "GENE_ENSEMBL",
+                "GENE_UNIGENE", "ID", "CHR", "START", "STOP", "STRAND");
     if (withSeq) {
         selCol <- c(selCol, "REGION_SEQ");
     }
@@ -198,4 +198,39 @@ WriteLocusToCSV <- function(locus,
     }
     write.csv(CSV, file = file,
               row.names = FALSE, quote = FALSE);
+}
+
+
+#' Read a DBN file.
+#'
+#' Read a DBN (dot-bracket) structure file. See 'Details'.
+#'
+#' Open and read a DBN file, and return a \code{dataframe}
+#' with the following columns:
+#' \enumerate{
+#' \item Column 1: Sequence ID
+#' \item Column 2: Length of the sequence (in nt)
+#' \item Column 3: Mean free energy (MFE)
+#' }
+#' 
+#' @param file A character string; specifies the input DBN file.
+#'
+#' @return A \code{dataframe} object. See 'Details'.
+#'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' 
+#' @export
+ReadDBN <- function(file) {
+    if (!file.exists(file)) {
+        ss <- sprintf("Could not open %s.", file);
+        stop(ss);
+    }
+    d <- as.data.frame(matrix(readLines(file), ncol = 3, byrow = TRUE),
+                       stringsAsFactors = FALSE);
+    d[, 1] <- gsub("^>", "", d[, 1]);
+    d[, 2] <- nchar(d[, 2]);
+    d[, 3] <- gsub("^[\\(\\.\\)]+\\s", "", d[, 3]);
+    d[ ,3] <- as.numeric(gsub("[\\(\\)]", "", d[, 3]));
+    colnames(d) <- c("id", "siteSeqLength", "siteMFE");
+    return(d);
 }

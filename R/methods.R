@@ -231,11 +231,10 @@ SmartMap <- function(locus,
 #' @return A \code{dataframe} object.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' @keywords internal
 #' 
 #' @import Biostrings GenomicRanges IRanges
 #'
-#' @keywords internal
-#' 
 #' @export
 GetLocus.MapFromTranscripts <- function(gr, ref, seq, section, geneXID) {
     genomePos <- mapFromTranscripts(gr, ref);
@@ -870,3 +869,48 @@ GetMotifLoc <- function(motif,
     return(obj);
 }
 
+#' Fold sequences.
+#'
+#' Fold sequences. See 'Details'.
+#'
+#' The function takes a \code{dataframe}, extracts sequences from a
+#' column specified by \code{colSeq}, and predicts secondary structures
+#' using RNAfold \url{http://rna.tbi.univie.ac.at/}.
+#' An optional column containing sequence IDs may be specified by
+#' \code{colId}.
+#' The function returns a \code{dataframe} with three columns:
+#' \enumerate{
+#' \item Column 1: Sequence ID
+#' \item Column 2: Length of the sequence (in nt)
+#' \item Column 3: Mean free energy (MFE)
+#' }
+#'
+#' @param data A \code{dataframe} object. See 'Details'.
+#' @param colSeq An integer scalar; specifies the column in
+#' \code{data} containing the sequences.
+#' @param colId An integer scalar; specifies the column in
+#' \code{data} containing sequence IDs; if \code{NULL} IDs
+#' are generated automatically; default is \code{NULL}.
+#' 
+#' @return A \code{dataframe} object. See 'Details'.
+#'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#'
+#' @import Biostrings GenomicRanges IRanges
+#' 
+#' @export
+GetMFE <- function(data, colSeq, colId = NULL) {
+    sq <- DNAStringSet(data[, colSeq]);
+    if (is.null(colId) || length(data[, colId]) != length(sq)) {
+        id <- sprintf("seq%i", seq(1, length(sq)));
+    } else {
+        id <- data[, colId];
+    }
+    names(sq) <- id;
+    writeXStringSet(sq, file = "tmp.fa", format = "fasta");
+    cmd <- sprintf("RNAfold --noPS < tmp.fa > tmp.dbn");
+    system(sprintf(cmd));
+    str <- ReadDBN("tmp.dbn");
+    file.remove(c("tmp.fa", "tmp.dbn"));
+    return(str);
+}
