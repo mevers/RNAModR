@@ -862,17 +862,23 @@ PlotSpatialRatio <- function(locPos, locNeg,
 
 #' Plot GC content.
 #'
-#' Plot GC content.
+#' Plot and assess GC content distributions from two site lists.
+#' See 'Details'.
 #'
-#' The function calculates GC contents within a region around every
+#' The function calculates the GC content within a region around every
 #' site from two \code{txLoc} objects. The window is defined
 #' by extending the position of every transcript locus upstream and
 #' downstream by \code{flank} nucleotides (if possible).
-#' The means of resulting GC content distributions are compared and
-#' assessed using a two-tailed t-test.
+#' The means of the resulting GC content distributions are assessed
+#' using a two-tailed t-test. If \code{geneNorm = TRUE}, the site GC
+#' content is normalised to the GC content of the entire transcript
+#' section. If \code{subsample = TRUE}, only a subsample of entries
+#' from the \emph{second} \code{txLoc} object will be used. This is
+#' useful (and therefore the default), as \code{loc2} usually
+#' refers to the much larger list of null sites.
 #' 
-#' @param locPos A \code{txLoc} object.
-#' @param locNeg A \code{txLoc} object.
+#' @param loc1 A \code{txLoc} object.
+#' @param loc2 A \code{txLoc} object.
 #' @param flank An integer scalar; see 'Details'.
 #' @param filter A logical scalar; only consider loci in transcript
 #' regions specified in filter; Default is \code{NULL}.
@@ -880,16 +886,16 @@ PlotSpatialRatio <- function(locPos, locNeg,
 #' content in window to GC content of transcript section; default
 #' is \code{FALSE}.
 #' @param subsample A logical scalar; if \code{TRUE} a subsample
-#' of \code{locNeg} is used instead of the full set; the subsample 
+#' of \code{loc2} is used instead of the full set; the subsample 
 #' size is dynamically determined based on the total number of sites
-#' in \code{locPos}; default is \code{TRUE}.
+#' in \code{loc1}; default is \code{TRUE}.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #'
 #' @importFrom beanplot beanplot
 #' 
 #' @export
-PlotGC <- function(locPos, locNeg,
+PlotGC <- function(loc1, loc2,
                    flank = 10,
                    filter = NULL,
                    geneNorm = FALSE,
@@ -897,37 +903,37 @@ PlotGC <- function(locPos, locNeg,
     # Plot and compare GC content.
     #
     # Args:
-    #   locPos: A txLoc object of the positive control sites
-    #   locNeg: A txLoc object of the negative control sites.
+    #   loc1: A txLoc object of the positive control sites
+    #   loc2: A txLoc object of the negative control sites.
     #
     # Returns:
     #   NULL
-    CheckClassTxLocConsistency(locPos, locNeg);
-    locPos <- FilterTxLoc(locPos, filter);
-    locNeg <- FilterTxLoc(locNeg, filter);
-    idPos <- GetId(locPos);
-    idNeg <- GetId(locNeg);
-    refGenome <- GetRef(locPos);
+    CheckClassTxLocConsistency(loc1, loc2);
+    loc1 <- FilterTxLoc(loc1, filter);
+    loc2 <- FilterTxLoc(loc2, filter);
+    id1 <- GetId(loc1);
+    id2 <- GetId(loc2);
+    refGenome <- GetRef(loc1);
     if (subsample == TRUE) {
-      sizePos <- sum(GetNumberOfLoci(locPos));
-      sizeNeg <- sum(GetNumberOfLoci(locNeg));
-      locNeg <- SubsampleTxLoc(locNeg, sizePos / sizeNeg);
+      size1 <- sum(GetNumberOfLoci(loc1));
+      size2 <- sum(GetNumberOfLoci(loc2));
+      loc2 <- SubsampleTxLoc(loc2, size1 / size2);
     }
-    gcPos <- GetGC(locPos, flank = flank);
-    gcNeg <- GetGC(locNeg, flank = flank);
+    dataGC1 <- GetGC(loc1, flank = flank);
+    dataGC2 <- GetGC(loc2, flank = flank);
     df <- data.frame();
     namesBean <- vector();
-    for (i in 1:length(gcPos)) {
-        GC1 <- gcPos[[i]][, "siteGC"];
-        GC2 <- gcNeg[[i]][, "siteGC"];
+    for (i in 1:length(dataGC1)) {
+        GC1 <- dataGC1[[i]][, "siteGC"];
+        GC2 <- dataGC2[[i]][, "siteGC"];
         if (geneNorm) {
-            GC1 <- GC1 / gcPos[[i]][, "sectionGC"];
-            GC2 <- GC2 / gcNeg[[i]][, "sectionGC"];
+            GC1 <- GC1 / dataGC1[[i]][, "sectionGC"];
+            GC2 <- GC2 / dataGC2[[i]][, "sectionGC"];
         }
         ttest <- t.test(GC1, GC2);
         wtest <- wilcox.test(GC1, GC2);
         lbl <- sprintf("%s (%i,%i)\ndiff=%4.3f\n95%%CI=(%4.3f,%4.3f)\np=%4.3e",
-                       names(gcPos)[i],
+                       names(dataGC1)[i],
                        length(GC1), length(GC2),
                        ttest$estimate[1] - ttest$estimate[2],
                        min(ttest$conf.int),
@@ -937,8 +943,8 @@ PlotGC <- function(locPos, locNeg,
         namesBean <- c(namesBean, lbl);
         df <- rbind(df, cbind.data.frame(
             c(GC1, GC2),
-            c(rep(sprintf("%s %s", names(gcPos)[i], idPos), length(GC1)),
-              rep(sprintf("%s %s", names(gcNeg)[i], idNeg), length(GC2))),
+            c(rep(sprintf("%s %s", names(dataGC1)[i], id1), length(GC1)),
+              rep(sprintf("%s %s", names(dataGC2)[i], id2), length(GC2))),
             stringsAsFactors = FALSE));
     }
     levels <- unique(df[, 2]);
@@ -968,13 +974,13 @@ PlotGC <- function(locPos, locNeg,
              font.main = 1,
              method = "jitter");
     axis(1,
-         at = seq(1, length(gcPos)),
+         at = seq(1, length(dataGC1)),
          labels = namesBean,
          padj = 1,
          las = 1);
     legend("bottomleft",
            fill = c(rgb(1,0,0,0.5), rgb(0,0,1,0.5)),
-           legend = c(idPos, idNeg),
+           legend = c(id1, id2),
            bty = "n");
 }
 
@@ -1067,11 +1073,25 @@ PlotAbundance.generic <- function(data,
 }
 
 
-#' Plot distribution of relative distances between sites
-#' from two \code{txLoc} objects.
+#' Plot distribution of relative distances.
 #' 
 #' Plot distribution of relative distances between sites
-#' from two \code{txLoc} objects.
+#' from two \code{txLoc} objects. See 'Details'.
+#'
+#' The function calculates the minimum distance between entries
+#' from two \code{txLoc} objects located within the same
+#' transcript section. Relative distances are shown within a
+#' window (-\code{flank}, \code{flank}), where negative
+#' distances correspond to an upstream feature from \code{loc1}
+#' relative to \code{loc2}, and positive distances to a
+#' downstream feature from \code{loc1} relative to \code{loc2}.
+#' Relative distances are binned in bins of \code{binWidth} nt,
+#' and shown as an abundance histogram.
+#' If \code{doBootstrap = TRUE}, 95% confidence intervals are
+#' calculated and shown, based on an empirical bootstrap of
+#' relative distances.
+#' 
+#'
 #'
 #' @param loc1 A \code{txLoc} object.
 #' @param loc2 A \code{txLoc} object.
@@ -1080,8 +1100,8 @@ PlotAbundance.generic <- function(data,
 #' @param binWidth An integer scalar; specifies the spatial width
 #' by which distances will be binned; default is 20.
 #' @param doBootstrap A logical scalar; if \code{YES} calculate
-#' 95% CI based on empirical bootstrap of sites within transcript
-#' region; default is \code{TRUE}.
+#' 95% CI based on empirical bootstrap of relative distances within
+#' transcript region; default is \code{TRUE}.
 #' 
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' 
@@ -1293,12 +1313,17 @@ PlotSeqLogo <- function(locus, flank = 5, filter = NULL, ylim = c(0, 2)) {
 }
 
 
-#' Plot overlap of two txLoc objects.
+#' Plot overlap of sites.
 #'
-#' Plot overlap of two txLoc objects.
+#' Plot overlap of sites from two \code{txLoc} object.
+#' See 'Details'.
 #'
-#' This function plots the overlap of entries from two
-#' \code{txLoc} objects as Venn diagrams.
+#' The function plots one or multiple Venn diagrams denoting the
+#' spatial overlap between entries from two \code{txLoc} objects.
+#' Two features are defined as overlapping, if they overlap by
+#' at least one nucleotide. Overlaps are determined using the
+#' function \code{GenomicRanges::countOverlaps}.
+#' 
 #'
 #' @param loc1 A \code{txLoc} object.
 #' @param loc2 A \code{txLoc} object.
