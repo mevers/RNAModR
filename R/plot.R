@@ -1151,13 +1151,26 @@ PlotRelDistDistribution <- function(loc1,
 }
 
 
-#' Perform and plot enrichment analysis of relative distances of
-#' "positive" and "negative" control sites relative to "reference"
-#' sites.
+#' Perform enrichment analysis of relative distances.
 #' 
-#' Perform and plot enrichment analysis of relative distances of
-#' "positive" and "negative" control sites relative to "reference"
-#' sites.
+#' Perform enrichment analysis and plot results of two relative
+#' distance distributions. See 'Details'.
+#'
+#' The function calculates minimum distances between entries from
+#' \code{locPos} relative to \code{locRef}, and \code{locNeg}
+#' relative to \code{locRef}. Enrichment/depletion is assessed
+#' using multiple Fisher's exact tests on the counts per distance
+#' bin relative to the counts in all other bins within the window
+#' defined by (-\code{flank}, \code{flank}). Resulting enrichment
+#' plots show odds-ratios (including 95\% confidence intervals) and
+#' associated p-values as a function of relative distance bins.
+#' Negative distances correspond to an enrichment/depletion of
+#' sites from \code{locPos} relative to sites from \code{locNeg}
+#' upstream of the closest site from \code{locRef}. Positive
+#' distances correspond to a downstream enrichment/depletion
+#' relative to sites from \code{locRef}.
+#' The bin width and window size can be adjusted with
+#' \code{flank} and \code{binWidth}.
 #' 
 #' @param locPos A \code{txLoc} object.
 #' @param locNeg A \code{txLoc} object.
