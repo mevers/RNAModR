@@ -27,32 +27,30 @@ testGLM <- function(locPos,
             ctsMat <- as.matrix(rbind(ctsPos, ctsNeg));
             rownames(ctsMat) <- c(idPos, idNeg);
             # Generate bootstrap samples
+            nBS <- 1000;
             mat1 <- matrix(sample(posPos[[j]], 
+                                  size = nBS * length(posPos[[j]]), 
+                                  replace = TRUE),
+                            ncol = nBS);
+            mat1 <- apply(mat1, 2, function(x) {table(cut(x, breaks = breaks))});
+            mat2 <- matrix(sample(posNeg[[j]], 
                                   size = 1000 * length(posPos[[j]]), 
                                   replace = TRUE),
                             ncol = 1000);
-            mat1 <- apply(mat1, 2, function(x) {table(cut(x, breaks = breaks))});
-            colnames(mat1) <- sprintf("%s_%i", idPos, seq(1, 1000));
-            mat2 <- matrix(sample(posNeg[[j]], 
-                                  size = 1000 * length(posNeg[[j]]), 
-                                  replace = TRUE),
-                            ncol = 1000);
             mat2 <- apply(mat2, 2, function(x) {table(cut(x, breaks = breaks))});
-            colnames(mat2) <- sprintf("%s_%i", idNeg, seq(1, 1000));
-            # Count data and design matrix
-            countData <- cbind(mat1, mat2);
-            nSamples <- ncol(countData);
-            colData <- data.frame(condition = c(rep(idPos, 1000), 
-                                                rep(idNeg, 1000)));
-            dds <- DESeqDataSetFromMatrix(countData = countData,
-                                          colData = colData,
-                                          design = ~condition);
-            dds$condition <- relevel(dds$condition, ref = idNeg);
-            # This is very very slow.
-            # Need to find a better and faster method.
-            # Logistic regression ...
-            dds <- DESeq(dds);
-            res <- results(dds);
+            #plot(rowMeans(mat2), col = "blue", ylim = c(0, 200));
+            #points(rowMeans(mat1), col = "red");
+            # Logistic regression
+            for (k in 1:nrow(mat1)) {
+              y <- cbind(mat1[k, ], mat2[k, ]);
+              x <- factor(c(rep(idPos, nBS), rep(idNeg, nBS)), 
+                          levels = c(idPos, idNeg));
+              y <- factor(c(rep(idPos, nBS), rep(idNeg, nBS)), 
+                          levels = c(idPos, idNeg));
+              y <- c(rep(0, nBS), rep(1, nBS))
+              x <- c(mat1[k, ], mat2[k, ]);
+              fit <- glm(y ~ x, family = binomial("logit"));
+            }
         }
     }
 }
