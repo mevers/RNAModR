@@ -20,18 +20,8 @@ generating null sites.
 
 ### The github way (requires the [devtools](https://github.com/hadley/devtools) package)
 
-1. Open an R terminal.
+1. Make sure you have the following R/Bioconductor packages installed
 
-2. Within R, type
-
-   ```{r}
-if (!require("devtools")) install.packages("devtools")
-devtools::install_github("mevers/RNAModR", build_vignettes = FALSE)
-   ```
-
-### Additional dependencies
-**RNAmodR** makes use of functions provided by the following R/Bioconductor packages:
- 
  * AnnotationDbi
  * beanplot
  * Biostrings
@@ -42,25 +32,37 @@ devtools::install_github("mevers/RNAModR", build_vignettes = FALSE)
  * RSQLite
  * rtracklayer
 
-Additionally, **RNAModR** requires _organism-specific_ R packages to contruct a custom transcriptome. 
+You can install additional R/Bioconductor packages in the usual way:
+
+```{r}
+source("http://www.bioconductor.org/biocLite.R")
+biocLite(c("AnnotationDbi", "beanplot", "Biostrings", "GenomeInfoDb", "GenomicFeatures", "GenomicRanges", "gplots", "RSQLite", "rtracklayer"))
+```
+
+Additionally, **RNAModR** requires two _organism-specific_ R packages to contruct a custom transcriptome. Currently, **RNAModR** supports human 
+and mouse data, based on the following reference genome versions
+
+* Human: hg38, hg19
+* Mouse: mm10, mm9.
+
 For example, if genomic positions of RNA modification are based on the human GRCh38/hg38 reference genome,
 RNAModR requires the following packages:
 
 * BSgenome.Hsapiens.UCSC.hg38
 * org.Hs.eg.db
 
-Currently, **RNAModR** supports human and mouse data, based on the following reference genome versions
-
-* Human: hg38, hg19
-* Mouse: mm10, mm9.
-
-Note that additional packages can be installed following the usual Bioconductor procedure; for example, if data 
-are based on the hg38 reference genome, the following R commands will install the necessary dependencies:
-
+You can install the two packages with
 ```{r}
-source("http://www.bioconductor.org/biocLite.R")
-biocLite(c("AnnotationDbi", "beanplot", "Biostrings", "BSgenome.Hsapiens.UCSC.hg38", "GenomeInfoDb", "GenomicFeatures", "GenomicRanges", "gplots", "org.Hs.eg.db", "RSQLite", "rtracklayer"))
+biocLite(c("BSgenome.Hsapiens.UCSC.hg38", "org.Hs.eg.db"))
 ```
+
+2. If all package dependencies are met, install **RNAModR** with devtools
+
+   ```{r}
+if (!require("devtools")) install.packages("devtools");
+devtools::install_github("mevers/RNAModR", build_vignettes = FALSE);
+   ```
+
 
 ## Getting started
 The following lines of R code will load the **RNAModR** library, and plot the distribution of m6A sites [[Linder et al., Nature Methods 12, 767 (2015)](http://www.nature.com/nmeth/journal/v12/n8/abs/nmeth.3453.html)] across the 5'UTR, CDS and 3'UTR of the human hg38-based transcriptome.
