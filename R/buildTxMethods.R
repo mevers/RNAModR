@@ -294,8 +294,6 @@ GetTxBySec <- function(txdb,
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #'
-#' @importFrom IRanges unlist
-#'
 #' @export
 DedupeBasedOnNearestRef <- function(query, ref, showPb = FALSE) {
     query <- query[which(elementLengths(query) > 0)];
@@ -365,8 +363,6 @@ DedupeBasedOnNearestRef <- function(query, ref, showPb = FALSE) {
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
-#'
-#' @importFrom IRanges unlist
 #'
 #' @export
 CollapseTxBySec <- function(txBySec,
