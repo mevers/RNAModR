@@ -30,7 +30,7 @@ relative to \code{locRef}. Enrichment/depletion is assessed
 using multiple Fisher's exact tests on the counts per distance
 bin relative to the counts in all other bins within the window
 defined by (-\code{flank}, \code{flank}). Resulting enrichment
-plots show odds-ratios (including 95% confidence intervals) and
+plots show odds-ratios (including 95\% confidence intervals) and
 associated p-values as a function of relative distance bins.
 Negative distances correspond to an enrichment/depletion of
 sites from \code{locPos} relative to sites from \code{locNeg}

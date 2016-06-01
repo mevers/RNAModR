@@ -907,7 +907,7 @@ GetMFE <- function(data, colSeq, colId = NULL) {
         id <- data[, colId];
     }
     names(sq) <- id;
-    writeXStringSet(sq, file = "tmp.fa", format = "fasta");
+    writeXStringSet(sq, filepath = "tmp.fa", format = "fasta");
     cmd <- sprintf("RNAfold --noPS < tmp.fa > tmp.dbn");
     system(sprintf(cmd));
     str <- ReadDBN("tmp.dbn");

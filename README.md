@@ -59,7 +59,7 @@ are based on the hg38 reference genome, the following R commands will install th
 
 ```{r}
 source("http://www.bioconductor.org/biocLite.R")
-biocLite(c("AnnotationDbi", "beanplot", "Biostring", "BSgenome.HSapiens.UCSC.hg38", "GenomeInfoDb", "GenomicFeatures", "GenomicRanges", "gplots", "org.Hs.eg.db", "RSQLite", "rtracklayer"))
+biocLite(c("AnnotationDbi", "beanplot", "Biostrings", "BSgenome.Hsapiens.UCSC.hg38", "GenomeInfoDb", "GenomicFeatures", "GenomicRanges", "gplots", "org.Hs.eg.db", "RSQLite", "rtracklayer"))
 ```
 
 ## Getting started

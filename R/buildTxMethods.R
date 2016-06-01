@@ -294,6 +294,8 @@ GetTxBySec <- function(txdb,
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #'
+#' @importFrom IRanges unlist
+#'
 #' @export
 DedupeBasedOnNearestRef <- function(query, ref, showPb = FALSE) {
     query <- query[which(elementLengths(query) > 0)];
@@ -314,7 +316,7 @@ DedupeBasedOnNearestRef <- function(query, ref, showPb = FALSE) {
             idxRef <- which(names(ref) == dupeID[i]);
             if (length(idxQuery) > 1) {
                 dist <- distance(
-                    GenomicRanges::unlist(range(query[idxQuery])),
+                    unlist(range(query[idxQuery])),
                     range(ref[[idxRef]]));
                 idxMinDist <- which.min(dist);
                 rem <- c(rem, idxQuery[-idxMinDist]);
@@ -363,6 +365,8 @@ DedupeBasedOnNearestRef <- function(query, ref, showPb = FALSE) {
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
+#'
+#' @importFrom IRanges unlist
 #'
 #' @export
 CollapseTxBySec <- function(txBySec,
@@ -434,7 +438,7 @@ CollapseTxBySec <- function(txBySec,
         cat("Collapsing duplicate promoter entries\n");
         promoter <- txBySec[[whichPromoter]];
         # Expand multiple entries under the same ID
-        promoter <- as(GenomicRanges::unlist(promoter), "GRangesList");
+        promoter <- as(unlist(promoter), "GRangesList");
         promoter.match <- DedupeBasedOnNearestRef(promoter, utr5.match, showPb = TRUE);
     }
     # (3) Collapse introns (if included)
