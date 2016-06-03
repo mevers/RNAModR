@@ -27,15 +27,14 @@ A \code{TxDb} object. See 'Details'.
 \description{
 Download a new or load an existing reference transcriptome.
 See 'Details'.
-This is a low-level function that is being called from
-\code{BuildTx}.
 }
 \details{
-If no local transcriptome db file exists or \code{forceDownload}
-is \code{TRUE}, the function generates an reference transcriptome
-by calling \code{makeTxDbFromUCSC} from the \code{GenomicFeatures}
-package; the return object is a \code{TxDb} object and is saved
-locally as an sqlite db.
+This is a low-level function that is being called from
+\code{BuildTx}. If no local transcriptome db file exists or
+\code{forceDownload} is \code{TRUE}, the function generates an
+reference transcriptome by calling \code{makeTxDbFromUCSC} from
+the \code{GenomicFeatures} package; the return object is a
+\code{TxDb} object and is saved locally as an sqlite db.
 Details on the \code{txdb} return object can be obtained from
 \code{print(x)}, where \code{x} is the name of the \code{txdb}
 return object.

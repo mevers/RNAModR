@@ -4,8 +4,8 @@
 \alias{BuildTx}
 \title{Build a custom transcriptome.}
 \usage{
-BuildTx(genomeVersion = c("hg38", "hg19", "mm10", "mm9"), force = FALSE,
-  sanityCheck = FALSE)
+BuildTx(genomeVersion = c("hg38", "hg19", "hg18", "mm10", "mm9", "mm8", "dm6",
+  "dm3", "dm2", "sacCer3", "sacCer2", "sacCer1"), force = FALSE)
 }
 \arguments{
 \item{genomeVersion}{A character string; refers to a specific
@@ -13,9 +13,6 @@ reference genome assembly version; default is \code{"hg38"}.}
 
 \item{force}{A logical scalar; if \code{TRUE} force rebuild of
 transcriptome; this will overwrite existing data.}
-
-\item{sanityCheck}{A logical scalar; if \code{TRUE} perform
-sanity checks.}
 }
 \description{
 Build a custom, organism-specific transcriptome. See 'Details'.
@@ -31,9 +28,14 @@ For most operations, the user will run this function once, and
 continue with further downstream analyses. Various RNAModR 
 routines will automatically load the transcriptome data to e.g. 
 map sites to and from the transcriptome.
-Currently, RNAModR supports analyses of human and mouse data,
-based on different reference genome versions (human: hg38, hg19;
-mouse: mm10, mm9).
+Currently, RNAModR supports analyses of human, mouse, fruitfly
+and yeast data, based on different reference genome versions:
+\itemize{
+\item Homo sapiens: hg38, hg19, hg18
+\item Mus musculus: mm10, mm9, mm8
+\item Drosophila melanogaster: dm6, dm3, dm2
+\item Cerevisiae saccharomyces: sacCer3, sacCer2, sacCer1
+}
 Reconstruction of existing transcriptome data can be achieved
 by running \code{BuildTx} with \code{force = TRUE}. Note that
 this will overwrite the existing RData file.

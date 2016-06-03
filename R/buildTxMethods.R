@@ -1,16 +1,100 @@
+#' Check package dependencies.
+#'
+#' Check package dependencies. See 'Details'.
+#'
+#' This is a low-level function that is being called from
+#' \code{BuildTx}. The function checks that the R packages
+#' providing the relevant gene annotations and reference genome
+#' for reference genome \code{genomeVersion} are available
+#' in the current R environment. The function returns \code{TRUE}
+#' if the necessary R packages are installed.
+#'
+#' @param genomeVersion A character string; refers to a specific
+#' reference genome assembly version; default is \code{"hg38"}.
+#'
+#' @return A logical scalar. See 'Details'.
+#'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' @keywords internal
+#'
+#' @examples
+#' \dontrun{
+#' CheckPkgDependencies("hg38");
+#' }
+#'
+#' @export
+CheckPkgDependencies <- function(genomeVersion = "hg38") {
+    pkgsInstalled <- installed.packages();
+    pkgsReq <- list();
+    if (genomeVersion == "hg38") {
+        pkgsReq[["Annot"]] <- "org.Hs.eg.db";
+        pkgsReq[["Genome"]] <- "BSgenome.Hsapiens.UCSC.hg38";
+    } else if (genomeVersion == "hg19") {
+        pkgsReq[["Annot"]] <- "org.Hs.eg.db";
+        pkgsReq[["Genome"]] <- "BSgenome.Hsapiens.UCSC.hg19";
+    } else if (genomeVersion == "hg18") {
+        pkgsReq[["Annot"]] <- "org.Hs.eg.db";
+        pkgsReq[["Genome"]] <- "BSgenome.Hsapiens.UCSC.hg18";
+    } else if (genomeVersion == "mm10") {
+        pkgsReq[["Annot"]] <- "org.Mm.eg.db";
+        pkgsReq[["Genome"]] <- "BSgenome.Mmusculus.UCSC.mm10";
+    } else if (genomeVersion == "mm9") {
+        pkgsReq[["Annot"]] <- "org.Mm.eg.db";
+        pkgsReq[["Genome"]] <- "BSgenome.Mmusculus.UCSC.mm9";
+    } else if (genomeVersion == "mm8") {
+        pkgsReq[["Annot"]] <- "org.Mm.eg.db";
+        pkgsReq[["Genome"]] <- "BSgenome.Mmusculus.UCSC.mm8";
+    } else if (genomeVersion == "dm6") {
+        pkgsReq[["Annot"]] <- "org.Dm.eg.db";
+        pkgsReq[["Genome"]] <- "BSgenome.Dmelanogaster.UCSC.dm6";
+    } else if (genomeVersion == "dm3") {
+        pkgsReq[["Annot"]] <- "org.Dm.eg.db";
+        pkgsReq[["Genome"]] <- "BSgenome.Dmelanogaster.UCSC.dm3";
+    } else if (genomeVersion == "dm2") {
+        pkgsReq[["Annot"]] <- "org.Dm.eg.db";
+        pkgsReq[["Genome"]] <- "BSgenome.Dmelanogaster.UCSC.dm2";
+    } else if (genomeVersion == "sacCer3") {
+        pkgsReq[["Annot"]] <- "org.Sc.sgd.db";
+        pkgsReq[["Genome"]] <- "BSgenome.Scerevisiae.UCSC.sacCer3";
+    } else if (genomeVersion == "sacCer2") {
+        pkgsReq[["Annot"]] <- "org.Sc.sgd.db";
+        pkgsReq[["Genome"]] <- "BSgenome.Scerevisiae.UCSC.sacCer2";
+    } else if (genomeVersion == "sacCer1") {
+        pkgsReq[["Annot"]] <- "org.Sc.sgd.db";
+        pkgsReq[["Genome"]] <- "BSgenome.Scerevisiae.UCSC.sacCer1";
+    }
+    ret <- sapply(pkgsReq, function(x) x %in% pkgsInstalled[, "Package"]);
+    df <- cbind(t(as.data.frame(pkgsReq)), ret);
+    if (!all(ret)) {
+        # Create meaningful error message
+        ss <- "[ERROR] R/Bioconductor package dependencies not met.";
+        pkgsMissing <- df[which(df[, 2] == FALSE), 1];
+        for (i in 1:length(pkgsMissing)) {
+            ss <- sprintf("%s\n  Not found: %s", ss, pkgsMissing[i]);
+        }
+        ss <- sprintf("%s\n\n  Running", ss);
+        biocSrc <- "source(\"http://www.bioconductor.org/biocLite.R\")";
+        ss <- sprintf("%s\n   %s", ss, biocSrc);
+        for (i in 1:length(pkgsMissing)) {
+            ss <- sprintf("%s\n   biocLite(\"%s\")", ss, pkgsMissing[i]);
+        }
+        ss <- sprintf("%s\n  might fix that.", ss);
+        stop(ss);
+    }
+}
+
+
 #' Download a new or load an existing reference transcriptome.
 #'
 #' Download a new or load an existing reference transcriptome.
 #' See 'Details'.
-#' This is a low-level function that is being called from
-#' \code{BuildTx}. 
-
 #'
-#' If no local transcriptome db file exists or \code{forceDownload}
-#' is \code{TRUE}, the function generates an reference transcriptome
-#' by calling \code{makeTxDbFromUCSC} from the \code{GenomicFeatures}
-#' package; the return object is a \code{TxDb} object and is saved
-#' locally as an sqlite db.
+#' This is a low-level function that is being called from
+#' \code{BuildTx}. If no local transcriptome db file exists or
+#' \code{forceDownload} is \code{TRUE}, the function generates an
+#' reference transcriptome by calling \code{makeTxDbFromUCSC} from
+#' the \code{GenomicFeatures} package; the return object is a
+#' \code{TxDb} object and is saved locally as an sqlite db.
 #' Details on the \code{txdb} return object can be obtained from
 #' \code{print(x)}, where \code{x} is the name of the \code{txdb}
 #' return object.
@@ -68,7 +152,7 @@ GetTxDb <- function(genomeVersion = "hg38",
                                  tablename = "refGene");
         saveDb(txdb, file = sqliteFile);
     } else {
-        cat(sprintf("Found existing sqlite database. Using %s ...\n",
+        cat(sprintf("Found existing sqlite database %s.\n",
                     sqliteFile));
         txdb <- loadDb(file = sqliteFile);
     }
@@ -134,28 +218,51 @@ GetGeneIds <- function(txdb) {
     if (length(genomeVersion)==0) {
         stop("Could not identify genome version from transcript database.");
     }
-    if (grepl("(hg38|hg19)", genomeVersion, ignore.case = TRUE)) {
+    # Load gene annotation package
+    if (grepl("(hg38|hg19|hg18)", genomeVersion,
+              ignore.case = TRUE)) {
         if (SafeLoad("org.Hs.eg.db")) {
             refDb <- get("org.Hs.eg.db");
         } else {
-            stop(sprintf("Could not load gene annotation for %s.",
+            stop(sprintf("[ERROR] Could not load gene annotation for %s.",
                          genomeVersion));
         }
-    } else if (grepl("(mm10|mm9)", genomeVersion, ignore.case = TRUE)) {
+    } else if (grepl("(mm10|mm9|mm8)", genomeVersion,
+                     ignore.case = TRUE)) {
         if (SafeLoad("org.Mm.eg.db")) {
             refDb <- get("org.Mm.eg.db");
         } else {
-            stop(sprintf("Could not load gene annotation for %s.",
+            stop(sprintf("[ERROR] Could not load gene annotation for %s.",
+                         genomeVersion));
+        }
+    } else if (grepl("(dm6|dm3|dm2)", genomeVersion,
+                     ignore.case = TRUE)) {
+        if (SafeLoad("org.Dm.eg.db")) {
+            refDb <- get("org.Dm.eg.db");
+        } else {
+            stop(sprintf("[ERROR] Could not load gene annotation for %s.",
+                         genomeVersion));
+        }
+    } else if (grepl("(sacCer3|sacCer2|sacCer1)", genomeVersion,
+                     ignore.case = TRUE)) {
+        if (SafeLoad("org.Sc.sgd.db")) {
+            refDb <- get("org.Sc.sgd.db");
+        } else {
+            stop(sprintf("[ERROR] Could not load gene annotation for %s.",
                          genomeVersion));
         }
     } else {
         stop(sprintf("Unknown genome %s.", genomeVersion));
     }
     tx <- transcripts(txdb);
-    geneXID <- select(txdb,
-                      keys = tx$tx_name,
-                      columns="GENEID",
-                      keytype = "TXNAME");
+    # Suppress messages indicating matching of duplicate keys
+    # That's ok, because duplicate keys will lead to duplicate
+    # entries
+    geneXID <- suppressMessages(select(txdb,
+                                       keys = tx$tx_name,
+                                       columns="GENEID",
+                                       keytype = "TXNAME",
+                                       multiVals = "first"));
     geneXID <- geneXID[!duplicated(geneXID[, 1]), ];
     colnames(geneXID)[1:2] <- c("REFSEQ", "ENTREZID");
     identifier <- c("ENTREZID", "SYMBOL", "ENSEMBL", "UNIGENE", "GENENAME");
@@ -196,8 +303,8 @@ GetGeneIds <- function(txdb) {
 #' @param promDownstream An integer; specifies the number of
 #' nucleotides to be included downstream of 5'UTR start as part
 #' of the promoter.
-#' @param verbose A logical scalar; if \code{TRUE}, print more
-#' output and additional warnings; default is \code{FALSE}.
+#' @param verbose A logical scalar; if \code{TRUE}, print additional
+#' information; default is \code{FALSE}
 #'
 #' @return A \code{list} of \code{GRangesList} objects
 #'
@@ -223,15 +330,11 @@ GetTxBySec <- function(txdb,
     #             Default is c("Promoter","5'UTR","CDS","3'UTR").
     #   promUpstream: Number of upstream nt's to be included in promoter.
     #   promDownstream: Number of downstream nt's to be included in promoter.
-    #   verbose: Print additional output and warnings. Default is FALSE.
+    #   verbose: Print additional information
     #
     # Returns:
     #   List of GRangesList transcript features.
     CheckClass(txdb, "TxDb");
-    oldWarningStat <- getOption("warn");
-    if (!verbose) {
-        options(warn = -1);
-    }
     validFeat <- c("Promoter",
                    "CDS", "coding",
                    "5pUTR", "5'UTR", "UTR5",
@@ -244,19 +347,28 @@ GetTxBySec <- function(txdb,
     }
     txBySec <- list();
     for (i in 1:length(sections)) {
+        # Suppress warning messages that arise from duplicate entries.
+        # That's ok because we will deal with duplicates later
         if (grepl("(CDS|coding)", sections[i], ignore.case = TRUE)) {
-            sec <- cdsBy(txdb, by="tx", use.names = TRUE);
+            sec <- suppressWarnings(
+                cdsBy(txdb, by="tx", use.names = TRUE));
         } else if (grepl("(5pUTR|5'UTR|UTR5)", sections[i], ignore.case = TRUE)) {
-            sec <- fiveUTRsByTranscript(txdb, use.names = TRUE);
+            sec <- suppressWarnings(
+                fiveUTRsByTranscript(txdb, use.names = TRUE));
         } else if (grepl("(3pUTR|3'UTR|UTR3)", sections[i], ignore.case = TRUE)) {
-            sec <- threeUTRsByTranscript(txdb, use.names = TRUE);
+            sec <- suppressWarnings(
+                threeUTRsByTranscript(txdb, use.names = TRUE));
         } else if (grepl("(Intron|Intronic)", sections[i], ignore.case = TRUE)) {
-            sec <- intronsByTranscript(txdb, use.names = TRUE);
+            sec <- suppressWarnings(
+                intronsByTranscript(txdb, use.names = TRUE));
         } else if (grepl("Promoter", sections[i], ignore.case = TRUE)) {
-            promoter <- promoters(txdb,
-                                  columns = c("tx_id", "tx_name"),
-                                  upstream = promUpstream,
-                                  downstream = promDownstream);
+            promoter <- suppressWarnings(
+                promoters(txdb,
+                          columns = c("tx_id", "tx_name"),
+                          upstream = promUpstream,
+                          downstream = promDownstream));
+            # Make sure we are still within valid transcript ranges
+            promoter <- trim(promoter);
             sec <- GenomicRanges::split(promoter, promoter$tx_name);
         }
         txBySec[[length(txBySec) + 1]] <- sec;
@@ -266,7 +378,6 @@ GetTxBySec <- function(txdb,
         }
     }
     names(txBySec) <- sections;
-    options(warn = oldWarningStat);
     return(txBySec);
 }
 
@@ -521,8 +632,6 @@ PerformSanityCheck <- function(txBySec) {
 #' based on introns are not extracted; this is usually a good idea
 #' as long intronic sequences can lead to large memory imprints
 #' (and file sizes if objects are saved).
-#' @param verbose A logical scalar; if \code{TRUE} print
-#' additional output; default is \code{FALSE}.
 #'
 #' @return A \code{list} of \code{DNAStringSet} objects.
 #'
@@ -531,48 +640,47 @@ PerformSanityCheck <- function(txBySec) {
 #'
 #' @export
 GetTxSeq <- function(txBySec,
-                     skipIntrons = TRUE,
-                     verbose = FALSE) {
+                     skipIntrons = TRUE) {
     # Get a list of sequences for every feature from the list
     # of transcript sections
     #
     # Args:
     #   txBySec: List of GRangesList transcript sections.
-    #   verbose: Print additional output. Default is FALSE.
+    #   skipIntrons: If TRUE, skip intron sequences.
     #
     # Returns:
     #   List of DNAStringSet sequences
     genomeVersion <- unique(unlist(lapply(txBySec, function(x) genome(x))));
-    validGenomes <- c("hg38", "hg19", "hg18", "mm10", "mm9", "mm8");
-    if (length(genomeVersion) == 0) {
-        stop("Could not identify genome version from list of transcript segments.");
-    }
-    if (!(genomeVersion %in% validGenomes)) {
-        ss <- sprintf("%s is not a valid genome version.\n", genomeVersion);
-        ss <- sprintf("%sValid genome versions are: %s",
-                      ss,
-                      paste0(validGenomes, collapse = ", "));
-        stop(ss);
-    }
     if (grepl("^hg", genomeVersion)) {
         genomePkg <- sprintf("BSgenome.Hsapiens.UCSC.%s", genomeVersion);
         if (SafeLoad(genomePkg)) {
             genome <- get(genomePkg);
         } else {
-            stop(sprintf("Could not load genome %s.", genomeVersion));
+            stop(sprintf("[ERROR] Could not load genome %s.", genomeVersion));
         }
     } else if (grepl("^mm",genomeVersion)) {
         genomePkg <- sprintf("BSgenome.Mmusculus.UCSC.%s", genomeVersion);
         if (SafeLoad(genomePkg)) {
             genome <- get(genomePkg);
         } else {
-            stop(sprintf("Could not load genome %s.",genomeVersion));
+            stop(sprintf("[ERROR] Could not load genome %s.",genomeVersion));
+        }
+    } else if (grepl("^dm",genomeVersion)) {
+        genomePkg <- sprintf("BSgenome.Dmelanogaster.UCSC.%s", genomeVersion);
+        if (SafeLoad(genomePkg)) {
+            genome <- get(genomePkg);
+        } else {
+            stop(sprintf("[ERROR] Could not load genome %s.",genomeVersion));
+        }
+    } else if (grepl("^sac",genomeVersion)) {
+        genomePkg <- sprintf("BSgenome.Scerevisiae.UCSC.%s", genomeVersion);
+        if (SafeLoad(genomePkg)) {
+            genome <- get(genomePkg);
+        } else {
+            stop(sprintf("[ERROR] Could not load genome %s.",genomeVersion));
         }
     } else {
-        stop(sprintf("Unknown genome %s.",genomeVersion));
-    }
-    if (verbose) {
-        cat(sprintf("Loaded genome version %s.",genomeVersion));
+        stop(sprintf("[ERROR] Unknown genome %s.",genomeVersion));
     }
     sections <- names(txBySec);
     if (skipIntrons == TRUE) {
@@ -613,9 +721,14 @@ GetTxSeq <- function(txBySec,
 #' continue with further downstream analyses. Various RNAModR 
 #' routines will automatically load the transcriptome data to e.g. 
 #' map sites to and from the transcriptome.
-#' Currently, RNAModR supports analyses of human and mouse data,
-#' based on different reference genome versions (human: hg38, hg19;
-#' mouse: mm10, mm9).
+#' Currently, RNAModR supports analyses of human, mouse, fruitfly
+#' and yeast data, based on different reference genome versions:
+#' \itemize{
+#' \item Homo sapiens: hg38, hg19, hg18
+#' \item Mus musculus: mm10, mm9, mm8
+#' \item Drosophila melanogaster: dm6, dm3, dm2
+#' \item Cerevisiae saccharomyces: sacCer3, sacCer2, sacCer1
+#' }
 #' Reconstruction of existing transcriptome data can be achieved
 #' by running \code{BuildTx} with \code{force = TRUE}. Note that
 #' this will overwrite the existing RData file.
@@ -628,8 +741,6 @@ GetTxSeq <- function(txBySec,
 #' reference genome assembly version; default is \code{"hg38"}.
 #' @param force A logical scalar; if \code{TRUE} force rebuild of
 #' transcriptome; this will overwrite existing data.
-#' @param sanityCheck A logical scalar; if \code{TRUE} perform
-#' sanity checks.
 #' 
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' 
@@ -644,10 +755,11 @@ GetTxSeq <- function(txBySec,
 #'
 #' @export
 BuildTx <- function(genomeVersion = c(
-                        "hg38", "hg19",
-                        "mm10", "mm9"),
-                    force = FALSE,
-                    sanityCheck = FALSE) {
+                        "hg38", "hg19", "hg18",
+                        "mm10", "mm9", "mm8",
+                        "dm6", "dm3", "dm2",
+                        "sacCer3", "sacCer2", "sacCer1"),
+                    force = FALSE) {
     # Build a custom transcriptome.
     #
     # Args:
@@ -658,31 +770,36 @@ BuildTx <- function(genomeVersion = c(
     genomeVersion <- match.arg(genomeVersion);
     fn <- sprintf("tx_%s.RData", genomeVersion);
     if (file.exists(fn) && (force == FALSE)) {
-        cat("Found existing transcriptome data.\n");
+        cat("Found existing transcriptome data. Nothing to do.\n");
         cat("To rebuild run with force = TRUE.\n");
     } else if (!file.exists(fn) || (force == TRUE)) {
         cat("Building the transcriptome. This will take a few minutes.\n");
         cat("Note that this step should only be done once.\n");
-        cat(sprintf("%s Stage 1/5: Getting transcripts and gene annotations.\n",
+        # Stage 1 - Check package dependencies
+        cat(sprintf("%s Stage 1/6: Checking package dependencies.\n",
                     format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
-        txdb <- GetTxDb(genomeVersion = genomeVersion, force = force);
+        CheckPkgDependencies(genomeVersion = genomeVersion);
+        # Stage 2 - Create txdb object
+        cat(sprintf("%s Stage 2/6: Getting transcripts and gene annotations.\n",
+                    format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
+        txdb <- GetTxDb(genomeVersion = genomeVersion,
+                        standardChrOnly = TRUE,
+                        force = force);
         geneXID <- GetGeneIds(txdb);
-        cat(sprintf("%s Stage 2/5: Splitting transcript by section.\n",
+        # Stage 3 - Split txdb by transcript sections
+        cat(sprintf("%s Stage 3/6: Splitting transcripts by section.\n",
                     format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
         txBySec <- GetTxBySec(txdb);
-        if (sanityCheck) {
-            PerformSanityCheck(txBySec);
-        }
-        cat(sprintf("%s Stage 3/5: Collapsing isoforms.\n",
+        # Stage 4 - Collapse isoforms
+        cat(sprintf("%s Stage 4/6: Collapsing isoforms.\n",
                     format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
         txBySec <- CollapseTxBySec(txBySec, geneXID);
-        if (sanityCheck) {
-            PerformSanityCheck(txBySec);
-        }
-        cat(sprintf("%s Stage 4/5: Obtaining sequences.\n",
+        # Stage 5 - Extract sequences
+        cat(sprintf("%s Stage 5/6: Extracting sequences.\n",
                     format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
         seqBySec <- GetTxSeq(txBySec);
-        cat(sprintf("%s Stage 5/5: Storing results in file.\n",
+        # Stage 6 - Save objects
+        cat(sprintf("%s Stage 6/6: Storing results in file.\n",
                     format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
         save(geneXID, txBySec, seqBySec,
              file = fn,

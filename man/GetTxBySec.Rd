@@ -22,8 +22,8 @@ the promoter.}
 nucleotides to be included downstream of 5'UTR start as part
 of the promoter.}
 
-\item{verbose}{A logical scalar; if \code{TRUE}, print more
-output and additional warnings; default is \code{FALSE}.}
+\item{verbose}{A logical scalar; if \code{TRUE}, print additional
+information; default is \code{FALSE}}
 }
 \value{
 A \code{list} of \code{GRangesList} objects
