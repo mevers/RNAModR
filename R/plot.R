@@ -21,6 +21,7 @@
 #' @keywords internal
 #'
 #' @import GenomicRanges IRanges
+#' @importFrom graphics boxplot
 #' 
 #' @export
 PlotTxSecLength <- function(txBySec,
@@ -116,6 +117,7 @@ PlotTxSecLength <- function(txBySec,
 #' @keywords internal
 #'
 #' @import GenomicRanges IRanges
+#' @importFrom grDevices rainbow
 #'
 #' @export
 PlotTxSecLength.bean <- function(txBySec,
@@ -207,6 +209,8 @@ PlotTxSecLength.bean <- function(txBySec,
 #' specified in \code{filter}; if \code{NULL} consider all sections. 
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#'
+#' @importFrom graphics pie
 #'
 #' @examples
 #' \dontrun{
@@ -430,6 +434,10 @@ PlotSpatialDistribution <- function(locus,
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
+#' 
+#' @importFrom graphics abline axis barplot legend lines mtext
+#' par plot polygon text
+#' @importFrom stats fisher.test lowess p.adjust
 #' 
 #' @return A list of \code{fisher.test} return objects and \code{mat}
 PlotEnrichment.Generic <- function(mat, title = "",
@@ -893,6 +901,7 @@ PlotSpatialRatio <- function(locPos, locNeg,
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #'
 #' @importFrom beanplot beanplot
+#' @importFrom stats t.test wilcox.test
 #' 
 #' @export
 PlotGC <- function(loc1, loc2,
@@ -1003,6 +1012,9 @@ PlotGC <- function(loc1, loc2,
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
+#'
+#' @importFrom graphics legend lines plot polygon
+#' @importFrom stats lowess
 #'
 #' @export
 PlotAbundance.generic <- function(data,

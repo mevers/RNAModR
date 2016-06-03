@@ -1,3 +1,4 @@
+#' @importFrom stats binomial glm
 testGLM <- function(locPos,
                     locNeg,
                     filter = NULL,

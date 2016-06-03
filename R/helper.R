@@ -393,6 +393,8 @@ GetRelDistNearest <- function(gr1,
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
+#'
+#' @importFrom graphics hist
 #' 
 #' @export
 EstimateCIFromBS <- function(x, breaks, nBS = 5000) {
@@ -434,6 +436,8 @@ EstimateCIFromBS <- function(x, breaks, nBS = 5000) {
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
+#'
+#' @importFrom grDevices col2rgb rgb
 #' 
 #' @export
 AddAlpha <- function(hexList, alpha = 0.5) {

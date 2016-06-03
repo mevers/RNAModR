@@ -19,6 +19,7 @@
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #'
 #' @import GenomicRanges IRanges
+#' @importFrom utils read.table
 #' 
 #' @export
 ReadBED <- function(file, collapseRange = FALSE) {
@@ -100,6 +101,8 @@ WriteFeatToBED <- function(txFeatures) {
 #' "noChrName".
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#'
+#' @importFrom utils write.table
 #' 
 #' @export
 WriteTxLocToBED <- function(locus,
@@ -162,6 +165,8 @@ WriteTxLocToBED <- function(locus,
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
+#'
+#' @importFrom utils write.csv
 #' 
 #' @export
 WriteTxLocToCSV <- function(locus,

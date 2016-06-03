@@ -17,6 +17,8 @@
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #'
+#' @importFrom utils installed.packages
+#' 
 #' @examples
 #' \dontrun{
 #' CheckPkgDependencies("hg38");
@@ -405,6 +407,8 @@ GetTxBySec <- function(txdb,
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #'
+#' @importFrom utils setTxtProgressBar txtProgressBar
+#' 
 #' @export
 DedupeBasedOnNearestRef <- function(query, ref, showPb = FALSE) {
     query <- query[which(elementLengths(query) > 0)];

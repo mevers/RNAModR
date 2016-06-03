@@ -11,9 +11,13 @@ Imports:
     Biostrings,
     GenomeInfoDb,
     gplots,
+    graphics,
+    grDevices,
     methods,
     RSQLite,
-    rtracklayer
+    rtracklayer,
+    stats,
+    utils
 Depends:
     GenomicRanges,
     GenomicFeatures,

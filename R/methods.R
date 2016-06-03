@@ -329,6 +329,8 @@ GetLocus.MapFromTranscripts <- function(gr, ref, seq, section, geneXID) {
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' 
 #' @import GenomicRanges IRanges
+#' @importFrom utils setTxtProgressBar txtProgressBar
+#' @importFrom stats runif setNames
 #' 
 #' @examples
 #' \dontrun{
@@ -481,6 +483,8 @@ GenerateNull <- function(locus,
 }
 
 
+#' @importFrom utils setTxtProgressBar txtProgressBar
+#' @importFrom stats runif setNames
 GenerateNull.new <- function(locus,
                             id = NULL,
                             method = c("ntAbund", "perm"),
