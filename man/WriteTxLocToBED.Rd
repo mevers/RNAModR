@@ -4,24 +4,39 @@
 \alias{WriteTxLocToBED}
 \title{Write \code{txLoc} object to a BED file.}
 \usage{
-WriteTxLocToBED(locus, file = NULL, formatChr = "noChrName")
+WriteTxLocToBED(locus, file = NULL, noChrName = FALSE)
 }
 \arguments{
 \item{locus}{A \code{txLoc} object.}
 
-\item{file}{Filename of output BED file. If NULL then file = "sites.bed".}
+\item{file}{A character string; specifies the filename of the output 
+BED file. If \code{NULL}, then \code{file = "sites.bed"}; default is
+\code{NULL}.}
 
-\item{formatChr}{Set output format of chromosome column. Default is
-"noChrName".}
+\item{noChrName}{A logical scalar; if \code{TRUE}, chromosome names
+will be written without "chr"; default is \code{FALSE}.}
 }
 \description{
-Write \code{txLoc} object to a BED file.
+Write \code{txLoc} object to a BED file. See 'Details'.
 }
 \details{
-This function writes entries from a \code{txLoc} object to a BED file.
-This process is not "splice-aware", i.e. if an entry spans an intron
-the BED entry gives the left and right-most genomic coordinate of the
-feature.
+The function writes entries from a \code{txLoc} object to a 6-column
+BED file (BED6). Note that this process is not "splice-aware", i.e. 
+if an entry spans an intron the BED entry gives the left and right-most 
+genomic coordinate of the feature. If \code{file = NULL}, entries will 
+be written to  \code{sites.bed}. If \code{noChrName = TRUE}, chromosome 
+names in column 1 of the BED file will be written without "chr".
+}
+\examples{
+\dontrun{
+bedFile <- system.file("extdata",
+                       "miCLIP_m6A_Linder2015_hg38.bed",
+                       package = "RNAModR");
+sites <- ReadBED(bedFile);
+txSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
+WriteTxLocToBED(txSites);
+}
+
 }
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}

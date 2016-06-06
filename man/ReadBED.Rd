@@ -4,21 +4,25 @@
 \alias{ReadBED}
 \title{Read BED-formatted file.}
 \usage{
-ReadBED(file, collapseRange = FALSE)
+ReadBED(file, collapseRange = TRUE)
 }
 \arguments{
 \item{file}{A character string; specifies the input BED file.}
 
 \item{collapseRange}{A logical scalar; if \code{TRUE} loci
 spanning more than one nucleotide are collapsed to a single
-nucleotide locus corresponding to the midpoint of the range.}
+nucleotide locus corresponding to the midpoint of the range;
+default is \code{TRUE}.}
 }
 \value{
-A \code{GRanges} object.
+A \code{GRanges} object. See 'Details'.
 }
 \description{
-Open and read a BED file, and store the annotation
-features in a \code{GRanges} object.
+Read BED-formatted file. See 'Details'.
+}
+\details{
+The function opens and reads in a BED6-formatted file, and 
+stores the annotation features in a \code{GRanges} object.
 }
 \examples{
 bedFile <- system.file("extdata",

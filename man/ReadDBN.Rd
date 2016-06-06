@@ -13,11 +13,11 @@ ReadDBN(file)
 A \code{dataframe} object. See 'Details'.
 }
 \description{
-Read a DBN (dot-bracket) structure file. See 'Details'.
+Read a DBN file. See 'Details'.
 }
 \details{
-Open and read a DBN file, and return a \code{dataframe}
-with the following columns:
+The function reads in a DBN (dot-bracket) structure file, and
+returns a \code{dataframe} with the following data columns:
 \enumerate{
 \item Column 1: Sequence ID
 \item Column 2: Length of the sequence (in nt)

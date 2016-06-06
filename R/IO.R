@@ -1,7 +1,7 @@
 #' Read BED-formatted file.
 #'
 #' Read BED-formatted file. See 'Details'.
-
+#'
 #' The function opens and reads in a BED6-formatted file, and 
 #' stores the annotation features in a \code{GRanges} object.
 #'

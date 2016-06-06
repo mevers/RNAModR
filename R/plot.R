@@ -1152,7 +1152,7 @@ PlotRelDistDistribution <- function(loc1,
                          id2,
                          names(dist)[i],
                          length(dist[[i]]));
-        xlab <- "Relative distance to exon-exon junction [nt]";
+        xlab <- sprintf("Relative distance to %s [nt]", id2);
         PlotAbundance.generic(dist[[i]],
                               xmin = -flank, xmax = flank,
                               binWidth = binWidth,
@@ -1206,7 +1206,7 @@ PlotRelDistEnrichment <- function(locPos,
     CheckClassTxLocRef(locPos, locNeg);
     CheckClassTxLocRef(locPos, locRef);
     idPos <- GetId(locPos);
-    idNeg <- GetId(locPos);
+    idNeg <- GetId(locNeg);
     idRef <- GetId(locRef);
     refGenome <- GetRef(locPos);
     grPos <- TxLoc2GRangesList(locPos,
