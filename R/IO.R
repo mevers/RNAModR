@@ -1,14 +1,17 @@
 #' Read BED-formatted file.
 #'
-#' Open and read a BED file, and store the annotation
-#' features in a \code{GRanges} object.
+#' Read BED-formatted file. See 'Details'.
+
+#' The function opens and reads in a BED6-formatted file, and 
+#' stores the annotation features in a \code{GRanges} object.
 #'
 #' @param file A character string; specifies the input BED file.
 #' @param collapseRange A logical scalar; if \code{TRUE} loci
 #' spanning more than one nucleotide are collapsed to a single
-#' nucleotide locus corresponding to the midpoint of the range.
+#' nucleotide locus corresponding to the midpoint of the range;
+#' default is \code{TRUE}.
 #'
-#' @return A \code{GRanges} object.
+#' @return A \code{GRanges} object. See 'Details'.
 #' 
 #' @examples
 #' bedFile <- system.file("extdata",
@@ -22,7 +25,7 @@
 #' @importFrom utils read.table
 #' 
 #' @export
-ReadBED <- function(file, collapseRange = FALSE) {
+ReadBED <- function(file, collapseRange = TRUE) {
     # Read BED file and convert to GRanges object.
     #
     # Args:
@@ -88,26 +91,40 @@ WriteFeatToBED <- function(txFeatures) {
 
 #' Write \code{txLoc} object to a BED file.
 #'
-#' Write \code{txLoc} object to a BED file.
+#' Write \code{txLoc} object to a BED file. See 'Details'.
 #'
-#' This function writes entries from a \code{txLoc} object to a BED file.
-#' This process is not "splice-aware", i.e. if an entry spans an intron
-#' the BED entry gives the left and right-most genomic coordinate of the
-#' feature.
+#' The function writes entries from a \code{txLoc} object to a 6-column
+#' BED file (BED6). Note that this process is not "splice-aware", i.e. 
+#' if an entry spans an intron the BED entry gives the left and right-most 
+#' genomic coordinate of the feature. If \code{file = NULL}, entries will 
+#' be written to  \code{sites.bed}. If \code{noChrName = TRUE}, chromosome 
+#' names in column 1 of the BED file will be written without "chr".
 #' 
 #' @param locus A \code{txLoc} object.
-#' @param file Filename of output BED file. If NULL then file = "sites.bed".
-#' @param formatChr Set output format of chromosome column. Default is
-#' "noChrName".
+#' @param file A character string; specifies the filename of the output 
+#' BED file. If \code{NULL}, then \code{file = "sites.bed"}; default is
+#' \code{NULL}.
+#' @param noChrName A logical scalar; if \code{TRUE}, chromosome names
+#' will be written without "chr"; default is \code{FALSE}. 
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #'
+#' @examples
+#' \dontrun{
+#' bedFile <- system.file("extdata",
+#'                        "miCLIP_m6A_Linder2015_hg38.bed",
+#'                        package = "RNAModR");
+#' sites <- ReadBED(bedFile);
+#' txSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
+#' WriteTxLocToBED(txSites);
+#' }
+#' 
 #' @importFrom utils write.table
 #' 
 #' @export
 WriteTxLocToBED <- function(locus,
                             file = NULL,
-                            formatChr = "noChrName") {
+                            noChrName = FALSE) {
     # Save transcript features in BED file.
     #
     # Args:
@@ -126,7 +143,7 @@ WriteTxLocToBED <- function(locus,
     for (i in 1:length(locus)) {
         feat <- locus[[i]][, c("CHR", "START", "STOP", "ID", "SCORE", "STRAND")];
         if (is.numeric(feat[, 2]) && is.numeric(feat[, 3])) {
-            if (formatChr == "noChrName") {
+            if (noChrName == TRUE) {
                 feat[, 1] <- gsub("chr", "", feat[ ,1]);
             }
             feat[, 2] <- feat[ ,2] - 1;
@@ -208,10 +225,10 @@ WriteTxLocToCSV <- function(locus,
 
 #' Read a DBN file.
 #'
-#' Read a DBN (dot-bracket) structure file. See 'Details'.
+#' Read a DBN file. See 'Details'.
 #'
-#' Open and read a DBN file, and return a \code{dataframe}
-#' with the following columns:
+#' The function reads in a DBN (dot-bracket) structure file, and
+#' returns a \code{dataframe} with the following data columns:
 #' \enumerate{
 #' \item Column 1: Sequence ID
 #' \item Column 2: Length of the sequence (in nt)
