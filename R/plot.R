@@ -423,14 +423,21 @@ PlotSpatialDistribution <- function(locus,
 #' Bejamini and Hochberg.
 #' Note: This function should not be invoked directly by the user.
 #'
-#' @param mat The data matrix.
-#' @param title An identifier for \code{mat}.
-#' @param x.las Orientation of x-axis labels. Default is 1.
-#' @param x.cex Scaling factor for x-axis labels. Default is 1.
-#' @param x.padj Vertical adjustment of x-axis labels. Default is 1.
-#' @param plotType Plot style. Default is "l".
-#' @param reverseXaxis Reverse the order of values from \code{mat}.
-#' @param withExtendedAxisLabel Print extended axis label.
+#' @param mat A \code{dataframe}; specifies the contingency table.
+#' @param title A character string; specifies plot title.
+#' @param xlab A character string; specifies the x-axis label.
+#' @param x.las An integer scalar; specifies the orientation of
+#' x-axis labels; Default is 1.
+#' @param x.cex A float scalar; specifies a scaling factor for
+#' x-axis labels; default is 1.
+#' @param x.padj A float scalar; specifies the vertical adjustment
+#' of x-axis labels; default is 1.
+#' @param plotType A character string; specifies the plot style;
+#' default is "l" (for line).
+#' @param reverseXaxis A logical scalar; if \code{TRUE}, the order
+#' of columns from \code{mat} is reversed; default is \code{FALSE}.
+#' @param withExtendedAxisLabel An integer scalar; specifies the
+#' format of axis label.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
@@ -439,8 +446,10 @@ PlotSpatialDistribution <- function(locus,
 #' par plot polygon text
 #' @importFrom stats fisher.test lowess p.adjust
 #' 
-#' @return A list of \code{fisher.test} return objects and \code{mat}
-PlotEnrichment.Generic <- function(mat, title = "",
+#' @return A list of \code{fisher.test} return objects and \code{mat}.
+PlotEnrichment.Generic <- function(mat,
+                                   title = "",
+                                   xlab = "",
                                    x.las = 1, x.cex = 1, x.padj = 1,
                                    plotType = "l",
                                    reverseXaxis = FALSE,
@@ -502,7 +511,7 @@ PlotEnrichment.Generic <- function(mat, title = "",
     ymin <- log10pval.limit;
     ymax <- 1;
     # Plot log10(p-value)'s
-    par(mar = c(7, 4, 4, 4) + 0.1);
+    par(mar = c(5, 4, 4, 4) + 0.1);
     xrange <- 1.2 * length(pval);
     xmin <- -0.04 * xrange;
     xmin <- 0.2;
@@ -516,6 +525,7 @@ PlotEnrichment.Generic <- function(mat, title = "",
                   border = NA,
                   main = title, font.main = 1);
     abline(h = -2, col = "blue", lty = 3, lwd = 2);
+    symScaleX <- FALSE;
     if (withExtendedAxisLabel > 0) {
         if (withExtendedAxisLabel == 1) {
             labels = sprintf("%s\nOR=%4.3f,p=%4.3e",
@@ -528,24 +538,31 @@ PlotEnrichment.Generic <- function(mat, title = "",
                 10^OR, 10^pval.uncapped);
         }
     } else {
-        labels = names(OR);
+        labels <- names(OR);
+        x1 <- as.numeric(
+            gsub("(\\(|,[+-]*\\d+\\.*\\d*e*\\+*\\d*])", "", labels));
+        x2 <- as.numeric(
+            gsub("(\\([+-]*\\d+\\.*\\d*e*\\+*\\d*,|])", "", labels));
+        if (x2[length(x2)] + x1[1] == 0) {
+            symScaleX <- TRUE;
+        }
     }
     x <- mp;
-#    if (length(labels) > 10 && all(grepl("\\(.+\\]", labels))) {
-#        absXmin <- as.numeric(gsub("(\\(|,.+)", "",
-#                                   labels[1]));
-#        absXmax <- as.numeric(gsub("(\\(.+,|\\])", "",
-#                                   labels[length(labels)]));
-#        idx <- round(seq(1, nrow(x), length.out = 5));
-#        axis(1, at = x[idx, ],
-#             labels = seq(absXmin, absXmax, length.out = 5),
-#             las = x.las, padj = x.padj, cex.axis = x.cex);
-#        mtext("x-axis label", side = 1, line = 3);
-#    } else {
-        axis(1, at = x,
-             labels = labels,
-             las = x.las, padj = x.padj, cex.axis = x.cex);
-#    }
+    # Draw x axis
+    idxLabels <- seq(1, length(x), length.out = 10);
+    if (symScaleX == TRUE) {
+#        idxLabels <- c(
+#            seq(1, floor(length(x) / 2), by = round(length(x) / 10)),
+#            floor(length(x) / 2 + 0.5),
+#            seq(floor(length(x) / 2) + 1, length(x), by = round(length(x) / 10)));
+        abline(v = x[floor(length(x) / 2 + 0.5)],
+               col = rgb(0, 0, 0, 0.2), lwd = 2);
+    }
+    axis(1, at = x[idxLabels],
+         labels = labels[idxLabels],
+         las = x.las, padj = x.padj, cex.axis = x.cex);
+    mtext(xlab, side = 1, line = 2.7);
+    # Draw right y axis
     axis(4, at = seq(ymin, ymax));
     mtext("log10(p-value)", side = 4, line = 2.5);
     # Draw significance labels
@@ -556,6 +573,7 @@ PlotEnrichment.Generic <- function(mat, title = "",
     sig[pval <= -1.30103 & pval > -2] <- "*";
     sig[pval > -1.30103] <- "ns";
     text(x, y = 0.5, labels = sig, srt = 90, col = "blue");
+    # Draw legend
     legend("bottomleft",
            c("Odds-ratio (OR)",
              "95% CI OR",
@@ -571,6 +589,7 @@ PlotEnrichment.Generic <- function(mat, title = "",
          xlim = c(xmin, xmax),
          ylim = c(-1.0, 1.0),
          axes = FALSE, xlab = "", ylab = "");
+    # Draw 95% confidence intervals
     CI <- cbind(c(x, rev(x)),
                 c(CI[1 ,], rev(CI[2, ])));
     polygon(CI[,1], CI[,2], col = rgb(1, 0, 0, 0.2),
@@ -641,10 +660,12 @@ PlotSectionEnrichment <- function(locPos,
                      idPos, sum(ctsPos),
                      idNeg, sum(ctsNeg));
     par(mfrow = c(1,1));
-    ret <- PlotEnrichment.Generic(ctsMat,
-                                  title = title,
-                                  x.las = 1, x.cex = 0.8, x.padj = 0.8,
-                                  withExtendedAxisLabel = withExtendedAxisLabel);
+    ret <- PlotEnrichment.Generic(
+        ctsMat,
+        title = title,
+        xlab = "",
+        x.las = 1, x.cex = 0.8, x.padj = 0.8,
+        withExtendedAxisLabel = withExtendedAxisLabel);
 }
 
 #' Perform spatial enrichment analysis and plot results.
@@ -720,17 +741,18 @@ PlotSpatialEnrichment <- function(locPos,
             ctsNeg <- table(cut(posNeg[[j]], breaks = breaks));
             ctsMat <- as.matrix(rbind(ctsPos, ctsNeg));
             rownames(ctsMat) <- c(idPos, idNeg);
-            title <- sprintf("%s\nN(%s) = %i, N(%s) = %i\n%s (bw = %i nt)",
+            title <- sprintf("%s\nN(%s) = %i, N(%s) = %i, bw = %i nt, window = %i nt",
                              names(locPos)[i],
                              idPos,
                              sum(ctsPos),
                              idNeg,
                              sum(ctsNeg),
-                             xlab[[j]],
-                             binWidth);
+                             binWidth,
+                             posMax);
             tmp <- PlotEnrichment.Generic(ctsMat,
                                           title = title,
-                                          x.las = 2, x.cex = 0.8, x.padj = 0.8,
+                                          xlab = xlab[[j]],
+                                          x.las = 1, x.cex = 0.8, x.padj = 0,
                                           reverseXaxis = revAxis[[j]]);
         }
     }
@@ -1236,14 +1258,18 @@ PlotRelDistEnrichment <- function(locPos,
         ctsNeg <- table(cut(distNeg[[i]], breaks = breaks));
         ctsMat <- as.matrix(rbind(ctsPos, ctsNeg));
         rownames(ctsMat) <- c("pos", "neg");
-        title <- sprintf("%s\nN(d(%s,%s)) = %i, N(d(%s,%s)) = %i\n(bw = %i nt)",
-                         names(distPos)[i],
-                         idPos, idRef, sum(ctsPos),
-                         idNeg, idRef, sum(ctsNeg),
-                         binWidth);
-        tmp <- PlotEnrichment.Generic(ctsMat,
-                                      title = title,
-                                      x.las = 2, x.cex = 0.8, x.padj = 0.8);
+        title <- sprintf(
+            "%s\nN(d(%s,%s)) = %i, N(d(%s,%s)) = %i, bw = %i nt, flank = %i nt",
+            names(distPos)[i],
+            idPos, idRef, sum(ctsPos),
+            idNeg, idRef, sum(ctsNeg),
+            binWidth,
+            flank);
+        tmp <- PlotEnrichment.Generic(
+            ctsMat,
+            title = title,
+            xlab = sprintf("Distance relative to %s [nt]", idRef),
+            x.las = 1, x.cex = 0.8, x.padj = 0);
     }
 }
 

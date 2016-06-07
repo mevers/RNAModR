@@ -149,9 +149,14 @@ GetTxDb <- function(genomeVersion = "hg38",
     # Returns:
     #   TxDb object.
     sqliteFile <- sprintf("txdb_%s.sqlite", genomeVersion);
+    # RefSeq genes for human, mouse and fruitfly data
+    # SGP genes for yeast
+    geneRef <- ifelse(grepl("sacCer", genomeVersion),
+                      "sgdGene",
+                      "refGene");
     if ((!file.exists(sqliteFile)) || (force == TRUE)) {
         txdb <- makeTxDbFromUCSC(genome = genomeVersion,
-                                 tablename = "refGene");
+                                 tablename = geneRef);
         saveDb(txdb, file = sqliteFile);
     } else {
         cat(sprintf("Found existing sqlite database %s.\n",

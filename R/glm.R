@@ -14,6 +14,7 @@ testGLM <- function(locPos,
         locPos <- locPos[which(names(locPos) %in% filter)];
         locNeg <- locNeg[which(names(locNeg) %in% filter)];
     }
+    par(mfrow = c(length(locPos), 2));
     breaks <- seq(0, posMax, by = binWidth);
     for (i in 1:length(locPos)) {
         posPos <- list("5p" = locPos[[i]]$TXSTART,
@@ -23,35 +24,55 @@ testGLM <- function(locPos,
         posPos <- lapply(posPos, function(x) x[x <= posMax]);
         posNeg <- lapply(posNeg, function(x) x[x <= posMax]);
         for (j in 1:length(posPos)) {
-            ctsPos <- table(cut(posPos[[j]], breaks = breaks));
-            ctsNeg <- table(cut(posNeg[[j]], breaks = breaks));
-            ctsMat <- as.matrix(rbind(ctsPos, ctsNeg));
-            rownames(ctsMat) <- c(idPos, idNeg);
             # Generate bootstrap samples
-            nBS <- 1000;
+            nBS <- 100;
             mat1 <- matrix(sample(posPos[[j]], 
                                   size = nBS * length(posPos[[j]]), 
                                   replace = TRUE),
-                            ncol = nBS);
+                           ncol = nBS);
             mat1 <- apply(mat1, 2, function(x) {table(cut(x, breaks = breaks))});
             mat2 <- matrix(sample(posNeg[[j]], 
-                                  size = 1000 * length(posPos[[j]]), 
+                                  size = nBS * length(posPos[[j]]), 
                                   replace = TRUE),
-                            ncol = 1000);
+                            ncol = nBS);
             mat2 <- apply(mat2, 2, function(x) {table(cut(x, breaks = breaks))});
-            #plot(rowMeans(mat2), col = "blue", ylim = c(0, 200));
-            #points(rowMeans(mat1), col = "red");
             # Logistic regression
+            df <- data.frame(matrix(0, ncol = 5, nrow = nrow(mat1)));
+            df[ ,1] <- breaks[-length(breaks)] + binWidth / 2;
             for (k in 1:nrow(mat1)) {
-              y <- cbind(mat1[k, ], mat2[k, ]);
-              x <- factor(c(rep(idPos, nBS), rep(idNeg, nBS)), 
-                          levels = c(idPos, idNeg));
-              y <- factor(c(rep(idPos, nBS), rep(idNeg, nBS)), 
-                          levels = c(idPos, idNeg));
-              y <- c(rep(0, nBS), rep(1, nBS))
-              x <- c(mat1[k, ], mat2[k, ]);
-              fit <- glm(y ~ x, family = binomial("logit"));
+                x <- factor(c(rep(idPos, nBS), rep(idNeg, nBS)),
+                            levels = c(idNeg, idPos));
+                y <- c(mat1[k, ], mat2[k, ]);
+                y[y == 0] <- 1.e-3;
+                fit <- glm(log10(y) ~ x);
+#                fit <- glm(y ~ x);
+                df[k, 2] <- summary(fit)$coefficients[2, 1];
+                df[k, c(3, 4)] <- confint.default(fit, level = 0.95)[2, ];
+                df[k, 5] <- log10(summary(fit)$coefficients[2, 4]);
             }
+            if (j == 1) {
+                xmin <- 0;
+                xmax <- posMax;
+            } else {
+                xmin <- posMax;
+                xmax <- 0;
+            }
+            plot(df[, 1], df[, 2],
+                 xlim = c(xmin, xmax),
+                 ylim = c(-round(max(abs(df[, 2]))), round(max(abs(df[, 2])))),
+                 col = rgb(1, 0.2, 0.2, 1), type = "l",
+                 lwd = 2,
+                 xlab = "Absolute position [nt]");
+            CI <- cbind(c(df[, 1], rev(df[, 1])),
+                        c(df[, 3], rev(df[, 4])));
+            polygon(CI[,1], CI[,2], col = rgb(1, 0, 0, 0.2),
+                    lwd = 1, border = NA, lty = 1);
+            abline(h = 0.0, col = "red", lty = 3, lwd = 2);
+            points(df[, 1], df[, 5],
+                   type = "h",
+                   lwd = 10,
+                   lend = "butt",
+                   col = rgb(0.2, 0.2, 1, 0.1));
         }
     }
 }
