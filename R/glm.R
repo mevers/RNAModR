@@ -26,7 +26,7 @@ testGLM <- function(locPos,
         posNeg <- lapply(posNeg, function(x) x[x <= posMax]);
         for (j in 1:length(posPos)) {
             # Generate bootstrap samples
-            nBS <- 100;
+            nBS <- 1000;
             mat1 <- matrix(sample(posPos[[j]], 
                                   size = nBS * length(posPos[[j]]), 
                                   replace = TRUE),
@@ -37,16 +37,14 @@ testGLM <- function(locPos,
                                   replace = TRUE),
                             ncol = nBS);
             mat2 <- apply(mat2, 2, function(x) {table(cut(x, breaks = breaks))});
-            # Logistic regression
+            # Poisson regression
             df <- data.frame(matrix(0, ncol = 5, nrow = nrow(mat1)));
             df[ ,1] <- breaks[-length(breaks)] + binWidth / 2;
             for (k in 1:nrow(mat1)) {
                 x <- factor(c(rep(idPos, nBS), rep(idNeg, nBS)),
                             levels = c(idNeg, idPos));
                 y <- c(mat1[k, ], mat2[k, ]);
-                y[y == 0] <- 1.e-3;
-                fit <- glm(log10(y) ~ x);
-#                fit <- glm(y ~ x);
+                fit <- glm(y ~ x, family = "poisson");
                 df[k, 2] <- summary(fit)$coefficients[2, 1];
                 df[k, c(3, 4)] <- confint.default(fit, level = 0.95)[2, ];
                 df[k, 5] <- log10(summary(fit)$coefficients[2, 4]);
