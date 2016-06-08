@@ -27,5 +27,5 @@ Suggests:
     testthat
 License: GPL-3 | file LICENSE
 LazyData: false
-RoxygenNote: 5.0.1
+RoxygenNote: 5.0.1.9000
 VignetteBuilder: knitr

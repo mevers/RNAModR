@@ -4,29 +4,36 @@
 \alias{PlotEnrichment.Generic}
 \title{Generic function to perform enrichment analysis and plot results.}
 \usage{
-PlotEnrichment.Generic(mat, title = "", x.las = 1, x.cex = 1,
-  x.padj = 1, plotType = "l", reverseXaxis = FALSE,
-  withExtendedAxisLabel = 0)
+PlotEnrichment.Generic(mat, title = "", xlab = "", x.las = 1, x.cex = 1,
+  x.padj = 1, plotType = "l", revXaxis = FALSE, xAxisLblFmt = 0)
 }
 \arguments{
-\item{mat}{The data matrix.}
+\item{mat}{A \code{dataframe}; specifies the contingency table.}
 
-\item{title}{An identifier for \code{mat}.}
+\item{title}{A character string; specifies plot title.}
 
-\item{x.las}{Orientation of x-axis labels. Default is 1.}
+\item{xlab}{A character string; specifies the x-axis label.}
 
-\item{x.cex}{Scaling factor for x-axis labels. Default is 1.}
+\item{x.las}{An integer scalar; specifies the orientation of
+x-axis labels; Default is 1.}
 
-\item{x.padj}{Vertical adjustment of x-axis labels. Default is 1.}
+\item{x.cex}{A float scalar; specifies a scaling factor for
+x-axis labels; default is 1.}
 
-\item{plotType}{Plot style. Default is "l".}
+\item{x.padj}{A float scalar; specifies the vertical adjustment
+of x-axis labels; default is 1.}
 
-\item{reverseXaxis}{Reverse the order of values from \code{mat}.}
+\item{plotType}{A character string; specifies the plot style;
+default is "l" (for line).}
 
-\item{withExtendedAxisLabel}{Print extended axis label.}
+\item{revXaxis}{A logical scalar; if \code{TRUE}, the order
+of columns from \code{mat} is reversed; default is \code{FALSE}.}
+
+\item{xAxisLblFmt}{An integer scalar; specifies the
+format of the x-axis label.}
 }
 \value{
-A list of \code{fisher.test} return objects and \code{mat}
+A list of \code{fisher.test} return objects and \code{mat}.
 }
 \description{
 Generic function to perform enrichment analysis and plot results.

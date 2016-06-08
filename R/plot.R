@@ -434,10 +434,10 @@ PlotSpatialDistribution <- function(locus,
 #' of x-axis labels; default is 1.
 #' @param plotType A character string; specifies the plot style;
 #' default is "l" (for line).
-#' @param reverseXaxis A logical scalar; if \code{TRUE}, the order
+#' @param revXaxis A logical scalar; if \code{TRUE}, the order
 #' of columns from \code{mat} is reversed; default is \code{FALSE}.
-#' @param withExtendedAxisLabel An integer scalar; specifies the
-#' format of axis label.
+#' @param xAxisLblFmt An integer scalar; specifies the
+#' format of the x-axis label.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
@@ -452,8 +452,8 @@ PlotEnrichment.Generic <- function(mat,
                                    xlab = "",
                                    x.las = 1, x.cex = 1, x.padj = 1,
                                    plotType = "l",
-                                   reverseXaxis = FALSE,
-                                   withExtendedAxisLabel = 0) {
+                                   revXaxis = FALSE,
+                                   xAxisLblFmt = 0) {
     # Generic function to perform enrichment analysis and plot results.
     #
     # Args:
@@ -463,8 +463,8 @@ PlotEnrichment.Generic <- function(mat,
     #   x.cex: Scaling factor for x-axis labels. Default is 1.
     #   x.padj: Vertical adjustment of x-axis labels. Default is 1.
     #   plotType: Plot style. Default is "l".
-    #   reverseXaxis: Reverse the order of values from mat.
-    #   withExtendedAxisLabel: Print extended axis label.
+    #   revXaxis: Reverse the order of values from mat.
+    #   xAxisLblFmt: Print extended axis label.
     #
     # Returns:
     #   A list of fisher.test return objects.
@@ -500,7 +500,7 @@ PlotEnrichment.Generic <- function(mat,
     CI[CI == 0] <- 1.e-12;
     CI[is.infinite(CI)] <- 1e12;
     CI <- log10(CI);
-    if (reverseXaxis) {
+    if (revXaxis) {
         OR <- rev(OR);
         pval <- rev(pval);
         CI[1, ] <- rev(CI[1, ]);
@@ -525,42 +525,53 @@ PlotEnrichment.Generic <- function(mat,
                   border = NA,
                   main = title, font.main = 1);
     abline(h = -2, col = "blue", lty = 3, lwd = 2);
-    symScaleX <- FALSE;
-    if (withExtendedAxisLabel > 0) {
-        if (withExtendedAxisLabel == 1) {
-            labels = sprintf("%s\nOR=%4.3f,p=%4.3e",
-                names(OR), 10^OR, 10^pval.uncapped);
-        } else {
-            labels = sprintf("%s\nN(%s)=%i\nN(%s)=%i\nOR=%4.3f\np=%4.3e",
-                names(OR),
-                rownames(mat)[1], mat[1, ],
-                rownames(mat)[2], mat[2, ],
-                10^OR, 10^pval.uncapped);
-        }
-    } else {
-        labels <- names(OR);
+    # Draw x axis
+    idxLabels <- seq(1, length(OR));
+    labels <- names(OR);
+    if (xAxisLblFmt == 1) {
+        labels = sprintf("%s\nOR=%4.3f,p=%4.3e",
+            names(OR),
+            10^OR,
+            10^pval.uncapped);
+    } else if (xAxisLblFmt == 2) {
+        labels = sprintf("%s\nN(%s)=%i\nN(%s)=%i\nOR=%4.3f\np=%4.3e",
+            names(OR),
+            rownames(mat)[1], mat[1, ],
+            rownames(mat)[2], mat[2, ],
+            10^OR,
+            10^pval.uncapped);
+    } else if (xAxisLblFmt == 3) {
         x1 <- as.numeric(
             gsub("(\\(|,[+-]*\\d+\\.*\\d*e*\\+*\\d*])", "", labels));
         x2 <- as.numeric(
             gsub("(\\([+-]*\\d+\\.*\\d*e*\\+*\\d*,|])", "", labels));
-        if (x2[length(x2)] + x1[1] == 0) {
-            symScaleX <- TRUE;
+#        labels <- (x2 + x1) / 2;
+        deltaIdx <- floor(length(x1) / 10 + 0.5);
+        # Zero-crossing?
+        idxZero <- which(x2 == 0 | (x1 < 0 & x2 > 0));
+        if (length(idxZero) == 0) {
+            idxLabels <- seq(1, length(x1), deltaIdx);
+            if (revXaxis == TRUE) {
+                idxLabels <- sort(seq(length(x1), 1, -deltaIdx));
+            }
+
+        } else {
+            deltaIdx <- round(length(labels) / 10 + 0.5);
+            idxLabels <- sort(
+                c(seq(idxZero, by = -deltaIdx),
+                  seq(idxZero + deltaIdx, length(labels), by = deltaIdx)));
+            abline(v = mp[idxZero],
+                   col = rgb(0, 0, 0, 0.2),
+                   lwd = 2,
+                   lty = 3);
         }
     }
-    x <- mp;
-    # Draw x axis
-    idxLabels <- seq(1, length(x), length.out = 10);
-    if (symScaleX == TRUE) {
-#        idxLabels <- c(
-#            seq(1, floor(length(x) / 2), by = round(length(x) / 10)),
-#            floor(length(x) / 2 + 0.5),
-#            seq(floor(length(x) / 2) + 1, length(x), by = round(length(x) / 10)));
-        abline(v = x[floor(length(x) / 2 + 0.5)],
-               col = rgb(0, 0, 0, 0.2), lwd = 2);
-    }
-    axis(1, at = x[idxLabels],
+    axis(1,
+         at = mp[idxLabels],
          labels = labels[idxLabels],
-         las = x.las, padj = x.padj, cex.axis = x.cex);
+         las = x.las,
+         padj = x.padj,
+         cex.axis = x.cex);
     mtext(xlab, side = 1, line = 2.7);
     # Draw right y axis
     axis(4, at = seq(ymin, ymax));
@@ -572,7 +583,7 @@ PlotEnrichment.Generic <- function(mat,
     sig[pval <= -2 & pval > -3] <- "**";
     sig[pval <= -1.30103 & pval > -2] <- "*";
     sig[pval > -1.30103] <- "ns";
-    text(x, y = 0.5, labels = sig, srt = 90, col = "blue");
+    text(mp, y = 0.5, labels = sig, srt = 90, col = "blue");
     # Draw legend
     legend("bottomleft",
            c("Odds-ratio (OR)",
@@ -584,13 +595,13 @@ PlotEnrichment.Generic <- function(mat,
            bty = "n");
     # Plot odds-ratios
     par(new = TRUE);
-    plot(x, OR, col = rgb(1, 0.2, 0.2, 1),
+    plot(mp, OR, col = rgb(1, 0.2, 0.2, 1),
          lwd = 2, type = plotType,
          xlim = c(xmin, xmax),
          ylim = c(-1.0, 1.0),
          axes = FALSE, xlab = "", ylab = "");
     # Draw 95% confidence intervals
-    CI <- cbind(c(x, rev(x)),
+    CI <- cbind(c(mp, rev(mp)),
                 c(CI[1 ,], rev(CI[2, ])));
     polygon(CI[,1], CI[,2], col = rgb(1, 0, 0, 0.2),
             lwd = 1, border = NA, lty = 1);
@@ -612,7 +623,7 @@ PlotEnrichment.Generic <- function(mat,
 #' @param locPos A \code{txLoc} object. These should be the positive control sites.
 #' @param locNeg A \code{txLoc} object. These should be the negative control sites.
 #' @param filter Only plot loci in transcript regions specified in filter.  Default is NULL.
-#' @param withExtendedAxisLabel Plot extended axis labels. Default is 2. See ??? for details.
+#' @param xAxisLblFmt Plot extended axis labels. Default is 2. See ??? for details.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #'
@@ -632,7 +643,7 @@ PlotEnrichment.Generic <- function(mat,
 PlotSectionEnrichment <- function(locPos,
                                   locNeg,
                                   filter = NULL,
-                                  withExtendedAxisLabel = 2) {
+                                  xAxisLblFmt = 2) {
     # Perform transcript section enrichment analysis and plot results.
     #
     # Args:
@@ -665,7 +676,7 @@ PlotSectionEnrichment <- function(locPos,
         title = title,
         xlab = "",
         x.las = 1, x.cex = 0.8, x.padj = 0.8,
-        withExtendedAxisLabel = withExtendedAxisLabel);
+        xAxisLblFmt = xAxisLblFmt);
 }
 
 #' Perform spatial enrichment analysis and plot results.
@@ -753,7 +764,8 @@ PlotSpatialEnrichment <- function(locPos,
                                           title = title,
                                           xlab = xlab[[j]],
                                           x.las = 1, x.cex = 0.8, x.padj = 0,
-                                          reverseXaxis = revAxis[[j]]);
+                                          revXaxis = revAxis[[j]],
+                                          xAxisLblFmt = 3);
         }
     }
 }
@@ -1269,7 +1281,8 @@ PlotRelDistEnrichment <- function(locPos,
             ctsMat,
             title = title,
             xlab = sprintf("Distance relative to %s [nt]", idRef),
-            x.las = 1, x.cex = 0.8, x.padj = 0);
+            x.las = 1, x.cex = 0.8, x.padj = 0,
+            xAxisLblFmt = 3);
     }
 }
 

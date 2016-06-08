@@ -4,8 +4,7 @@
 \alias{PlotSectionEnrichment}
 \title{Perform transcript section enrichment analysis and plot results.}
 \usage{
-PlotSectionEnrichment(locPos, locNeg, filter = NULL,
-  withExtendedAxisLabel = 2)
+PlotSectionEnrichment(locPos, locNeg, filter = NULL, xAxisLblFmt = 2)
 }
 \arguments{
 \item{locPos}{A \code{txLoc} object. These should be the positive control sites.}
@@ -14,7 +13,7 @@ PlotSectionEnrichment(locPos, locNeg, filter = NULL,
 
 \item{filter}{Only plot loci in transcript regions specified in filter.  Default is NULL.}
 
-\item{withExtendedAxisLabel}{Plot extended axis labels. Default is 2. See ??? for details.}
+\item{xAxisLblFmt}{Plot extended axis labels. Default is 2. See ??? for details.}
 }
 \description{
 Perform transcript section enrichment analysis and plot results.
