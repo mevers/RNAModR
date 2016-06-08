@@ -56,6 +56,9 @@ generating null sites.
     biocLite(c("BSgenome.Hsapiens.UCSC.hg38", "org.Hs.eg.db"))
     ```
 
+    We also offer the possibility to download pre-constructed transcriptome data, see section [Downloadable transcriptome data](#downloadTx).
+
+
 2. If all package dependencies are met, install **RNAModR** with devtools
 
    ```{r}
@@ -71,6 +74,8 @@ devtools::install_github(..., force = TRUE);
 
 ## Getting started
 The following lines of R code will load the **RNAModR** library, and plot the distribution of m6A sites [[Linder et al., Nature Methods 12, 767 (2015)](http://www.nature.com/nmeth/journal/v12/n8/abs/nmeth.3453.html)] across the 5'UTR, CDS and 3'UTR of the human hg38-based transcriptome.
+
+Note: You can also download pre-constructed transcriptome data, see the [next section](#downloadTx) for details.
 
 ```{r}
 # Load the library.
@@ -90,6 +95,35 @@ posSites <- FilterTxLoc(posSites, filter = c("5'UTR", "CDS", "3'UTR"));
 # Plot distribution across transcript sections
 PlotSectionDistribution(posSites);
 ```
+
+## Downloadable transcriptome data<a name="downloadTx"></a>
+You can download pre-constructed transcriptome data files for the following reference genome versions
+
+*Homo sapiens*
+
+1. [hg38](https://drive.google.com/open?id=0B5_hfxBdKWHRVlBCTUlSazJfaWs)
+2. [hg19](https://drive.google.com/open?id=0B5_hfxBdKWHRemRwMUtoa1ZnNVE)
+3. [hg18](https://drive.google.com/open?id=0B5_hfxBdKWHRZ3ZqdXpVN0VmWlU)
+
+*Mus musculus*
+
+1. [mm10](https://drive.google.com/open?id=0B5_hfxBdKWHRYzliNkotN1NwSTQ)
+2. [mm9](https://drive.google.com/open?id=0B5_hfxBdKWHRdkNSMmNleVJUSm8)
+3. [mm8](https://drive.google.com/open?id=0B5_hfxBdKWHRMmN5WGRsRkpWcWc)
+
+In order to use the transcriptome data you need to copy the RData file into your working directory.
+You can check that RNAModR correctly finds the transcriptome data by running e.g.
+
+```{r}
+BuildTx("hg38");
+```
+
+Provided you have copied the file tx_hg38.RData into the working directory, this should produce the following message
+
+```
+Found existing transcriptome data. Nothing to do.
+To rebuild run with force = TRUE.
+``` 
 
 ## Documentation
 
