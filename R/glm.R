@@ -44,7 +44,7 @@ testGLM <- function(locPos,
                 x <- factor(c(rep(idPos, nBS), rep(idNeg, nBS)),
                             levels = c(idNeg, idPos));
                 y <- c(mat1[k, ], mat2[k, ]);
-                fit <- glm(y ~ x, family = "poisson");
+                fit <- glm(y ~ x, family = poisson(link = "log"));
                 df[k, 2] <- summary(fit)$coefficients[2, 1];
                 df[k, c(3, 4)] <- confint.default(fit, level = 0.95)[2, ];
                 df[k, 5] <- log10(summary(fit)$coefficients[2, 4]);
@@ -61,7 +61,8 @@ testGLM <- function(locPos,
                  ylim = c(-round(max(abs(df[, 2]))), round(max(abs(df[, 2])))),
                  col = rgb(1, 0.2, 0.2, 1), type = "l",
                  lwd = 2,
-                 xlab = "Absolute position [nt]");
+                 xlab = "Absolute position [nt]",
+                 ylab = "log(Fold change)");
             CI <- cbind(c(df[, 1], rev(df[, 1])),
                         c(df[, 3], rev(df[, 4])));
             polygon(CI[,1], CI[,2], col = rgb(1, 0, 0, 0.2),

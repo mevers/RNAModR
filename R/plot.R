@@ -1410,7 +1410,8 @@ PlotOverlap <- function(loc1, loc2) {
         par(mfrow = c(ceiling(length(gr1) / 2), 2));
     }
     for (i in 1:length(gr1)) {
-        m <- countOverlaps(gr1[[i]], gr2[[i]]);
+        # Supress warnings of sequences in gr1 not being in gr2
+        m <- suppressWarnings(countOverlaps(gr1[[i]], gr2[[i]]));
         overlap <- length(m[m > 0]);
         grps <- list(
             seq(1, length(gr1[[i]])),

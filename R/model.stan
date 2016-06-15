@@ -3,20 +3,21 @@
 data {
   // Number of observations
   int<lower=1> N;
-  // Number of parameters
-  int<lower=1> K;
   // Data
-  matrix[N,K] X;
+  int X[N];
   // Response
-  vector[N] y;
+  int y[N];
 }
 
 parameters {
   // Define parameters to estimate
   vector[K] beta;
-  real<lower=0> sigma;
 }
 
 model {
-  y ~ lognormal(X * beta, sigma);
+  // Priors
+  beta[0] <- gamma(1, 1);
+  beta[1] <- gamma(1, 1);
+
+  y ~ poisson(beta[0] + beta[1] * X);
 }
