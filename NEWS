@@ -1,0 +1,8 @@
+# All changes to RNAModR are documented here
+
+## Version 0.1.0
+
+- Changed method to calculate nearest distances between two
+  GRanges objects. We now collapse ranges to the start position
+  and determine nearest distances based on start positions of the
+  two GRanges objects. Thanks to Andrew Shafik for prompting this.

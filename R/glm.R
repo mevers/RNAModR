@@ -1,4 +1,4 @@
-#' @importFrom stats binomial confint.default glm
+#' @importFrom stats binomial confint.default glm poisson
 #' @importFrom graphics points
 testGLM <- function(locPos,
                     locNeg,

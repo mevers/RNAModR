@@ -540,30 +540,33 @@ PlotEnrichment.Generic <- function(mat,
             rownames(mat)[2], mat[2, ],
             10^OR,
             10^pval.uncapped);
-    } else if (xAxisLblFmt == 3) {
+    } else if (xAxisLblFmt >= 3) {
         x1 <- as.numeric(
             gsub("(\\(|,[+-]*\\d+\\.*\\d*e*\\+*\\d*])", "", labels));
         x2 <- as.numeric(
             gsub("(\\([+-]*\\d+\\.*\\d*e*\\+*\\d*,|])", "", labels));
-#        labels <- (x2 + x1) / 2;
-        deltaIdx <- floor(length(x1) / 10 + 0.5);
+        labels <- (x2 + x1) / 2;
         # Zero-crossing?
         idxZero <- which(x2 == 0 | (x1 < 0 & x2 > 0));
-        if (length(idxZero) == 0) {
-            idxLabels <- seq(1, length(x1), deltaIdx);
-            if (revXaxis == TRUE) {
-                idxLabels <- sort(seq(length(x1), 1, -deltaIdx));
-            }
-
-        } else {
-            deltaIdx <- round(length(labels) / 10 + 0.5);
-            idxLabels <- sort(
-                c(seq(idxZero, by = -deltaIdx),
-                  seq(idxZero + deltaIdx, length(labels), by = deltaIdx)));
+        if (length(idxZero) > 0) {
             abline(v = mp[idxZero],
                    col = rgb(0, 0, 0, 0.2),
                    lwd = 2,
                    lty = 3);
+        }
+        if (xAxisLblFmt == 3) {
+            deltaIdx <- floor(length(x1) / 10 + 0.5);
+            if (length(idxZero) == 0) {
+                idxLabels <- seq(1, length(x1), deltaIdx);
+                if (revXaxis == TRUE) {
+                    idxLabels <- sort(seq(length(x1), 1, -deltaIdx));
+                }
+            } else {
+                deltaIdx <- round(length(labels) / 10 + 0.5);
+                idxLabels <- sort(
+                    c(seq(idxZero, by = -deltaIdx),
+                      seq(idxZero + deltaIdx, length(labels), by = deltaIdx)));
+            }
         }
     }
     axis(1,
@@ -1176,7 +1179,7 @@ PlotRelDistDistribution <- function(loc1,
         par(mfrow = c(ceiling(length(dist) / 2), 2));
     }
     breaks <- seq(-flank, flank, by = binWidth);
-    bwString <- sprintf("bw = %3.2f", binWidth);
+    bwString <- sprintf("bw = %3i nt", binWidth);
     for (i in 1:length(dist)) {
         if (flank > 0) {
             dist[[i]] <- dist[[i]][abs(dist[[i]]) <= flank];

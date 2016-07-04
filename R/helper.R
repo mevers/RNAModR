@@ -330,10 +330,11 @@ TxLoc2GRangesList <- function(locus,
 #' \code{GRangesList} objects. See 'Details'.
 #'
 #' The function uses \code{GenomicRanges::distanceToNearest}
-#' to calculate nearest distances between entries from two
-#' \code{GRangesList} objects. The return object is a list
-#' of distances, where every list element corresponds to
-#' a \code{GRangesList} element.
+#' to return the nearest distances between the start positions
+#' of a feature from \code{gr1} and any feature from \code{gr2}
+#' with the same name (based on field \code{seqnames}). The
+#' return object is a list of distances, where every list
+#' element corresponds to a \code{GRangesList} element.
 #'
 #' @param gr1 A \code{GRangesList} object.
 #' @param gr2 A \code{GRangesList} object.
@@ -362,6 +363,12 @@ GetRelDistNearest <- function(gr1,
     }
     dist.list <- list();
     for (i in 1:length(gr1)) {
+        # Collapse range of gr1 and gr2
+        end(gr1[[i]]) <- start(gr1[[i]]);
+        end(gr2[[i]]) <- start(gr2[[i]]);
+        # Disable warnings to get rid of messages "Each of the
+        # 2 combined objects has sequence levels not in the other".
+        # As this is expected to happen, we can safely ignore.
         options(warn = -1);
         d <- as.data.frame(distanceToNearest(gr1[[i]], gr2[[i]]));
         options(warn = 0);
