@@ -331,10 +331,15 @@ TxLoc2GRangesList <- function(locus,
 #'
 #' The function uses \code{GenomicRanges::distanceToNearest}
 #' to return the nearest distances between the start positions
-#' of a feature from \code{gr1} and any feature from \code{gr2}
+#' of a features from \code{gr1} and any feature from \code{gr2}
 #' with the same name (based on field \code{seqnames}). The
 #' return object is a list of distances, where every list
-#' element corresponds to a \code{GRangesList} element.
+#' element corresponds to a list element from \code{gr1} and
+#' \code{gr2}.
+#' Note that distances are given as signed integers: Negative
+#' distances correspond to pos(gr1) < pos(gr2), positive
+#' distances correspond to pos(gr1) > pos(gr2).
+#' 
 #'
 #' @param gr1 A \code{GRangesList} object.
 #' @param gr2 A \code{GRangesList} object.
@@ -370,10 +375,16 @@ GetRelDistNearest <- function(gr1,
         # 2 combined objects has sequence levels not in the other".
         # As this is expected to happen, we can safely ignore.
         options(warn = -1);
+        # Get the nearest distance between entries from gr1[[i]]
+        # and gr2[[i]] with the same seqnames (i.e. transcript ID).
         d <- as.data.frame(distanceToNearest(gr1[[i]], gr2[[i]]));
         options(warn = 0);
         idx1 <- d$queryHits;
         idx2 <- d$subjectHits;
+        # Set d > 0 if pos(gr1[[i]]) > pos(gr2[[i]])
+        #     d < 0 if pos(gr1[[i]]) < pos(gr2[[i]])
+        # In words: Negative distances => gr1 is upstream of gr2
+        #           Positive distances => gr1 is downstream of gr2
         dist <- ifelse(end(gr1[[i]][idx1]) > start(gr2[[i]][idx2]),
                        d$distance,
                        -d$distance);

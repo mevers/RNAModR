@@ -22,10 +22,15 @@ Return list of nearest distances between entries from two
 \details{
 The function uses \code{GenomicRanges::distanceToNearest}
 to return the nearest distances between the start positions
-of a feature from \code{gr1} and any feature from \code{gr2}
+of a features from \code{gr1} and any feature from \code{gr2}
 with the same name (based on field \code{seqnames}). The
 return object is a list of distances, where every list
-element corresponds to a \code{GRangesList} element.
+element corresponds to a list element from \code{gr1} and
+\code{gr2}.
+Note that distances are given as signed integers
+\begin{equation}
+ \hat{d} = \mathrm{sgn}(gr1, gr2) d
+\end{equation}
 }
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}
