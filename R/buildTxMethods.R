@@ -18,7 +18,7 @@
 #' @keywords internal
 #'
 #' @importFrom utils installed.packages
-#' 
+#'
 #' @examples
 #' \dontrun{
 #' CheckPkgDependencies("hg38");
@@ -122,7 +122,7 @@ CheckPkgDependencies <- function(genomeVersion = "hg38") {
 #'
 #' @return A \code{TxDb} object. See 'Details'.
 #'
-#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au} 
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #'
 #' @examples
@@ -130,7 +130,7 @@ CheckPkgDependencies <- function(genomeVersion = "hg38") {
 #' txdb <- GetTxDb();
 #' print(txdb);
 #' }
-#' 
+#'
 #' @export
 GetTxDb <- function(genomeVersion = "hg38",
                     standardChrOnly = TRUE,
@@ -179,9 +179,9 @@ GetTxDb <- function(genomeVersion = "hg38",
 #' Get different gene IDs.
 #'
 #' Get different gene IDs for mapping between different gene
-#' annotations (Ensembl, Entrez, etc.). See 'Details'. 
+#' annotations (Ensembl, Entrez, etc.). See 'Details'.
 #' This is a low-level function that is being called from
-#' \code{BuildTx}. 
+#' \code{BuildTx}.
 #'
 #' The function extracts the genome assembly version from
 #' the \code{TxDb} object, and loads the suitable genome wide
@@ -207,7 +207,7 @@ GetTxDb <- function(genomeVersion = "hg38",
 #' @param txdb A \code{TxDb} object.
 #'
 #' @return A \code{data.frame}. See 'Details'.
-#' 
+#'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #'
@@ -291,7 +291,7 @@ GetGeneIds <- function(txdb) {
 #'
 #' Get transcript sections. See 'Details'.
 #' This is a low-level function that is being called from
-#' \code{BuildTx}. 
+#' \code{BuildTx}.
 #'
 #' The function returns a \code{list} of \code{GRangesList}
 #' objects. The number and names of list entries match the
@@ -299,7 +299,7 @@ GetGeneIds <- function(txdb) {
 #' \code{GRangesList} are labelled according to their
 #' transcript RefSeq ID. Note that multiple entries with
 #' identical RefSeq ID exist.
-#' 
+#'
 #' @param txdb A \code{TxDb} object.
 #' @param sections A character vector; specifies which transcript
 #' sections should be extracted from \code{txdb}; default is
@@ -390,13 +390,13 @@ GetTxBySec <- function(txdb,
 
 
 #' De-duplicate \code{GRangesList} entries based on distance.
-#' 
+#'
 #' De-duplicate \code{GRangesList} entries based on distance.
 #' See 'Details'.
 #' This is a low-level function that is being called from
-#' \code{CollapseTxBySec}. 
+#' \code{CollapseTxBySec}.
 
-#' 
+#'
 #' For two \code{GRangesList} objects select entries from
 #' \code{query} that have an entry in \code{ref} and collapse
 #' multiple entries with the same name from \code{query} based
@@ -413,10 +413,10 @@ GetTxBySec <- function(txdb,
 #' @keywords internal
 #'
 #' @importFrom utils setTxtProgressBar txtProgressBar
-#' 
+#'
 #' @export
 DedupeBasedOnNearestRef <- function(query, ref, showPb = FALSE) {
-    query <- query[which(elementLengths(query) > 0)];
+    query <- query[which(elementNROWS(query) > 0)];
     query <- query[which(names(query) %in% names(ref))];
     query <- query[order(names(query), -sum(width(query)))];
     dupes <- which(duplicated(names(query)));
@@ -454,11 +454,11 @@ DedupeBasedOnNearestRef <- function(query, ref, showPb = FALSE) {
 
 
 #' Collapse entries from a \code{GetTxBySec} return object.
-#' 
+#'
 #' Collapse entries from a \code{GetTxBySec} return object.
 #' See 'Details'.
 #' This is a low-level function that is being called from
-#' \code{BuildTx}. 
+#' \code{BuildTx}.
 #'
 #' Entries are collapsed using the following method:
 #' \itemize{
@@ -470,7 +470,7 @@ DedupeBasedOnNearestRef <- function(query, ref, showPb = FALSE) {
 #'   \item For every 5'UTR with a unique RefSeq ID, the
 #' corresponding upstream promoter is chosen.
 #' }
-#' 
+#'
 #' @param txBySec A \code{list} of \code{GRangesList} objects;
 #' output of function \code{GetTxBySec}.
 #' @param geneXID A \code{data.frame}; output of function
@@ -585,10 +585,10 @@ CollapseTxBySec <- function(txBySec,
 
 
 #' Perform sanity check of collapsed transcriptome.
-#' 
+#'
 #' Perform sanity check of collapsed transcriptome. See 'Details'.
 #' This is a low-level function that is being called from
-#' \code{BuildTx}. 
+#' \code{BuildTx}.
 #'
 #' The function checks for entries with duplicate RefSeq IDs
 #' across a list of transcripts sections. For example, the return
@@ -632,7 +632,7 @@ PerformSanityCheck <- function(txBySec) {
 #'
 #' Get sequences for transcript segments.
 #' This is a low-level function that is being called from
-#' \code{BuildTx}. 
+#' \code{BuildTx}.
 
 #'
 #' @param txBySec A \code{list} of \code{GRangesList} objects;
@@ -720,15 +720,15 @@ GetTxSeq <- function(txBySec,
 #'
 #' Build a custom, organism-specific transcriptome. See 'Details'.
 #'
-#' The function builds an organism-specific transcriptome containing 
+#' The function builds an organism-specific transcriptome containing
 #' one transcript per unique Entrez ID; the transcript is selected
 #' from all UCSC RefSeq annotation-based isoforms as the transcript
 #' with the longest CDS, and longest upstream/downstream adjoining
 #' UTRs. Transcript segments are stored per transcript section, and
 #' written into a \code{.RData} file.
 #' For most operations, the user will run this function once, and
-#' continue with further downstream analyses. Various RNAModR 
-#' routines will automatically load the transcriptome data to e.g. 
+#' continue with further downstream analyses. Various RNAModR
+#' routines will automatically load the transcriptome data to e.g.
 #' map sites to and from the transcriptome.
 #' Currently, RNAModR supports analyses of human, mouse, fruitfly
 #' and yeast data, based on different reference genome versions:
@@ -744,15 +744,15 @@ GetTxSeq <- function(txBySec,
 #' Running \code{BuildTx} with \code{sanityCheck = TRUE} performs
 #' additional checks of the various transcriptome components, and
 #' is intended for debugging purposes only. It is usually safe to
-#' run with the default \code{sanityCheck = FALSE}. 
-#' 
+#' run with the default \code{sanityCheck = FALSE}.
+#'
 #' @param genomeVersion A character string; refers to a specific
 #' reference genome assembly version; default is \code{"hg38"}.
 #' @param force A logical scalar; if \code{TRUE} force rebuild of
 #' transcriptome; this will overwrite existing data.
-#' 
+#'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
-#' 
+#'
 #' @import AnnotationDbi GenomeInfoDb GenomicRanges GenomicFeatures
 #' RSQLite
 #'
@@ -824,10 +824,10 @@ BuildTx <- function(genomeVersion = c(
 #' Build a test transcriptome. See 'Details'.
 #'
 #' The function builds a transcriptome for testing purposes.
-#' 
+#'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
-#' 
+#'
 #' @import GenomicRanges GenomicFeatures RSQLite
 #'
 #' @export
@@ -846,7 +846,7 @@ BuildTxTest <- function() {
                           exon_end=c(999, 2085, 2144, 2199, 3601, 5199),
                           cds_start=c(1, 2022, 2101, 2131, 3201, 4001),
                           cds_end=c(999, 2085, 2144, 2193, 3601, 4501));
-    genes <- cbind.data.frame(tx_name = sprintf("tx%i", seq(1,3)), 
+    genes <- cbind.data.frame(tx_name = sprintf("tx%i", seq(1,3)),
                               gene_id = sprintf("gene%i", seq(1,3)));
     chrominfo <- cbind.data.frame(chrom = "chr1", length = 5199, is_circular = FALSE);
     txdb <- makeTxDb(tx, splice, genes = genes, chrominfo = chrominfo);
