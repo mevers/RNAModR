@@ -354,8 +354,8 @@ TxLoc2GRangesList <- function(locus,
 #' @export
 GetRelDistNearest <- function(gr1,
                               gr2) {
-    CheckClass(gr1, "GRangesList")
-    CheckClass(gr2, "GRangesList")
+    CheckClass(gr1, "CompressedGRangesList")
+    CheckClass(gr2, "CompressedGRangesList")
     filter <- intersect(names(gr1), names(gr2))
     gr1 <- gr1[which(names(gr1) %in% filter)]
     gr2 <- gr2[which(names(gr2) %in% filter)]

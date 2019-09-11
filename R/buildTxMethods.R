@@ -28,6 +28,33 @@
 CheckPkgDependencies <- function(genomeVersion = "hg38") {
     pkgsInstalled <- installed.packages()
     pkgsReq <- list()
+    
+    #pkgsReq <- data.frame(
+    #    genomeVersion = c(
+    #        "hg38", "hg19", "hg18",
+    #        "mm10", "mm9", "mm8",
+    #        "dm6", "dm3", "dm2",
+    #        "sacCer3", "sacCer2", "sacCer1"),
+    #    annotation = c(
+    #        rep("org.Hs.eg.db", 3),
+    #        rep("org.Mm.eg.db", 3),
+    #        rep("org.Dm.eg.db", 3),
+    #        rep("org.Sc.sgd.db", 3)),
+    #    genome = c(
+    #        "BSgenome.Hsapiens.UCSC.hg38", 
+    #        "BSgenome.Hsapiens.UCSC.hg19",
+    #        "BSgenome.Hsapiens.UCSC.hg18",
+    #        "BSgenome.Mmusculus.UCSC.mm10",
+    #        "BSgenome.Mmusculus.UCSC.mm9",
+    #        "BSgenome.Mmusculus.UCSC.mm8",
+    #        "BSgenome.Dmelanogaster.UCSC.dm6",
+    #        "BSgenome.Dmelanogaster.UCSC.dm3",
+    #        "BSgenome.Dmelanogaster.UCSC.dm2",
+    #        "BSgenome.Scerevisiae.UCSC.sacCer3",
+    #        "BSgenome.Scerevisiae.UCSC.sacCer2",
+    #        "BSgenome.Scerevisiae.UCSC.sacCer1"))
+    #pkgsReq[match(genomeVersion, pkgsReq$genomeVersion), ]
+        
     if (genomeVersion == "hg38") {
         pkgsReq[["Annot"]] <- "org.Hs.eg.db"
         pkgsReq[["Genome"]] <- "BSgenome.Hsapiens.UCSC.hg38"
@@ -69,7 +96,7 @@ CheckPkgDependencies <- function(genomeVersion = "hg38") {
     df <- cbind(t(as.data.frame(pkgsReq)), ret)
     if (!all(ret)) {
         # Create meaningful error message
-        ss <- "[ERROR] R/Bioconductor package dependencies not met."
+        ss <- "[ERROR] R/Bioconductor package dependency not met."
         pkgsMissing <- df[which(df[, 2] == FALSE), 1]
         for (i in 1:length(pkgsMissing)) {
             ss <- sprintf("%s\n  Not found: %s", ss, pkgsMissing[i])
@@ -200,9 +227,15 @@ GetTxDb <- function(genomeVersion = "hg38",
 #'   \item ENTREZID: Entrez gene ID
 #'   \item SYMBOL: Gene symbol
 #'   \item ENSEMBL: Ensembl gene ID
-#'   \item UNIGENE: UniGene gene ID
 #'   \item GENENAME: Gene name
 #' }
+#' Note that mapping between gene IDs is a many-to-many mapping process.
+#' For example, different transcript RefSeq IDs can belong to the same
+#' gene. Which transcripts are associated with which gene depends in
+#' turn on the gene reference system (RefSeq, Ensembl, etc.). On top of
+#' that, the same transcript may have >1 location in the reference
+#' genome: NM_000451 (EntrezID 6473) is annotated on chromosomes X and Y,
+#' NM_001001418 (EntrezID 414060) has two loci on chr17.
 #'
 #' @param txdb A \code{TxDb} object.
 #'
@@ -261,29 +294,31 @@ GetGeneIds <- function(txdb) {
     } else {
         stop(sprintf("Unknown genome %s.", genomeVersion))
     }
-    tx <- transcripts(txdb)
-    # Suppress messages indicating matching of duplicate keys
+    
+    # Get transcripts from TxDb database; RefSeq transcript ID and Entrez gene ID
+    # as metadata columns
+    # Store REFSEQ and ENTREZID in DataFrame geneXID
+    tx <- transcripts(txdb, c("TXNAME", "GENEID"))
+    geneXID <- setNames(mcols(tx), c("REFSEQ", "ENTREZID"))
+    geneXID$ENTREZID <- as.character(geneXID$ENTREZID)
+
+    # Get various gene identifiers from OrgDb database and merge with
+    # geneXID DataFrame
+    # We suppress messages indicating matching of duplicate keys
     # That's ok, because duplicate keys will lead to duplicate
     # entries
-    geneXID <- suppressMessages(select(txdb,
-                                       keys = tx$tx_name,
-                                       columns="GENEID",
-                                       keytype = "TXNAME",
-                                       multiVals = "first"))
-    geneXID <- geneXID[!duplicated(geneXID[, 1]), ]
-    colnames(geneXID)[1:2] <- c("REFSEQ", "ENTREZID")
-    identifier <- c("ENTREZID", "SYMBOL", "ENSEMBL", "UNIGENE", "GENENAME")
-    ids <- sapply(identifier, function(x) {
-        mapIds(refDb,
-               keys = geneXID[, 2],
-               column = x,
-               keytype = "ENTREZID")})
-    ids <- as.data.frame(apply(ids, 2, unlist),
-                         stringsAsFactors = FALSE)
-    colnames(ids) <- identifier
-    geneXID <- cbind.data.frame(geneXID,
-                                ids[match(geneXID[, 2], ids[, 1]), -1])
-    return(geneXID)
+    identifier <- c("ENTREZID", "SYMBOL", "ENSEMBL", "GENENAME")
+    geneXID <- merge(
+        geneXID, 
+        suppressMessages(select(
+            refDb, 
+            keys = geneXID$ENTREZID, 
+            columns = identifier, 
+            keytype = "ENTREZID")),
+        by = "ENTREZID",
+        sort = FALSE)[c(2:1,3:5)]
+    
+    return(geneXID[!duplicated(geneXID), ])
 }
 
 
@@ -350,7 +385,7 @@ GetTxBySec <- function(txdb,
     isValidFeat <- grepl(sprintf("(%s)", paste0(validFeat, collapse = "|")),
                          sections, ignore.case = TRUE)
     if (!all(isValidFeat)) {
-        stop(sprintf("%s is not a valid features.", sections[!isValidFeat]))
+        stop(sprintf("%s is not a valid feature.", sections[!isValidFeat]))
     }
     txBySec <- list()
     for (i in 1:length(sections)) {
