@@ -54,15 +54,15 @@ setClass("txLoc",
 #' @keywords internal
 #' 
 #' @exportMethod GetLoci
-setGeneric("GetLoci", function(x) standardGeneric("GetLoci"));
+setGeneric("GetLoci", function(x) standardGeneric("GetLoci"))
 
 #' @rdname GetLoci
 setMethod("GetLoci",
           signature = "txLoc",
           definition = function(x) {
-              loc <- slot(x, "loci");
-              return(loc);
-          });
+              loc <- slot(x, "loci")
+              return(loc)
+          })
 
 
 #' Method "GetId" for S4 object txLoc.
@@ -77,15 +77,15 @@ setMethod("GetLoci",
 #' @keywords internal
 #' 
 #' @exportMethod GetId
-setGeneric("GetId", function(x) standardGeneric("GetId"));
+setGeneric("GetId", function(x) standardGeneric("GetId"))
 
 #' @rdname GetId
 setMethod("GetId",
           signature = "txLoc",
           definition = function(x) {
-              id <- slot(x, "id");
-              return(id);
-          });
+              id <- slot(x, "id")
+              return(id)
+          })
 
 
 #' Method "GetRef" for S4 object txLoc.
@@ -100,15 +100,15 @@ setMethod("GetId",
 #' @keywords internal
 #' 
 #' @exportMethod GetRef
-setGeneric("GetRef", function(x) standardGeneric("GetRef"));
+setGeneric("GetRef", function(x) standardGeneric("GetRef"))
 
 #' @rdname GetRef
 setMethod("GetRef",
           signature = "txLoc",
           definition = function(x) {
-              ref <- slot(x, "refGenome");
-              return(ref);
-          });
+              ref <- slot(x, "refGenome")
+              return(ref)
+          })
 
 
 #' Method "GetVersion" for S4 object txLoc.
@@ -123,15 +123,15 @@ setMethod("GetRef",
 #' @keywords internal
 #' 
 #' @exportMethod GetVersion
-setGeneric("GetVersion", function(x) standardGeneric("GetVersion"));
+setGeneric("GetVersion", function(x) standardGeneric("GetVersion"))
 
 #' @rdname GetVersion
 setMethod("GetVersion",
           signature = "txLoc",
           definition = function(x) {
-              version <- slot(x, "version");
-              return(version);
-          });
+              version <- slot(x, "version")
+              return(version)
+          })
 
 
 ###########################################################################
@@ -198,15 +198,15 @@ setMethod(
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' 
 #' @exportMethod GetNumberOfLoci
-setGeneric("GetNumberOfLoci", function(x) standardGeneric("GetNumberOfLoci"));
+setGeneric("GetNumberOfLoci", function(x) standardGeneric("GetNumberOfLoci"))
 
 #' @rdname GetNumberOfLoci
 setMethod("GetNumberOfLoci",
           signature = "txLoc",
           definition = function(x) {
-              loc <- slot(x, "loci");
-              return(sapply(loc, nrow));
-          });
+              loc <- slot(x, "loci")
+              return(sapply(loc, nrow))
+          })
 
 
 ###########################################################################
@@ -223,14 +223,14 @@ setMethod("GetNumberOfLoci",
 ##   #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 ##   #' 
 ##   #' @exportMethod SetId
-##   setGeneric("SetId", function(x, id) standardGeneric("SetId"));
+##   setGeneric("SetId", function(x, id) standardGeneric("SetId"))
 ##   
 ##   #' @rdname SetId
 ##   setMethod("SetId",
 ##             signature = "txLoc",
 ##             definition = function(x, id) {
-##                 slot(x, "id") <- id;
-##             });
+##                 slot(x, "id") <- id
+##             })
 ##   
 ##   
 ##   #' Method "SetVersion" for S4 object txLoc.
@@ -243,11 +243,11 @@ setMethod("GetNumberOfLoci",
 ##   #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 ##   #' 
 ##   #' @exportMethod SetVersion
-##   setGeneric("SetVersion", function(x, version) standardGeneric("SetVersion"));
+##   setGeneric("SetVersion", function(x, version) standardGeneric("SetVersion"))
 ##   
 ##   #' @rdname SetVersion
 ##   setMethod("SetVersion",
 ##             signature = "txLoc",
 ##             definition = function(x, version) {
-##                 slot(x, "version") <- version;
-##             });
+##                 slot(x, "version") <- version
+##             })

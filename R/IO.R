@@ -34,31 +34,31 @@ ReadBED <- function(file, collapseRange = TRUE) {
     # Returns:
     #   GRanges object
     if (!file.exists(file)) {
-        stop(sprintf("File %s doesn't exist.", file));
+        stop(sprintf("File %s doesn't exist.", file))
     }
-    bed <- read.table(file, header = FALSE);
+    bed <- read.table(file, header = FALSE)
     if (ncol(bed) < 6) {
-        stop("Need at least 6 columns in BED file.");
+        stop("Need at least 6 columns in BED file.")
     }
     if (all(!grepl("chr", bed[, 1], ignore.case = TRUE))) {
-        bed[, 1] <- sprintf("chr%s", bed[, 1]);
+        bed[, 1] <- sprintf("chr%s", bed[, 1])
     }
-    bed[, 1] <- gsub("chrMT", "chrM", bed[, 1]);
-    bed <- bed[order(bed[, 1], bed[, 2]), ];
+    bed[, 1] <- gsub("chrMT", "chrM", bed[, 1])
+    bed <- bed[order(bed[, 1], bed[, 2]), ]
     if (length(grep("\\.", bed[, 6])) > 0) {
-        bed[, 6] <- gsub("\\.", "*", bed[, 6]);
+        bed[, 6] <- gsub("\\.", "*", bed[, 6])
         warning(sprintf(
             "BED file %s contains entries without strand information.",
-            file));
+            file))
     }
     if (collapseRange == TRUE) {
-        bed[, 2] <- round(0.5 * (bed[, 2] + bed[, 3]));
-        bed[, 3] <- bed[, 2] + 1;
+        bed[, 2] <- round(0.5 * (bed[, 2] + bed[, 3]))
+        bed[, 3] <- bed[, 2] + 1
     }
-    colnames(bed) <- c("chr", "start", "end", "id", "score", "strand");
+    colnames(bed) <- c("chr", "start", "end", "id", "score", "strand")
     gr <- GRanges(bed$chr, IRanges(bed$start + 1,bed$end), bed$strand,
-                  score = bed$score, id = bed$id);
-    return(gr);
+                  score = bed$score, id = bed$id)
+    return(gr)
 }
 
 
@@ -84,7 +84,7 @@ WriteFeatToBED <- function(txFeatures) {
     # Returns:
     #   NULL
     for (i in 1:length(txFeatures)) {
-        rtracklayer::export(txFeatures[[i]], sprintf("%s.bed", names(txFeatures)[i]));
+        rtracklayer::export(txFeatures[[i]], sprintf("%s.bed", names(txFeatures)[i]))
     }
 }
 
@@ -136,38 +136,38 @@ WriteTxLocToBED <- function(locus,
     #
     # Returns:
     #    NULL
-    CheckClass(locus, "txLoc");
-    id <- GetId(locus);
-    locus <- GetLoci(locus);
-    BED <- vector();
+    CheckClass(locus, "txLoc")
+    id <- GetId(locus)
+    locus <- GetLoci(locus)
+    BED <- vector()
     for (i in 1:length(locus)) {
-        feat <- locus[[i]][, c("CHR", "START", "STOP", "ID", "SCORE", "STRAND")];
+        feat <- locus[[i]][, c("CHR", "START", "STOP", "ID", "SCORE", "STRAND")]
         if (is.numeric(feat[, 2]) && is.numeric(feat[, 3])) {
             if (noChrName == TRUE) {
-                feat[, 1] <- gsub("chr", "", feat[ ,1]);
+                feat[, 1] <- gsub("chr", "", feat[ ,1])
             }
-            feat[, 2] <- feat[ ,2] - 1;
+            feat[, 2] <- feat[ ,2] - 1
             feat[, 4] <- sprintf("%s|%s|%s",
                                  feat[, 4],
                                  locus[[i]][, c("GENE_ENSEMBL")],
-                                 names(locus)[i]);
-            BED <- rbind(BED, feat);
+                                 names(locus)[i])
+            BED <- rbind(BED, feat)
         } else {
-            ss <- sprintf("Skipping %s.\n", names(locus)[i]);
-            warning(ss);
+            ss <- sprintf("Skipping %s.\n", names(locus)[i])
+            warning(ss)
         }
     }
-    BED <- BED[order(BED[, 1], BED[, 2]), ];
+    BED <- BED[order(BED[, 1], BED[, 2]), ]
     if (is.null(file)) {
         if (nchar(id) > 0) {
-            file <- sprintf("sites_%s.bed", id);
+            file <- sprintf("sites_%s.bed", id)
         } else {
-            file <- "sites.bed";
+            file <- "sites.bed"
         }
     }
     write.table(BED, file = file,
                 sep = "\t", quote = FALSE,
-                col.names = FALSE, row.names = FALSE);
+                col.names = FALSE, row.names = FALSE)
 }
 
 
@@ -201,25 +201,25 @@ WriteTxLocToCSV <- function(locus,
     #
     # Returns:
     #   NULL
-    CheckClass(locus, "txLoc");
-    locus <- GetLoci(locus);
-    CSV <- vector();
+    CheckClass(locus, "txLoc")
+    locus <- GetLoci(locus)
+    CSV <- vector()
     selCol <- c("GENE_REGION", "REGION_TXWIDTH", "GENE_REFSEQ",
                 "GENE_ENTREZ", "GENE_SYMBOL", "GENE_ENSEMBL",
-                "GENE_UNIGENE", "ID", "CHR", "START", "STOP", "STRAND");
+                "GENE_UNIGENE", "ID", "CHR", "START", "STOP", "STRAND")
     if (withSeq) {
-        selCol <- c(selCol, "REGION_SEQ");
+        selCol <- c(selCol, "REGION_SEQ")
     }
     for (i in 1:length(locus)) {
-        data <- locus[[i]][, selCol];
-        CSV <- rbind(CSV, data);
+        data <- locus[[i]][, selCol]
+        CSV <- rbind(CSV, data)
     }
-    CSV <- CSV[order(CSV[, 8], CSV[, 9]), ];
+    CSV <- CSV[order(CSV[, 8], CSV[, 9]), ]
     if (is.null(file)) {
-        file <- "sites.csv";
+        file <- "sites.csv"
     }
     write.csv(CSV, file = file,
-              row.names = FALSE, quote = FALSE);
+              row.names = FALSE, quote = FALSE)
 }
 
 
@@ -244,15 +244,15 @@ WriteTxLocToCSV <- function(locus,
 #' @export
 ReadDBN <- function(file) {
     if (!file.exists(file)) {
-        ss <- sprintf("Could not open %s.", file);
-        stop(ss);
+        ss <- sprintf("Could not open %s.", file)
+        stop(ss)
     }
     d <- as.data.frame(matrix(readLines(file), ncol = 3, byrow = TRUE),
-                       stringsAsFactors = FALSE);
-    d[, 1] <- gsub("^>", "", d[, 1]);
-    d[, 2] <- nchar(d[, 2]);
-    d[, 3] <- gsub("^[\\(\\.\\)]+\\s", "", d[, 3]);
-    d[ ,3] <- as.numeric(gsub("[\\(\\)]", "", d[, 3]));
-    colnames(d) <- c("id", "siteSeqLength", "siteMFE");
-    return(d);
+                       stringsAsFactors = FALSE)
+    d[, 1] <- gsub("^>", "", d[, 1])
+    d[, 2] <- nchar(d[, 2])
+    d[, 3] <- gsub("^[\\(\\.\\)]+\\s", "", d[, 3])
+    d[ ,3] <- as.numeric(gsub("[\\(\\)]", "", d[, 3]))
+    colnames(d) <- c("id", "siteSeqLength", "siteMFE")
+    return(d)
 }

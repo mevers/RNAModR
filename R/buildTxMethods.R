@@ -26,62 +26,62 @@
 #'
 #' @export
 CheckPkgDependencies <- function(genomeVersion = "hg38") {
-    pkgsInstalled <- installed.packages();
-    pkgsReq <- list();
+    pkgsInstalled <- installed.packages()
+    pkgsReq <- list()
     if (genomeVersion == "hg38") {
-        pkgsReq[["Annot"]] <- "org.Hs.eg.db";
-        pkgsReq[["Genome"]] <- "BSgenome.Hsapiens.UCSC.hg38";
+        pkgsReq[["Annot"]] <- "org.Hs.eg.db"
+        pkgsReq[["Genome"]] <- "BSgenome.Hsapiens.UCSC.hg38"
     } else if (genomeVersion == "hg19") {
-        pkgsReq[["Annot"]] <- "org.Hs.eg.db";
-        pkgsReq[["Genome"]] <- "BSgenome.Hsapiens.UCSC.hg19";
+        pkgsReq[["Annot"]] <- "org.Hs.eg.db"
+        pkgsReq[["Genome"]] <- "BSgenome.Hsapiens.UCSC.hg19"
     } else if (genomeVersion == "hg18") {
-        pkgsReq[["Annot"]] <- "org.Hs.eg.db";
-        pkgsReq[["Genome"]] <- "BSgenome.Hsapiens.UCSC.hg18";
+        pkgsReq[["Annot"]] <- "org.Hs.eg.db"
+        pkgsReq[["Genome"]] <- "BSgenome.Hsapiens.UCSC.hg18"
     } else if (genomeVersion == "mm10") {
-        pkgsReq[["Annot"]] <- "org.Mm.eg.db";
-        pkgsReq[["Genome"]] <- "BSgenome.Mmusculus.UCSC.mm10";
+        pkgsReq[["Annot"]] <- "org.Mm.eg.db"
+        pkgsReq[["Genome"]] <- "BSgenome.Mmusculus.UCSC.mm10"
     } else if (genomeVersion == "mm9") {
-        pkgsReq[["Annot"]] <- "org.Mm.eg.db";
-        pkgsReq[["Genome"]] <- "BSgenome.Mmusculus.UCSC.mm9";
+        pkgsReq[["Annot"]] <- "org.Mm.eg.db"
+        pkgsReq[["Genome"]] <- "BSgenome.Mmusculus.UCSC.mm9"
     } else if (genomeVersion == "mm8") {
-        pkgsReq[["Annot"]] <- "org.Mm.eg.db";
-        pkgsReq[["Genome"]] <- "BSgenome.Mmusculus.UCSC.mm8";
+        pkgsReq[["Annot"]] <- "org.Mm.eg.db"
+        pkgsReq[["Genome"]] <- "BSgenome.Mmusculus.UCSC.mm8"
     } else if (genomeVersion == "dm6") {
-        pkgsReq[["Annot"]] <- "org.Dm.eg.db";
-        pkgsReq[["Genome"]] <- "BSgenome.Dmelanogaster.UCSC.dm6";
+        pkgsReq[["Annot"]] <- "org.Dm.eg.db"
+        pkgsReq[["Genome"]] <- "BSgenome.Dmelanogaster.UCSC.dm6"
     } else if (genomeVersion == "dm3") {
-        pkgsReq[["Annot"]] <- "org.Dm.eg.db";
-        pkgsReq[["Genome"]] <- "BSgenome.Dmelanogaster.UCSC.dm3";
+        pkgsReq[["Annot"]] <- "org.Dm.eg.db"
+        pkgsReq[["Genome"]] <- "BSgenome.Dmelanogaster.UCSC.dm3"
     } else if (genomeVersion == "dm2") {
-        pkgsReq[["Annot"]] <- "org.Dm.eg.db";
-        pkgsReq[["Genome"]] <- "BSgenome.Dmelanogaster.UCSC.dm2";
+        pkgsReq[["Annot"]] <- "org.Dm.eg.db"
+        pkgsReq[["Genome"]] <- "BSgenome.Dmelanogaster.UCSC.dm2"
     } else if (genomeVersion == "sacCer3") {
-        pkgsReq[["Annot"]] <- "org.Sc.sgd.db";
-        pkgsReq[["Genome"]] <- "BSgenome.Scerevisiae.UCSC.sacCer3";
+        pkgsReq[["Annot"]] <- "org.Sc.sgd.db"
+        pkgsReq[["Genome"]] <- "BSgenome.Scerevisiae.UCSC.sacCer3"
     } else if (genomeVersion == "sacCer2") {
-        pkgsReq[["Annot"]] <- "org.Sc.sgd.db";
-        pkgsReq[["Genome"]] <- "BSgenome.Scerevisiae.UCSC.sacCer2";
+        pkgsReq[["Annot"]] <- "org.Sc.sgd.db"
+        pkgsReq[["Genome"]] <- "BSgenome.Scerevisiae.UCSC.sacCer2"
     } else if (genomeVersion == "sacCer1") {
-        pkgsReq[["Annot"]] <- "org.Sc.sgd.db";
-        pkgsReq[["Genome"]] <- "BSgenome.Scerevisiae.UCSC.sacCer1";
+        pkgsReq[["Annot"]] <- "org.Sc.sgd.db"
+        pkgsReq[["Genome"]] <- "BSgenome.Scerevisiae.UCSC.sacCer1"
     }
-    ret <- sapply(pkgsReq, function(x) x %in% pkgsInstalled[, "Package"]);
-    df <- cbind(t(as.data.frame(pkgsReq)), ret);
+    ret <- sapply(pkgsReq, function(x) x %in% pkgsInstalled[, "Package"])
+    df <- cbind(t(as.data.frame(pkgsReq)), ret)
     if (!all(ret)) {
         # Create meaningful error message
-        ss <- "[ERROR] R/Bioconductor package dependencies not met.";
-        pkgsMissing <- df[which(df[, 2] == FALSE), 1];
+        ss <- "[ERROR] R/Bioconductor package dependencies not met."
+        pkgsMissing <- df[which(df[, 2] == FALSE), 1]
         for (i in 1:length(pkgsMissing)) {
-            ss <- sprintf("%s\n  Not found: %s", ss, pkgsMissing[i]);
+            ss <- sprintf("%s\n  Not found: %s", ss, pkgsMissing[i])
         }
-        ss <- sprintf("%s\n\n  Running", ss);
-        biocSrc <- "source(\"http://www.bioconductor.org/biocLite.R\")";
-        ss <- sprintf("%s\n   %s", ss, biocSrc);
+        ss <- sprintf("%s\n\n  Running", ss)
+        biocSrc <- "source(\"http://www.bioconductor.org/biocLite.R\")"
+        ss <- sprintf("%s\n   %s", ss, biocSrc)
         for (i in 1:length(pkgsMissing)) {
-            ss <- sprintf("%s\n   biocLite(\"%s\")", ss, pkgsMissing[i]);
+            ss <- sprintf("%s\n   biocLite(\"%s\")", ss, pkgsMissing[i])
         }
-        ss <- sprintf("%s\n  might fix that.", ss);
-        stop(ss);
+        ss <- sprintf("%s\n  might fix that.", ss)
+        stop(ss)
     }
 }
 
@@ -148,31 +148,31 @@ GetTxDb <- function(genomeVersion = "hg38",
     #
     # Returns:
     #   TxDb object.
-    sqliteFile <- sprintf("txdb_%s.sqlite", genomeVersion);
+    sqliteFile <- sprintf("txdb_%s.sqlite", genomeVersion)
     # RefSeq genes for human, mouse and fruitfly data
     # SGP genes for yeast
     geneRef <- ifelse(grepl("sacCer", genomeVersion),
                       "sgdGene",
-                      "refGene");
+                      "refGene")
     if ((!file.exists(sqliteFile)) || (force == TRUE)) {
         txdb <- makeTxDbFromUCSC(genome = genomeVersion,
-                                 tablename = geneRef);
-        saveDb(txdb, file = sqliteFile);
+                                 tablename = geneRef)
+        saveDb(txdb, file = sqliteFile)
     } else {
         cat(sprintf("Found existing sqlite database %s.\n",
-                    sqliteFile));
-        txdb <- loadDb(file = sqliteFile);
+                    sqliteFile))
+        txdb <- loadDb(file = sqliteFile)
     }
     if (standardChrOnly) {
-        txdb <- keepStandardChromosomes(txdb);
+        txdb <- keepStandardChromosomes(txdb)
     }
     if (verbose) {
-        cat("List of chromosomes:\n");
-        print(seqlevels(txdb));
-        cat("List of columns:\n");
-        print(columns(txdb));
+        cat("List of chromosomes:\n")
+        print(seqlevels(txdb))
+        cat("List of columns:\n")
+        print(columns(txdb))
     }
-    return(txdb);
+    return(txdb)
 }
 
 
@@ -221,47 +221,47 @@ GetGeneIds <- function(txdb) {
     #
     # Returns:
     #   Dataframe of different gene IDs.
-    genomeVersion <- unique(genome(txdb));
+    genomeVersion <- unique(genome(txdb))
     if (length(genomeVersion)==0) {
-        stop("Could not identify genome version from transcript database.");
+        stop("Could not identify genome version from transcript database.")
     }
     # Load gene annotation package
     if (grepl("(hg38|hg19|hg18)", genomeVersion,
               ignore.case = TRUE)) {
         if (SafeLoad("org.Hs.eg.db")) {
-            refDb <- get("org.Hs.eg.db");
+            refDb <- get("org.Hs.eg.db")
         } else {
             stop(sprintf("[ERROR] Could not load gene annotation for %s.",
-                         genomeVersion));
+                         genomeVersion))
         }
     } else if (grepl("(mm10|mm9|mm8)", genomeVersion,
                      ignore.case = TRUE)) {
         if (SafeLoad("org.Mm.eg.db")) {
-            refDb <- get("org.Mm.eg.db");
+            refDb <- get("org.Mm.eg.db")
         } else {
             stop(sprintf("[ERROR] Could not load gene annotation for %s.",
-                         genomeVersion));
+                         genomeVersion))
         }
     } else if (grepl("(dm6|dm3|dm2)", genomeVersion,
                      ignore.case = TRUE)) {
         if (SafeLoad("org.Dm.eg.db")) {
-            refDb <- get("org.Dm.eg.db");
+            refDb <- get("org.Dm.eg.db")
         } else {
             stop(sprintf("[ERROR] Could not load gene annotation for %s.",
-                         genomeVersion));
+                         genomeVersion))
         }
     } else if (grepl("(sacCer3|sacCer2|sacCer1)", genomeVersion,
                      ignore.case = TRUE)) {
         if (SafeLoad("org.Sc.sgd.db")) {
-            refDb <- get("org.Sc.sgd.db");
+            refDb <- get("org.Sc.sgd.db")
         } else {
             stop(sprintf("[ERROR] Could not load gene annotation for %s.",
-                         genomeVersion));
+                         genomeVersion))
         }
     } else {
-        stop(sprintf("Unknown genome %s.", genomeVersion));
+        stop(sprintf("Unknown genome %s.", genomeVersion))
     }
-    tx <- transcripts(txdb);
+    tx <- transcripts(txdb)
     # Suppress messages indicating matching of duplicate keys
     # That's ok, because duplicate keys will lead to duplicate
     # entries
@@ -269,21 +269,21 @@ GetGeneIds <- function(txdb) {
                                        keys = tx$tx_name,
                                        columns="GENEID",
                                        keytype = "TXNAME",
-                                       multiVals = "first"));
-    geneXID <- geneXID[!duplicated(geneXID[, 1]), ];
-    colnames(geneXID)[1:2] <- c("REFSEQ", "ENTREZID");
-    identifier <- c("ENTREZID", "SYMBOL", "ENSEMBL", "UNIGENE", "GENENAME");
+                                       multiVals = "first"))
+    geneXID <- geneXID[!duplicated(geneXID[, 1]), ]
+    colnames(geneXID)[1:2] <- c("REFSEQ", "ENTREZID")
+    identifier <- c("ENTREZID", "SYMBOL", "ENSEMBL", "UNIGENE", "GENENAME")
     ids <- sapply(identifier, function(x) {
         mapIds(refDb,
                keys = geneXID[, 2],
                column = x,
-               keytype = "ENTREZID")});
+               keytype = "ENTREZID")})
     ids <- as.data.frame(apply(ids, 2, unlist),
-                         stringsAsFactors = FALSE);
-    colnames(ids) <- identifier;
+                         stringsAsFactors = FALSE)
+    colnames(ids) <- identifier
     geneXID <- cbind.data.frame(geneXID,
-                                ids[match(geneXID[, 2], ids[, 1]), -1]);
-    return(geneXID);
+                                ids[match(geneXID[, 2], ids[, 1]), -1])
+    return(geneXID)
 }
 
 
@@ -341,51 +341,51 @@ GetTxBySec <- function(txdb,
     #
     # Returns:
     #   List of GRangesList transcript features.
-    CheckClass(txdb, "TxDb");
+    CheckClass(txdb, "TxDb")
     validFeat <- c("Promoter",
                    "CDS", "coding",
                    "5pUTR", "5'UTR", "UTR5",
                    "3pUTR", "3'UTR", "UTR3",
-                   "Intron", "Intronic");
+                   "Intron", "Intronic")
     isValidFeat <- grepl(sprintf("(%s)", paste0(validFeat, collapse = "|")),
-                         sections, ignore.case = TRUE);
+                         sections, ignore.case = TRUE)
     if (!all(isValidFeat)) {
-        stop(sprintf("%s is not a valid features.", sections[!isValidFeat]));
+        stop(sprintf("%s is not a valid features.", sections[!isValidFeat]))
     }
-    txBySec <- list();
+    txBySec <- list()
     for (i in 1:length(sections)) {
         # Suppress warning messages that arise from duplicate entries.
         # That's ok because we will deal with duplicates later
         if (grepl("(CDS|coding)", sections[i], ignore.case = TRUE)) {
             sec <- suppressWarnings(
-                cdsBy(txdb, by="tx", use.names = TRUE));
+                cdsBy(txdb, by="tx", use.names = TRUE))
         } else if (grepl("(5pUTR|5'UTR|UTR5)", sections[i], ignore.case = TRUE)) {
             sec <- suppressWarnings(
-                fiveUTRsByTranscript(txdb, use.names = TRUE));
+                fiveUTRsByTranscript(txdb, use.names = TRUE))
         } else if (grepl("(3pUTR|3'UTR|UTR3)", sections[i], ignore.case = TRUE)) {
             sec <- suppressWarnings(
-                threeUTRsByTranscript(txdb, use.names = TRUE));
+                threeUTRsByTranscript(txdb, use.names = TRUE))
         } else if (grepl("(Intron|Intronic)", sections[i], ignore.case = TRUE)) {
             sec <- suppressWarnings(
-                intronsByTranscript(txdb, use.names = TRUE));
+                intronsByTranscript(txdb, use.names = TRUE))
         } else if (grepl("Promoter", sections[i], ignore.case = TRUE)) {
             promoter <- suppressWarnings(
                 promoters(txdb,
                           columns = c("tx_id", "tx_name"),
                           upstream = promUpstream,
-                          downstream = promDownstream));
+                          downstream = promDownstream))
             # Make sure we are still within valid transcript ranges
-            promoter <- trim(promoter);
-            sec <- GenomicRanges::split(promoter, promoter$tx_name);
+            promoter <- trim(promoter)
+            sec <- GenomicRanges::split(promoter, promoter$tx_name)
         }
-        txBySec[[length(txBySec) + 1]] <- sec;
+        txBySec[[length(txBySec) + 1]] <- sec
         if (verbose) {
             print(sprintf("%i entries for section %s.",
-                          length(sec), sections[i]));
+                          length(sec), sections[i]))
         }
     }
-    names(txBySec) <- sections;
-    return(txBySec);
+    names(txBySec) <- sections
+    return(txBySec)
 }
 
 
@@ -416,39 +416,39 @@ GetTxBySec <- function(txdb,
 #'
 #' @export
 DedupeBasedOnNearestRef <- function(query, ref, showPb = FALSE) {
-    query <- query[which(elementNROWS(query) > 0)];
-    query <- query[which(names(query) %in% names(ref))];
-    query <- query[order(names(query), -sum(width(query)))];
-    dupes <- which(duplicated(names(query)));
+    query <- query[which(elementNROWS(query) > 0)]
+    query <- query[which(names(query) %in% names(ref))]
+    query <- query[order(names(query), -sum(width(query)))]
+    dupes <- which(duplicated(names(query)))
     if (length(dupes) > 0) {
-        dupeID <- unique(names(query[dupes]));
-        rem <- vector();
+        dupeID <- unique(names(query[dupes]))
+        rem <- vector()
         if (showPb) {
             pb <- txtProgressBar(min = 0,
                                  max = length(dupeID),
                                  width = 80,
-                                 style = 3);
+                                 style = 3)
         }
         for (i in 1:length(dupeID)) {
-            idxQuery <- which(names(query) == dupeID[i]);
-            idxRef <- which(names(ref) == dupeID[i]);
+            idxQuery <- which(names(query) == dupeID[i])
+            idxRef <- which(names(ref) == dupeID[i])
             if (length(idxQuery) > 1) {
                 dist <- distance(
                     unlist(range(query[idxQuery])),
-                    range(ref[[idxRef]]));
-                idxMinDist <- which.min(dist);
-                rem <- c(rem, idxQuery[-idxMinDist]);
+                    range(ref[[idxRef]]))
+                idxMinDist <- which.min(dist)
+                rem <- c(rem, idxQuery[-idxMinDist])
                 if (showPb) {
-                    setTxtProgressBar(pb, i);
+                    setTxtProgressBar(pb, i)
                 }
             }
         }
         if (showPb) {
-            close(pb);
+            close(pb)
         }
-        return(query[-rem]);
+        return(query[-rem])
     } else {
-        return(query);
+        return(query)
     }
 }
 
@@ -504,35 +504,35 @@ CollapseTxBySec <- function(txBySec,
     # Returns:
     #   List of GRangesList transcript sections.
     # Error handling
-    sections <- names(txBySec);
-    whichCDS <- grep("(CDS|coding)", sections, ignore.case = TRUE);
+    sections <- names(txBySec)
+    whichCDS <- grep("(CDS|coding)", sections, ignore.case = TRUE)
     if (!length(whichCDS)) {
-        stop("Transcript feature list does not contain CDS entries.");
+        stop("Transcript feature list does not contain CDS entries.")
     }
-    whichUTR5 <- grep("(5pUTR|5'UTR|UTR5)", sections, ignore.case = TRUE);
+    whichUTR5 <- grep("(5pUTR|5'UTR|UTR5)", sections, ignore.case = TRUE)
     if (!length(whichUTR5)) {
-        stop("Transcript feature list does not contain 5'UTR entries.");
+        stop("Transcript feature list does not contain 5'UTR entries.")
     }
-    whichUTR3 <- grep("(3pUTR|3'UTR|UTR3)", sections, ignore.case = TRUE);
+    whichUTR3 <- grep("(3pUTR|3'UTR|UTR3)", sections, ignore.case = TRUE)
     if (!length(whichUTR3)) {
-        stop("Transcript feature list does not contain 3'UTR entries.");
+        stop("Transcript feature list does not contain 3'UTR entries.")
     }
-    whichPromoter <- grep("Promoter", sections, ignore.case = TRUE);
-    whichIntron <- grep("(Intron|Intronic)", sections, ignore.case = TRUE);
+    whichPromoter <- grep("Promoter", sections, ignore.case = TRUE)
+    whichIntron <- grep("(Intron|Intronic)", sections, ignore.case = TRUE)
     # (1) Collapse CDS:
     #      Step 1: Same RefSeq ID, multiple identical genomic copies
     #       Example: RefSeq ID = NM_000513
     #      Step 2: Same Entrez ID, multiple CDS isoforms
     #       Example: Entrez ID = 10001
-    cds <- txBySec[[whichCDS]];
-    cds <- cds[order(names(cds), -sum(GenomicRanges::width(cds)))];
-    cds <- cds[!duplicated(names(cds))];
-    geneData <- geneXID[which(geneXID[, 1] %in% names(cds)), ];
+    cds <- txBySec[[whichCDS]]
+    cds <- cds[order(names(cds), -sum(GenomicRanges::width(cds)))]
+    cds <- cds[!duplicated(names(cds))]
+    geneData <- geneXID[which(geneXID[, 1] %in% names(cds)), ]
     geneData$lengthCDS <- sum(GenomicRanges::width(
-        cds[match(geneData[, 1], names(cds))]));
-    geneData <- geneData[order(geneData[, 2], -geneData[, ncol(geneData)]), ];
-    geneData <- geneData[!duplicated(geneData[, 2]), ];
-    cds <- cds[which(names(cds) %in% geneData[, 1])];
+        cds[match(geneData[, 1], names(cds))]))
+    geneData <- geneData[order(geneData[, 2], -geneData[, ncol(geneData)]), ]
+    geneData <- geneData[!duplicated(geneData[, 2]), ]
+    cds <- cds[which(names(cds) %in% geneData[, 1])]
     # (2) Collapse UTR's
     #      Step 1: Filter based on valid RefSeq ID from cds
     #       Note that UTR list will still contain duplicate RefSeq entries,
@@ -540,47 +540,47 @@ CollapseTxBySec <- function(txBySec,
     #       genomic copies of the same CDS
     #       Example: NM_000513 (multiple genomic copies)
     #                NM_000982 (multiple UTR lengths & multiple genomic loci)
-    cat("Collapsing duplicate 5'UTR entries\n");
-    utr5 <- txBySec[[whichUTR5]];
-    utr5.match <- DedupeBasedOnNearestRef(utr5, cds, showPb = TRUE);
-    cat("Collapsing duplicate 3'UTR entries\n");
-    utr3 <- txBySec[[whichUTR3]];
-    utr3.match <- DedupeBasedOnNearestRef(utr3, cds, showPb = TRUE);
+    cat("Collapsing duplicate 5'UTR entries\n")
+    utr5 <- txBySec[[whichUTR5]]
+    utr5.match <- DedupeBasedOnNearestRef(utr5, cds, showPb = TRUE)
+    cat("Collapsing duplicate 3'UTR entries\n")
+    utr3 <- txBySec[[whichUTR3]]
+    utr3.match <- DedupeBasedOnNearestRef(utr3, cds, showPb = TRUE)
     # (3) Collapse promoters (if included)
     #     Note that promoters have a different GRangesList structure:
     #     Duplicates are stored as multiple entries under the same ID
     #     Example: NM_000071
     if (length(whichPromoter) > 0) {
-        cat("Collapsing duplicate promoter entries\n");
-        promoter <- txBySec[[whichPromoter]];
+        cat("Collapsing duplicate promoter entries\n")
+        promoter <- txBySec[[whichPromoter]]
         # Expand multiple entries under the same ID
-        promoter <- as(unlist(promoter), "GRangesList");
-        promoter.match <- DedupeBasedOnNearestRef(promoter, utr5.match, showPb = TRUE);
+        promoter <- as(unlist(promoter), "GRangesList")
+        promoter.match <- DedupeBasedOnNearestRef(promoter, utr5.match, showPb = TRUE)
     }
     # (3) Collapse introns (if included)
     if (length(whichIntron) > 0) {
-        cat("Collapsing duplicate introns entries\n");
-        intron <- txBySec[[whichIntron]];
-        intron.match <- DedupeBasedOnNearestRef(intron, cds, showPb = TRUE);
+        cat("Collapsing duplicate introns entries\n")
+        intron <- txBySec[[whichIntron]]
+        intron.match <- DedupeBasedOnNearestRef(intron, cds, showPb = TRUE)
     }
     # Generate return object
-    txBySec.collapsed <- list();
+    txBySec.collapsed <- list()
     for (i in 1:length(txBySec)) {
         if (grepl("(CDS|coding)", sections[i], ignore.case = TRUE)) {
-            feat <- cds;
+            feat <- cds
         } else if (grepl("(5pUTR|5'UTR|UTR5)", sections[i], ignore.case = TRUE)) {
-            feat <- utr5.match;
+            feat <- utr5.match
         } else if (grepl("(3pUTR|3'UTR|UTR3)", sections[i], ignore.case = TRUE)) {
-            feat <- utr3.match;
+            feat <- utr3.match
         } else if (grepl("(Intron|Intronic)", sections[i], ignore.case = TRUE)) {
-            feat <- intron.match;
+            feat <- intron.match
         } else if (grepl("Promoter", sections[i], ignore.case = TRUE)) {
-            feat <- promoter.match;
+            feat <- promoter.match
         }
-        txBySec.collapsed[[length(txBySec.collapsed)+1]] <- feat;
+        txBySec.collapsed[[length(txBySec.collapsed)+1]] <- feat
     }
-    names(txBySec.collapsed) <- sections;
-    return(txBySec.collapsed);
+    names(txBySec.collapsed) <- sections
+    return(txBySec.collapsed)
 }
 
 
@@ -610,21 +610,21 @@ PerformSanityCheck <- function(txBySec) {
     #
     # Returns:
     #   NULL
-    dupesInSec <- vector();
+    dupesInSec <- vector()
     for (i in 1:length(txBySec)) {
-        cat(sprintf("Sanity check for %s:\n", names(txBySec)[i]));
-        cat(sprintf("(1) Number of entries = %i\n", length(txBySec[[i]])));
-        cat("(2) Unique/duplicates?\n");
-        t <- table(duplicated(names(txBySec[[i]])));
-        print(t);
-        cat("\n");
+        cat(sprintf("Sanity check for %s:\n", names(txBySec)[i]))
+        cat(sprintf("(1) Number of entries = %i\n", length(txBySec[[i]])))
+        cat("(2) Unique/duplicates?\n")
+        t <- table(duplicated(names(txBySec[[i]])))
+        print(t)
+        cat("\n")
         if (length(grep("TRUE", names(t))) > 0) {
-            dupesInSec <- c(dupesInSec, names(txBySec)[i]);
+            dupesInSec <- c(dupesInSec, names(txBySec)[i])
         }
     }
     if (length(dupesInSec) > 0) {
         cat(sprintf("Found duplicate entries in sections %s.\n",
-                    paste0(dupesInSec, collapse = ", ")));
+                    paste0(dupesInSec, collapse = ", ")))
     }
 }
 
@@ -659,60 +659,60 @@ GetTxSeq <- function(txBySec,
     #
     # Returns:
     #   List of DNAStringSet sequences
-    genomeVersion <- unique(unlist(lapply(txBySec, function(x) genome(x))));
+    genomeVersion <- unique(unlist(lapply(txBySec, function(x) genome(x))))
     if (grepl("^hg", genomeVersion)) {
-        genomePkg <- sprintf("BSgenome.Hsapiens.UCSC.%s", genomeVersion);
+        genomePkg <- sprintf("BSgenome.Hsapiens.UCSC.%s", genomeVersion)
         if (SafeLoad(genomePkg)) {
-            genome <- get(genomePkg);
+            genome <- get(genomePkg)
         } else {
-            stop(sprintf("[ERROR] Could not load genome %s.", genomeVersion));
+            stop(sprintf("[ERROR] Could not load genome %s.", genomeVersion))
         }
     } else if (grepl("^mm",genomeVersion)) {
-        genomePkg <- sprintf("BSgenome.Mmusculus.UCSC.%s", genomeVersion);
+        genomePkg <- sprintf("BSgenome.Mmusculus.UCSC.%s", genomeVersion)
         if (SafeLoad(genomePkg)) {
-            genome <- get(genomePkg);
+            genome <- get(genomePkg)
         } else {
-            stop(sprintf("[ERROR] Could not load genome %s.",genomeVersion));
+            stop(sprintf("[ERROR] Could not load genome %s.",genomeVersion))
         }
     } else if (grepl("^dm",genomeVersion)) {
-        genomePkg <- sprintf("BSgenome.Dmelanogaster.UCSC.%s", genomeVersion);
+        genomePkg <- sprintf("BSgenome.Dmelanogaster.UCSC.%s", genomeVersion)
         if (SafeLoad(genomePkg)) {
-            genome <- get(genomePkg);
+            genome <- get(genomePkg)
         } else {
-            stop(sprintf("[ERROR] Could not load genome %s.",genomeVersion));
+            stop(sprintf("[ERROR] Could not load genome %s.",genomeVersion))
         }
     } else if (grepl("^sac",genomeVersion)) {
-        genomePkg <- sprintf("BSgenome.Scerevisiae.UCSC.%s", genomeVersion);
+        genomePkg <- sprintf("BSgenome.Scerevisiae.UCSC.%s", genomeVersion)
         if (SafeLoad(genomePkg)) {
-            genome <- get(genomePkg);
+            genome <- get(genomePkg)
         } else {
-            stop(sprintf("[ERROR] Could not load genome %s.",genomeVersion));
+            stop(sprintf("[ERROR] Could not load genome %s.",genomeVersion))
         }
     } else {
-        stop(sprintf("[ERROR] Unknown genome %s.",genomeVersion));
+        stop(sprintf("[ERROR] Unknown genome %s.",genomeVersion))
     }
-    sections <- names(txBySec);
+    sections <- names(txBySec)
     if (skipIntrons == TRUE) {
         whichIntrons <- grep("(Intron|Intronic)",
-                             sections, ignore.case = TRUE);
+                             sections, ignore.case = TRUE)
         if (length(whichIntrons) > 0) {
-            cat("Skipping introns.\n");
-            sections <- sections[-whichIntrons];
+            cat("Skipping introns.\n")
+            sections <- sections[-whichIntrons]
         }
     }
-    txSequences<-list();
+    txSequences<-list()
     pb <- txtProgressBar(min = 0,
                          max = length(sections),
                          width = 80,
-                         style = 3);
+                         style = 3)
     for (i in 1:length(sections)) {
-        seq <- extractTranscriptSeqs(genome, txBySec[[i]]);
-        txSequences[[length(txSequences)+1]] <- seq;
-        setTxtProgressBar(pb, i);
+        seq <- extractTranscriptSeqs(genome, txBySec[[i]])
+        txSequences[[length(txSequences)+1]] <- seq
+        setTxtProgressBar(pb, i)
     }
-    close(pb);
-    names(txSequences) <- sections;
-    return(txSequences);
+    close(pb)
+    names(txSequences) <- sections
+    return(txSequences)
 }
 
 
@@ -776,45 +776,45 @@ BuildTx <- function(genomeVersion = c(
     #
     # Returns:
     #   NULL
-    genomeVersion <- match.arg(genomeVersion);
-    fn <- sprintf("tx_%s.RData", genomeVersion);
+    genomeVersion <- match.arg(genomeVersion)
+    fn <- sprintf("tx_%s.RData", genomeVersion)
     if (file.exists(fn) && (force == FALSE)) {
-        cat("Found existing transcriptome data. Nothing to do.\n");
-        cat("To rebuild run with force = TRUE.\n");
+        cat("Found existing transcriptome data. Nothing to do.\n")
+        cat("To rebuild run with force = TRUE.\n")
     } else if (!file.exists(fn) || (force == TRUE)) {
-        cat("Building the transcriptome. This will take a few minutes.\n");
-        cat("Note that this step should only be done once.\n");
+        cat("Building the transcriptome. This will take a few minutes.\n")
+        cat("Note that this step should only be done once.\n")
         # Stage 1 - Check package dependencies
         cat(sprintf("%s Stage 1/6: Checking package dependencies.\n",
-                    format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
-        CheckPkgDependencies(genomeVersion = genomeVersion);
+                    format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")))
+        CheckPkgDependencies(genomeVersion = genomeVersion)
         # Stage 2 - Create txdb object
         cat(sprintf("%s Stage 2/6: Getting transcripts and gene annotations.\n",
-                    format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
+                    format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")))
         txdb <- GetTxDb(genomeVersion = genomeVersion,
                         standardChrOnly = TRUE,
-                        force = force);
-        geneXID <- GetGeneIds(txdb);
+                        force = force)
+        geneXID <- GetGeneIds(txdb)
         # Stage 3 - Split txdb by transcript sections
         cat(sprintf("%s Stage 3/6: Splitting transcripts by section.\n",
-                    format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
-        txBySec <- GetTxBySec(txdb);
+                    format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")))
+        txBySec <- GetTxBySec(txdb)
         # Stage 4 - Collapse isoforms
         cat(sprintf("%s Stage 4/6: Collapsing isoforms.\n",
-                    format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
-        txBySec <- CollapseTxBySec(txBySec, geneXID);
+                    format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")))
+        txBySec <- CollapseTxBySec(txBySec, geneXID)
         # Stage 5 - Extract sequences
         cat(sprintf("%s Stage 5/6: Extracting sequences.\n",
-                    format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
-        seqBySec <- GetTxSeq(txBySec);
+                    format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")))
+        seqBySec <- GetTxSeq(txBySec)
         # Stage 6 - Save objects
         cat(sprintf("%s Stage 6/6: Storing results in file.\n",
-                    format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
+                    format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")))
         save(geneXID, txBySec, seqBySec,
              file = fn,
-             compress = "gzip");
+             compress = "gzip")
         cat(sprintf("%s [DONE]\n",
-                    format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")));
+                    format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")))
     }
 }
 
@@ -833,38 +833,38 @@ BuildTx <- function(genomeVersion = c(
 #' @export
 BuildTxTest <- function() {
 # Generate txBySec
-    sections <- c("5'UTR", "CDS", "3'UTR");
+    sections <- c("5'UTR", "CDS", "3'UTR")
     tx <- data.frame(tx_id = seq(1,3),
                      tx_name=sprintf("tx%i",seq(1,3)),
                      tx_chrom="chr1",
                      tx_strand=c("-", "+", "+"),
                      tx_start=c(1, 2001, 3001),
-                     tx_end=c(999, 2199, 5199));
+                     tx_end=c(999, 2199, 5199))
     splice <-  data.frame(tx_id = c(1L, 2L, 2L, 2L, 3L, 3L),
                           exon_rank=c(1, 1, 2, 3, 1, 2),
                           exon_start=c(1, 2001, 2101, 2131, 3001, 4001),
                           exon_end=c(999, 2085, 2144, 2199, 3601, 5199),
                           cds_start=c(1, 2022, 2101, 2131, 3201, 4001),
-                          cds_end=c(999, 2085, 2144, 2193, 3601, 4501));
+                          cds_end=c(999, 2085, 2144, 2193, 3601, 4501))
     genes <- cbind.data.frame(tx_name = sprintf("tx%i", seq(1,3)),
-                              gene_id = sprintf("gene%i", seq(1,3)));
-    chrominfo <- cbind.data.frame(chrom = "chr1", length = 5199, is_circular = FALSE);
-    txdb <- makeTxDb(tx, splice, genes = genes, chrominfo = chrominfo);
+                              gene_id = sprintf("gene%i", seq(1,3)))
+    chrominfo <- cbind.data.frame(chrom = "chr1", length = 5199, is_circular = FALSE)
+    txdb <- makeTxDb(tx, splice, genes = genes, chrominfo = chrominfo)
     txBySec <- list(fiveUTRsByTranscript(txdb, use.names = TRUE),
                     cdsBy(txdb, by = "tx", use.names = TRUE),
-                    threeUTRsByTranscript(txdb, use.names = TRUE));
-    names(txBySec) <- sections;
+                    threeUTRsByTranscript(txdb, use.names = TRUE))
+    names(txBySec) <- sections
 # Generate genome
-    bases <- c("A", "C", "G", "T");
-    genome <- DNAString(paste(sample(bases, 5199, replace = TRUE), collapse = ""));
+    bases <- c("A", "C", "G", "T")
+    genome <- DNAString(paste(sample(bases, 5199, replace = TRUE), collapse = ""))
 # Generate seqBySec
-    seqBySec <- lapply(txBySec, function(x) extractTranscriptSeqs(genome, ranges(x)));
+    seqBySec <- lapply(txBySec, function(x) extractTranscriptSeqs(genome, ranges(x)))
 # Generate geneXID
     geneXID <- cbind.data.frame(REFSEQ = sprintf("tx%i", seq(1, 3)),
                                 ENTREZID = seq(1000, 3000, length.out = 3),
                                 SYMBOL = sprintf("gene%i", seq(1, 3)),
                                 ENSEMBL = sprintf("ENSEMBL%i", seq(1, 3)),
                                 UNIGENE = sprintf("UNIGENE%i", seq(1,3)),
-                                GENENAME = sprintf("name%i", seq(1,3)));
-    save(geneXID, txBySec, seqBySec, file = "tx_test.RData", compress = "gzip");
+                                GENENAME = sprintf("name%i", seq(1,3)))
+    save(geneXID, txBySec, seqBySec, file = "tx_test.RData", compress = "gzip")
 }

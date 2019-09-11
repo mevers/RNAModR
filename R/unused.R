@@ -13,34 +13,34 @@
 ##  #'
 ##  #' @export
 ##  PlotRelDistSSDistribution <- function(locus, ss, flank = 1000, binWidth = 20) {
-##      dist <- GetRelDistSS(locus, ss, flank);
-##      breaks <- seq(-flank, flank, by = binWidth);
-##      bwString <- sprintf("bw = %i nt", binWidth);
-##      h0 <- hist(dist, breaks = breaks, plot = FALSE);
+##      dist <- GetRelDistSS(locus, ss, flank)
+##      breaks <- seq(-flank, flank, by = binWidth)
+##      bwString <- sprintf("bw = %i nt", binWidth)
+##      h0 <- hist(dist, breaks = breaks, plot = FALSE)
 ##      plot(h0$mids, h0$counts,
 ##           type = "s",
 ##           lwd = 2,
 ##           xlab = "Relative distance from 1st CDS splice site [nt]",
 ##           ylab = "Abundance",
 ##           xlim = c(-1000, 1000),
-##           font.main = 1);
+##           font.main = 1)
 ##      CIFromBS <- EstimateCIFromBS(dist,
 ##                                   breaks = breaks,
-##                                   nBS = 5000);
+##                                   nBS = 5000)
 ##      x1 <- c(CIFromBS$x[1],
 ##              rep(CIFromBS$x[-1], each = 2),
-##              CIFromBS$x[length(CIFromBS$x)]);
+##              CIFromBS$x[length(CIFromBS$x)])
 ##      CI <- cbind(c(x1,
 ##                    rev(x1)),
 ##                  c(rep(CIFromBS$y.low, each = 2),
-##                    rev(rep(CIFromBS$y.high, each = 2))));
+##                    rev(rep(CIFromBS$y.high, each = 2))))
 ##      polygon(CI[, 1], CI[, 2], col = rgb(1, 0, 0, 0.2),
-##              lwd = 1, border = NA, lty = 1);
+##              lwd = 1, border = NA, lty = 1)
 ##      # Loess smoothing of boostrap CI
 ##      lines(lowess(CIFromBS$x, CIFromBS$y.low, f = 1/5),
-##            col = "red", lty = 2, lwd = 1);
+##            col = "red", lty = 2, lwd = 1)
 ##      lines(lowess(CIFromBS$x, CIFromBS$y.high, f = 1/5),
-##            col = "red", lty = 2, lwd = 1);
+##            col = "red", lty = 2, lwd = 1)
 ##      legend("topleft",
 ##             c(sprintf("Abundance (%s)", bwString),
 ##               "95%CI (empirical bootstrap)",
@@ -48,7 +48,7 @@
 ##             lwd = c(2, 5, 1),
 ##             col = c("black", rgb(1, 0, 0, 0.2), "red"),
 ##             lty = c(1, 1, 2),
-##             bty = "n");
+##             bty = "n")
 ##  }
 ##  
 ##  #' Plot relative distance enrichment of sites from \code{locPos}
@@ -69,22 +69,22 @@
 ##  #'
 ##  #' @export
 ##  PlotRelDistSSEnrichment <- function(locPos, locNeg, ss, flank = 1000, binWidth = 20) {
-##      idPos <- GetId(locPos);
-##      idNeg <- GetId(locNeg);
-##      distPos <- GetRelDistSS(locPos, ss, flank);
-##      distNeg <- GetRelDistSS(locNeg, ss, flank);
-##      breaks <- seq(-flank, flank, by = binWidth);
-##      ctsPos <- table(cut(distPos, breaks = breaks));
-##      ctsNeg <- table(cut(distNeg, breaks = breaks));
-##      ctsMat <- as.matrix(rbind(ctsPos, ctsNeg));
-##      rownames(ctsMat) <- c("pos", "neg");
+##      idPos <- GetId(locPos)
+##      idNeg <- GetId(locNeg)
+##      distPos <- GetRelDistSS(locPos, ss, flank)
+##      distNeg <- GetRelDistSS(locNeg, ss, flank)
+##      breaks <- seq(-flank, flank, by = binWidth)
+##      ctsPos <- table(cut(distPos, breaks = breaks))
+##      ctsNeg <- table(cut(distNeg, breaks = breaks))
+##      ctsMat <- as.matrix(rbind(ctsPos, ctsNeg))
+##      rownames(ctsMat) <- c("pos", "neg")
 ##      title <- sprintf("N(%s) = %i, N(%s) = %i\n(bw = %i nt)",
 ##                       idPos, sum(ctsPos),
 ##                       idNeg, sum(ctsNeg),
-##                       binWidth);
+##                       binWidth)
 ##      tmp <- PlotEnrichment.Generic(ctsMat,
 ##                                    title = title,
-##                                    x.las = 2, x.cex = 0.8, x.padj = 0.8);
+##                                    x.las = 2, x.cex = 0.8, x.padj = 0.8)
 ##  }
 
 
@@ -107,26 +107,26 @@
 ##                                         binWidth = 20,
 ##                                         doBootstrap = TRUE) {
 ##      if (length(dist) < 4) {
-##          par(mfrow = c(1, length(dist)));
+##          par(mfrow = c(1, length(dist)))
 ##      } else {
-##          par(mfrow = c(ceiling(length(dist) / 2), 2));
+##          par(mfrow = c(ceiling(length(dist) / 2), 2))
 ##      }
-##      breaks <- seq(-flank, flank, by = binWidth);
-##      bwString <- sprintf("bw = %3.2f", binWidth);
+##      breaks <- seq(-flank, flank, by = binWidth)
+##      bwString <- sprintf("bw = %3.2f", binWidth)
 ##      for (i in 1:length(dist)) {
 ##          if (flank > 0) {
-##              dist[[i]] <- dist[[i]][abs(dist[[i]]) <= flank];
+##              dist[[i]] <- dist[[i]][abs(dist[[i]]) <= flank]
 ##          }
 ##          title <- sprintf("%s (N=%i)",
 ##                           names(dist)[i],
-##                           length(dist[[i]]));
-##          xlab <- "Relative distance to exon-exon junction [nt]";
+##                           length(dist[[i]]))
+##          xlab <- "Relative distance to exon-exon junction [nt]"
 ##          PlotAbundance.generic(dist[[i]],
 ##                                xmin = -flank, xmax = flank,
 ##                                binWidth = binWidth,
 ##                                title = title,
 ##                                xlab = xlab,
-##                                doBootstrap = doBootstrap);
+##                                doBootstrap = doBootstrap)
 ##      }
 ##  }
 
@@ -152,28 +152,28 @@
 ##                                       flank = 1000,
 ##                                       binWidth = 20) {
 ##      if (length(distPos) < 4) {
-##          par(mfrow = c(1, length(distPos)));
+##          par(mfrow = c(1, length(distPos)))
 ##      } else {
-##          par(mfrow = c(ceiling(length(distPos) / 2), 2));
+##          par(mfrow = c(ceiling(length(distPos) / 2), 2))
 ##      }
-##      breaks <- seq(-flank, flank, by = binWidth);
-##      bwString <- sprintf("bw = %3.2f", binWidth);
+##      breaks <- seq(-flank, flank, by = binWidth)
+##      bwString <- sprintf("bw = %3.2f", binWidth)
 ##      for (i in 1:length(distPos)) {
 ##          if (flank > 0) {
-##              distPos[[i]] <- distPos[[i]][abs(distPos[[i]]) <= flank];
-##              distNeg[[i]] <- distNeg[[i]][abs(distNeg[[i]]) <= flank];
+##              distPos[[i]] <- distPos[[i]][abs(distPos[[i]]) <= flank]
+##              distNeg[[i]] <- distNeg[[i]][abs(distNeg[[i]]) <= flank]
 ##          }
-##          ctsPos <- table(cut(distPos[[i]], breaks = breaks));
-##          ctsNeg <- table(cut(distNeg[[i]], breaks = breaks));
-##          ctsMat <- as.matrix(rbind(ctsPos, ctsNeg));
-##          rownames(ctsMat) <- c("pos", "neg");
+##          ctsPos <- table(cut(distPos[[i]], breaks = breaks))
+##          ctsNeg <- table(cut(distNeg[[i]], breaks = breaks))
+##          ctsMat <- as.matrix(rbind(ctsPos, ctsNeg))
+##          rownames(ctsMat) <- c("pos", "neg")
 ##          title <- sprintf("N(%s) = %i, N(%s) = %i\n(bw = %i nt)",
 ##                           "pos", sum(ctsPos),
 ##                           "neg", sum(ctsNeg),
-##                           binWidth);
+##                           binWidth)
 ##          tmp <- PlotEnrichment.Generic(ctsMat,
 ##                                        title = title,
-##                                        x.las = 2, x.cex = 0.8, x.padj = 0.8);
+##                                        x.las = 2, x.cex = 0.8, x.padj = 0.8)
 ##      }
 ##  }
 
@@ -206,38 +206,38 @@
 ## GetRelDistSS <- function(locus,
 ##                          ss,
 ##                          flank = 1000) {
-##     CheckClass(locus, "txLoc");
-##     CheckClass(ss, "list", "GRangesList");
+##     CheckClass(locus, "txLoc")
+##     CheckClass(ss, "list", "GRangesList")
 ##     grLoc <- unlist(
 ##         TxLoc2GRangesList(locus,
-##                           filter = c("5'UTR", "CDS", "3'UTR")));
+##                           filter = c("5'UTR", "CDS", "3'UTR")))
 ##     # Select 5' splice sites in CDS
-##     grSS <- unlist(ss[[grep("5p", names(ss))]]);
+##     grSS <- unlist(ss[[grep("5p", names(ss))]])
 ##     grSS <- grSS[grep("(CDS|coding)",
 ##                       grSS$section,
-##                       ignore.case = TRUE)];
+##                       ignore.case = TRUE)]
 ##     # Filter genes with ss _and_ modification site
-##     genes <- intersect(grSS$gene, grLoc$gene);
-##     grSS <- grSS[which(grSS$gene %in% genes)];
-##     grLoc <- grLoc[which(grLoc$gene %in% genes)];
+##     genes <- intersect(grSS$gene, grLoc$gene)
+##     grSS <- grSS[which(grSS$gene %in% genes)]
+##     grLoc <- grLoc[which(grLoc$gene %in% genes)]
 ##     # Select first 5' splice site upstream of start codon in CDS
-##     grSSPos <- grSS[which(strand(grSS) == "+")];
-##     grSSNeg <- grSS[which(strand(grSS) == "-")];
+##     grSSPos <- grSS[which(strand(grSS) == "+")]
+##     grSSNeg <- grSS[which(strand(grSS) == "-")]
 ##     dupIDPos <- duplicated(grSSPos$gene,
-##                           fromLast = FALSE);
+##                           fromLast = FALSE)
 ##     dupIDNeg <- duplicated(grSSNeg$gene,
-##                           fromLast = TRUE);
-##     grSSPos <- grSSPos[!dupIDPos];
-##     grSSNeg <- grSSNeg[!dupIDNeg];
-##     grSS <- sort(append(grSSPos, grSSNeg));
-## #    rtracklayer::export(grSS, "ss5p_firstCDS.bed");
+##                           fromLast = TRUE)
+##     grSSPos <- grSSPos[!dupIDPos]
+##     grSSNeg <- grSSNeg[!dupIDNeg]
+##     grSS <- sort(append(grSSPos, grSSNeg))
+## #    rtracklayer::export(grSS, "ss5p_firstCDS.bed")
 ##     # Get distances
-##     d <- as.data.frame(distanceToNearest(grLoc, grSS));
-##     idx <- d$subjectHits;
-##     dist <- ifelse(end(grLoc) > start(grSS[idx]), d$distance, -d$distance);
-##     dist <- ifelse(strand(grLoc) == "+", dist, -dist);
-##     dist <- dist[abs(dist) <= flank];
-##     return(dist);
+##     d <- as.data.frame(distanceToNearest(grLoc, grSS))
+##     idx <- d$subjectHits
+##     dist <- ifelse(end(grLoc) > start(grSS[idx]), d$distance, -d$distance)
+##     dist <- ifelse(strand(grLoc) == "+", dist, -dist)
+##     dist <- dist[abs(dist) <= flank]
+##     return(dist)
 ## }
 
 
@@ -276,29 +276,29 @@
 ##                         filter = NULL,
 ##                         method = c("nearest", "all"),
 ##                         refPoint = c("ss", "mm", "se", "es", "ee")) {
-##      CheckClass(loc1, "txLoc");
-##      CheckClass(loc2, "txLoc");
-##      CheckClassTxLocRef(loc1, loc2);
-##      refPoint <- match.arg(refPoint);
-##      method <- match.arg(method);
-##      id1 <- GetId(loc1);
-##      id2 <- GetId(loc2);
-##      refGenome <- GetRef(loc1);
-##      sec <- intersect(names(GetLoci(loc1)), names(GetLoci(loc2)));
-##      loc1 <- FilterTxLoc(loc1, sec);
-##      loc2 <- FilterTxLoc(loc2, sec);
-##      loc1 <- GetLoci(loc1);
-##      loc2 <- GetLoci(loc2);
-##      dist.list <- list();
+##      CheckClass(loc1, "txLoc")
+##      CheckClass(loc2, "txLoc")
+##      CheckClassTxLocRef(loc1, loc2)
+##      refPoint <- match.arg(refPoint)
+##      method <- match.arg(method)
+##      id1 <- GetId(loc1)
+##      id2 <- GetId(loc2)
+##      refGenome <- GetRef(loc1)
+##      sec <- intersect(names(GetLoci(loc1)), names(GetLoci(loc2)))
+##      loc1 <- FilterTxLoc(loc1, sec)
+##      loc2 <- FilterTxLoc(loc2, sec)
+##      loc1 <- GetLoci(loc1)
+##      loc2 <- GetLoci(loc2)
+##      dist.list <- list()
 ##      for (i in 1:length(loc1)) {
-##          txID <- intersect(loc1[[i]]$REFSEQ, loc2[[i]]$REFSEQ);
+##          txID <- intersect(loc1[[i]]$REFSEQ, loc2[[i]]$REFSEQ)
 ##          if (length(txID) == 0) {
-##              dist.list[[length(dist.list)+1]] <- 0;
+##              dist.list[[length(dist.list)+1]] <- 0
 ##          } else {
-##              dist <- vector();
+##              dist <- vector()
 ##              for (j in 1:length(txID)) {
-##                  loc1.sel <- loc1[[i]][which(loc1[[i]]$REFSEQ == txID[j]), ];
-##                  loc2.sel <- loc2[[i]][which(loc2[[i]]$REFSEQ == txID[j]), ];
+##                  loc1.sel <- loc1[[i]][which(loc1[[i]]$REFSEQ == txID[j]), ]
+##                  loc2.sel <- loc2[[i]][which(loc2[[i]]$REFSEQ == txID[j]), ]
 ##                  distMat <- switch(refPoint,
 ##                                    "ss" = outer(loc1.sel$TXSTART,
 ##                                        loc2.sel$TXSTART,
@@ -314,18 +314,18 @@
 ##                                        "-"),
 ##                                    "ee" = outer(loc1.sel$TXEND,
 ##                                        loc2.sel$TXEND,
-##                                        "-"));
+##                                        "-"))
 ##                  if (method == "nearest") {
-##                      dist <- c(dist, apply(distMat, 1, function(x) x[which.min(abs(x))]));
+##                      dist <- c(dist, apply(distMat, 1, function(x) x[which.min(abs(x))]))
 ##                  } else {
-##                      dist <- c(dist, as.vector(distMat));
+##                      dist <- c(dist, as.vector(distMat))
 ##                  }
 ##              }
-##              dist.list[[length(dist.list) + 1]] <- dist;
+##              dist.list[[length(dist.list) + 1]] <- dist
 ##          }
 ##      }
-##      names(dist.list) <- names(loc1);
-##      return(dist.list);
+##      names(dist.list) <- names(loc1)
+##      return(dist.list)
 ##  }
 
 
@@ -350,33 +350,33 @@
 ## #'
 ## #' @export
 ## GetSpliceSites <- function(refGenome = "hg38", writeBED = FALSE) {
-##     refTx <- sprintf("tx_%s.RData", refGenome);
+##     refTx <- sprintf("tx_%s.RData", refGenome)
 ##     if (!file.exists(refTx)) {
-##         ss <- sprintf("Reference transcriptome for %s not found.", refGenome);
+##         ss <- sprintf("Reference transcriptome for %s not found.", refGenome)
 ##         ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
-##                       ss, refGenome);
-##         stop(ss);
+##                       ss, refGenome)
+##         stop(ss)
 ##     }
-##     load(refTx);
-##     requiredObj <- c("geneXID", "seqBySec", "txBySec");
+##     load(refTx)
+##     requiredObj <- c("geneXID", "seqBySec", "txBySec")
 ##     if (!all(requiredObj %in% ls())) {
-##         ss <- sprintf("Mandatory transcript objects not found.");
+##         ss <- sprintf("Mandatory transcript objects not found.")
 ##         ss <- sprintf("%s\nNeed all of the following: %s",
-##                       ss, paste0(requiredObj, collapse = ", "));
+##                       ss, paste0(requiredObj, collapse = ", "))
 ##         ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
-##                       ss, refGenome);
-##         stop(ss);
+##                       ss, refGenome)
+##         stop(ss)
 ##     }
-##     geneXID <- get("geneXID");
-##     seqBySec <- get("seqBySec");
-##     txBySec <- get("txBySec");
-##     secWithSpliceSites <- c("5'UTR", "CDS", "3'UTR");
-##     sel <- which(names(txBySec) %in% secWithSpliceSites);
-##     ss5p.all <- GRanges();
-##     ss3p.all <- GRanges();
+##     geneXID <- get("geneXID")
+##     seqBySec <- get("seqBySec")
+##     txBySec <- get("txBySec")
+##     secWithSpliceSites <- c("5'UTR", "CDS", "3'UTR")
+##     sel <- which(names(txBySec) %in% secWithSpliceSites)
+##     ss5p.all <- GRanges()
+##     ss3p.all <- GRanges()
 ##     for (i in 1:length(sel)) {
-##         junct <- psetdiff(range(txBySec[[sel[i]]]), txBySec[[sel[i]]]);
-##         junct <- unlist(junct[elementLengths(junct) > 0]);
+##         junct <- psetdiff(range(txBySec[[sel[i]]]), txBySec[[sel[i]]])
+##         junct <- unlist(junct[elementLengths(junct) > 0])
 ##         ss5p <- GRanges(
 ##             seqnames(junct),
 ##             IRanges(ifelse(strand(junct) == "+",
@@ -388,7 +388,7 @@
 ##             strand(junct),
 ##             type = "ss5p",
 ##             gene = names(junct),
-##             section = names(txBySec)[sel[i]]);
+##             section = names(txBySec)[sel[i]])
 ##         ss3p <- GRanges(
 ##             seqnames(junct),
 ##             IRanges(ifelse(strand(junct) == "+",
@@ -400,21 +400,21 @@
 ##             strand(junct),
 ##             type = "ss3p",
 ##             gene = names(junct),
-##             section = names(txBySec)[sel[i]]);
-##         ss5p.all <- append(ss5p.all, ss5p);
-##         ss3p.all <- append(ss3p.all, ss3p);
+##             section = names(txBySec)[sel[i]])
+##         ss5p.all <- append(ss5p.all, ss5p)
+##         ss3p.all <- append(ss3p.all, ss3p)
 ##     }
-##     ss5p.all <- sort(ss5p.all);
-##     ss3p.all <- sort(ss3p.all);
-##     ss5p.all$name <- paste(ss5p.all$type, ss5p.all$gene, ss5p.all$section, sep = "|");
-##     ss3p.all$name <- paste(ss3p.all$type, ss3p.all$gene, ss3p.all$section, sep = "|");
+##     ss5p.all <- sort(ss5p.all)
+##     ss3p.all <- sort(ss3p.all)
+##     ss5p.all$name <- paste(ss5p.all$type, ss5p.all$gene, ss5p.all$section, sep = "|")
+##     ss3p.all$name <- paste(ss3p.all$type, ss3p.all$gene, ss3p.all$section, sep = "|")
 ##     if (writeBED) {
-##         rtracklayer::export(ss5p.all, "ss5p.bed");
-##         rtracklayer::export(ss3p.all, "ss3p.bed");
+##         rtracklayer::export(ss5p.all, "ss5p.bed")
+##         rtracklayer::export(ss3p.all, "ss3p.bed")
 ##     }
 ##     ret <- list(GenomicRanges::split(ss5p.all, ss5p.all$gene),
-##                 GenomicRanges::split(ss3p.all, ss3p.all$gene));
-##     names(ret) <- c("ss5p", "ss3p");
-##     return(ret);
+##                 GenomicRanges::split(ss3p.all, ss3p.all$gene))
+##     names(ret) <- c("ss5p", "ss3p")
+##     return(ret)
 ## }
 

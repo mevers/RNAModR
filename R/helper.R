@@ -22,8 +22,8 @@ SafeLoad <- function(lib) {
     #   A logical scalar; TRUE if lib was loaded successfully
     ret <- suppressMessages(require(lib,
                                     character.only = TRUE,
-                                    quietly = TRUE));
-    return(ret);
+                                    quietly = TRUE))
+    return(ret)
 }
 
 
@@ -51,20 +51,20 @@ CheckClass <- function(object, classType = NULL, classType2 = NULL) {
     # Returns:
     #    TRUE
     if (class(object) != classType) {
-        objName <- deparse(substitute(object));
+        objName <- deparse(substitute(object))
         stop(sprintf("%s is not an object of type %s.\n",
                      objName, classType),
-             call. = FALSE);
+             call. = FALSE)
     }
     if (classType == "list" &&
         !is.null(classType2) &&
         !all(lapply(object, class) == classType2)) {
-        objName <- deparse(substitute(object));
+        objName <- deparse(substitute(object))
         stop(sprintf("%s does not contain a list of objects of type %s.\n",
                      objName, classType2),
-             call. = FALSE);
+             call. = FALSE)
     }
-    return(TRUE);
+    return(TRUE)
 }
 
 
@@ -84,20 +84,20 @@ CheckClass <- function(object, classType = NULL, classType2 = NULL) {
 #' 
 #' @export
 CheckClassTxLocRef <- function(obj1, obj2) {
-    CheckClass(obj1, "txLoc");
-    CheckClass(obj2, "txLoc");
-    obj1Name <- deparse(substitute(obj1));
-    obj2Name <- deparse(substitute(obj2));
-    ref1 <- GetRef(obj1);
-    ref2 <- GetRef(obj2);
+    CheckClass(obj1, "txLoc")
+    CheckClass(obj2, "txLoc")
+    obj1Name <- deparse(substitute(obj1))
+    obj2Name <- deparse(substitute(obj2))
+    ref1 <- GetRef(obj1)
+    ref2 <- GetRef(obj2)
     if (ref1 != ref2) {
         ss <- sprintf("%s and %s are not based on the same reference genome.",
-                      obj1Name, obj2Name);
-        ss <- sprintf("%s\n  %s: %s", ss, obj1Name, ref1);
-        ss <- sprintf("%s\n  %s: %s", ss, obj2Name, ref2);
-        stop(ss);
+                      obj1Name, obj2Name)
+        ss <- sprintf("%s\n  %s: %s", ss, obj1Name, ref1)
+        ss <- sprintf("%s\n  %s: %s", ss, obj2Name, ref2)
+        stop(ss)
     }
-    return(TRUE);
+    return(TRUE)
 }
 
 
@@ -129,22 +129,22 @@ CheckClassTxLocConsistency <- function(obj1, obj2) {
     #
     # Returns:
     #   TRUE
-    CheckClassTxLocRef(obj1, obj2);
-    obj1Name <- deparse(substitute(obj1));
-    obj2Name <- deparse(substitute(obj2));
-    sec1 <- names(GetLoci(obj1));
-    sec2 <- names(GetLoci(obj2));
-    matchSec <- intersect(sec1, sec2);
+    CheckClassTxLocRef(obj1, obj2)
+    obj1Name <- deparse(substitute(obj1))
+    obj2Name <- deparse(substitute(obj2))
+    sec1 <- names(GetLoci(obj1))
+    sec2 <- names(GetLoci(obj2))
+    matchSec <- intersect(sec1, sec2)
     if (!identical(sec1, sec2)) {
         ss <- sprintf("Transcript sections in %s and %s do not match.",
-             obj1Name, obj2Name);
+             obj1Name, obj2Name)
         ss <- sprintf("%s\n  %s: %s",
-                      ss, obj1Name, paste(sec1, collapse = ", "));
+                      ss, obj1Name, paste(sec1, collapse = ", "))
         ss <- sprintf("%s\n  %s: %s",
-                      ss, obj2Name, paste(sec2, collapse = ", "));
-        stop(ss);
+                      ss, obj2Name, paste(sec2, collapse = ", "))
+        stop(ss)
     }
-    return(TRUE);
+    return(TRUE)
 }
 
 
@@ -166,29 +166,29 @@ CheckClassTxLocConsistency <- function(obj1, obj2) {
 #' 
 #' @export
 LoadRefTx <- function(refGenome = "hg38", env = .GlobalEnv) {
-    refTx <- sprintf("tx_%s.RData", refGenome);
+    refTx <- sprintf("tx_%s.RData", refGenome)
     if (!file.exists(refTx)) {
-        ss <- sprintf("Reference transcriptome for %s not found.", refGenome);
+        ss <- sprintf("Reference transcriptome for %s not found.", refGenome)
         ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
-                      ss, refGenome);
-        stop(ss);
+                      ss, refGenome)
+        stop(ss)
     }
-    load(refTx);
-    requiredObj <- c("geneXID", "seqBySec", "txBySec");
+    load(refTx)
+    requiredObj <- c("geneXID", "seqBySec", "txBySec")
     if (!all(requiredObj %in% ls())) {
-        ss <- sprintf("Mandatory transcript objects not found.");
+        ss <- sprintf("Mandatory transcript objects not found.")
         ss <- sprintf("%s\nNeed all of the following: %s",
-                      ss, paste0(requiredObj, collapse = ", "));
+                      ss, paste0(requiredObj, collapse = ", "))
         ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
-                      ss, refGenome);
-        stop(ss);
+                      ss, refGenome)
+        stop(ss)
     }
-    geneXID <- base::get("geneXID");
-    seqBySec <- base::get("seqBySec");
-    txBySec <- base::get("txBySec");
-    assign("geneXID", geneXID, envir = env);
-    assign("seqBySec", seqBySec, envir = env);
-    assign("txBySec", txBySec, envir = env);
+    geneXID <- base::get("geneXID")
+    seqBySec <- base::get("seqBySec")
+    txBySec <- base::get("txBySec")
+    assign("geneXID", geneXID, envir = env)
+    assign("seqBySec", seqBySec, envir = env)
+    assign("txBySec", txBySec, envir = env)
 }
 
 
@@ -207,20 +207,20 @@ LoadRefTx <- function(refGenome = "hg38", env = .GlobalEnv) {
 #' 
 #' @export
 FilterTxLoc <- function(locus, filter = NULL) {
-    CheckClass(locus, "txLoc");
-    id <- GetId(locus);
-    refGenome <- GetRef(locus);
-    version <- GetVersion(locus);
-    locus <- GetLoci(locus);
+    CheckClass(locus, "txLoc")
+    id <- GetId(locus)
+    refGenome <- GetRef(locus)
+    version <- GetVersion(locus)
+    locus <- GetLoci(locus)
     if (!is.null(filter)) {
-        locus <- locus[which(names(locus) %in% filter)];
+        locus <- locus[which(names(locus) %in% filter)]
     }
     obj <- new("txLoc",
                loci = locus,
                id = id,
                refGenome = refGenome,
-               version = version);
-    return(obj);
+               version = version)
+    return(obj)
 }
 
 
@@ -238,25 +238,25 @@ FilterTxLoc <- function(locus, filter = NULL) {
 #' 
 #' @export
 SubsampleTxLoc <- function(locus, fraction = 0) {
-    CheckClass(locus, "txLoc");
-    id <- GetId(locus);
-    id <- sprintf("%s_subsampled", id);
-    refGenome <- GetRef(locus);
-    version <- GetVersion(locus);
+    CheckClass(locus, "txLoc")
+    id <- GetId(locus)
+    id <- sprintf("%s_subsampled", id)
+    refGenome <- GetRef(locus)
+    version <- GetVersion(locus)
     size <- lapply(GetNumberOfLoci(locus), 
-                   function(x) sample(x, fraction * x));
-    locus <- GetLoci(locus);
+                   function(x) sample(x, fraction * x))
+    locus <- GetLoci(locus)
     if (fraction > 0) {
         for (i in 1:length(locus)) {
-            locus[[i]] <- locus[[i]][size[[i]], ];
+            locus[[i]] <- locus[[i]][size[[i]], ]
         }
     }
     obj <- new("txLoc",
                loci = locus,
                id = id,
                refGenome = refGenome,
-               version = version);
-    return(obj);
+               version = version)
+    return(obj)
 }
 
 
@@ -288,15 +288,15 @@ SubsampleTxLoc <- function(locus, fraction = 0) {
 TxLoc2GRangesList <- function(locus,
                               filter = NULL,
                               method = c("tPos", "gPos")) {
-    CheckClass(locus, "txLoc");
-    method <- match.arg(method);
-    id <- GetId(locus);
-    locus <- GetLoci(locus);
+    CheckClass(locus, "txLoc")
+    method <- match.arg(method)
+    id <- GetId(locus)
+    locus <- GetLoci(locus)
     if (!is.null(filter)) {
-        locus <- locus[which(names(locus) %in% filter)];
+        locus <- locus[which(names(locus) %in% filter)]
     }
-    gr <- GRangesList();
-    options(warn = -1);
+    gr <- GRangesList()
+    options(warn = -1)
     for (i in 1:length(locus)) {
         gr[[length(gr) + 1]] <- switch(
             method,
@@ -315,11 +315,11 @@ TxLoc2GRangesList <- function(locus,
                 type = id,
                 gene = locus[[i]]$REFSEQ,
                 section = locus[[i]]$GENE_REGION,
-                names = locus[[i]]$ID));
+                names = locus[[i]]$ID))
     }
-    options(warn = 0);
-    names(gr) <- names(locus);
-    return(gr);
+    options(warn = 0)
+    names(gr) <- names(locus)
+    return(gr)
 }
 
 
@@ -354,45 +354,45 @@ TxLoc2GRangesList <- function(locus,
 #' @export
 GetRelDistNearest <- function(gr1,
                               gr2) {
-    CheckClass(gr1, "GRangesList");
-    CheckClass(gr2, "GRangesList");
-    filter <- intersect(names(gr1), names(gr2));
-    gr1 <- gr1[which(names(gr1) %in% filter)];
-    gr2 <- gr2[which(names(gr2) %in% filter)];
+    CheckClass(gr1, "GRangesList")
+    CheckClass(gr2, "GRangesList")
+    filter <- intersect(names(gr1), names(gr2))
+    gr1 <- gr1[which(names(gr1) %in% filter)]
+    gr2 <- gr2[which(names(gr2) %in% filter)]
     if (!identical(names(gr1), names(gr2))) {
-        ss <- sprintf("Transcript sections do not match:\n");
+        ss <- sprintf("Transcript sections do not match:\n")
         ss <- sprintf(" %s != %s\n",
                       paste(names(gr1), collapse = " "),
-                      paste(names(gr2), collapse = " "));
-        stop(ss);
+                      paste(names(gr2), collapse = " "))
+        stop(ss)
     }
-    dist.list <- list();
+    dist.list <- list()
     for (i in 1:length(gr1)) {
         # Collapse range of gr1 and gr2
-        end(gr1[[i]]) <- start(gr1[[i]]);
-        end(gr2[[i]]) <- start(gr2[[i]]);
+        end(gr1[[i]]) <- start(gr1[[i]])
+        end(gr2[[i]]) <- start(gr2[[i]])
         # Disable warnings to get rid of messages "Each of the
         # 2 combined objects has sequence levels not in the other".
         # As this is expected to happen, we can safely ignore.
-        options(warn = -1);
+        options(warn = -1)
         # Get the nearest distance between entries from gr1[[i]]
         # and gr2[[i]] with the same seqnames (i.e. transcript ID).
-        d <- as.data.frame(distanceToNearest(gr1[[i]], gr2[[i]]));
-        options(warn = 0);
-        idx1 <- d$queryHits;
-        idx2 <- d$subjectHits;
+        d <- as.data.frame(distanceToNearest(gr1[[i]], gr2[[i]]))
+        options(warn = 0)
+        idx1 <- d$queryHits
+        idx2 <- d$subjectHits
         # Set d > 0 if pos(gr1[[i]]) > pos(gr2[[i]])
         #     d < 0 if pos(gr1[[i]]) < pos(gr2[[i]])
         # In words: Negative distances => gr1 is upstream of gr2
         #           Positive distances => gr1 is downstream of gr2
         dist <- ifelse(end(gr1[[i]][idx1]) > start(gr2[[i]][idx2]),
                        d$distance,
-                       -d$distance);
-        names(dist) <- (gr1[[i]][idx1])$names;
-        dist.list[[length(dist.list) + 1]] <- dist;
+                       -d$distance)
+        names(dist) <- (gr1[[i]][idx1])$names
+        dist.list[[length(dist.list) + 1]] <- dist
     }
-    names(dist.list) <- names(gr1);
-    return(dist.list);
+    names(dist.list) <- names(gr1)
+    return(dist.list)
 }
 
 
@@ -425,22 +425,22 @@ EstimateCIFromBS <- function(x, breaks, nBS = 5000) {
     #
     # Returns:
     #    List of lower/upper 95% CI values for each bin.
-    h0 <- hist(x, breaks = breaks, plot = FALSE);
-    matBS <- matrix(0, ncol = length(breaks) - 1, nrow = nBS);
+    h0 <- hist(x, breaks = breaks, plot = FALSE)
+    matBS <- matrix(0, ncol = length(breaks) - 1, nrow = nBS)
     for (j in 1:nBS) {
-        xBS <- sample(x, size = length(x), replace = TRUE);
-        h <- hist(xBS, breaks = breaks, plot = FALSE);
-        matBS[j, ] <- h$counts;
+        xBS <- sample(x, size = length(x), replace = TRUE)
+        h <- hist(xBS, breaks = breaks, plot = FALSE)
+        matBS[j, ] <- h$counts
     }
-    sd <- apply(matBS, 2, sd);
-    z1 <- apply(matBS, 2, function(x) {(x - mean(x)) / sd(x)});
-    z1[is.na(z1)] <- 0;
-    z1 <- apply(z1, 2, sort);
-    y.low <- h0$counts - z1[round(0.025 * nBS), ] * sd;
-    y.high <- h0$counts - z1[round(0.975 * nBS), ] * sd;
+    sd <- apply(matBS, 2, sd)
+    z1 <- apply(matBS, 2, function(x) {(x - mean(x)) / sd(x)})
+    z1[is.na(z1)] <- 0
+    z1 <- apply(z1, 2, sort)
+    y.low <- h0$counts - z1[round(0.025 * nBS), ] * sd
+    y.high <- h0$counts - z1[round(0.975 * nBS), ] * sd
     return(list(x = h0$mids,
                 y.low = y.low,
-                y.high = y.high));
+                y.high = y.high))
 }
 
 
@@ -459,16 +459,16 @@ EstimateCIFromBS <- function(x, breaks, nBS = 5000) {
 #' 
 #' @export
 AddAlpha <- function(hexList, alpha = 0.5) {
-    mat <- sapply(hexList, col2rgb, alpha = TRUE) / 255.0;
-    mat[4, ] <- alpha;
-    col <- vector();
+    mat <- sapply(hexList, col2rgb, alpha = TRUE) / 255.0
+    mat[4, ] <- alpha
+    col <- vector()
     for (i in 1:ncol(mat)) {
         col <- c(col, rgb(mat[1, i],
                           mat[2, i],
                           mat[3, i],
-                          mat[4, i]));
+                          mat[4, i]))
     }
-    return(col);
+    return(col)
 }
 
 
@@ -485,7 +485,7 @@ AddAlpha <- function(hexList, alpha = 0.5) {
 #'
 #' @export
 IsEmptyChar <- function(v) {
-    return(all(nchar(v) == 0));
+    return(all(nchar(v) == 0))
 }
 
 
@@ -504,8 +504,8 @@ IsEmptyChar <- function(v) {
 #'
 #' @export
 GetColPal <- function(pal = c("apple", "google"), n = NULL, alpha = 1.0) {
-    pal <- match.arg(pal);
-    alpha <- alpha * 255;
+    pal <- match.arg(pal)
+    alpha <- alpha * 255
     if (pal == "apple") {
         col <- c(
             rgb(95, 178, 51, alpha = alpha, maxColorValue = 255),
@@ -513,18 +513,18 @@ GetColPal <- function(pal = c("apple", "google"), n = NULL, alpha = 1.0) {
             rgb(245, 114, 6, alpha = alpha, maxColorValue = 255),
             rgb(235, 15, 19, alpha = alpha, maxColorValue = 255),
             rgb(143, 47, 139, alpha = alpha, maxColorValue = 255),
-            rgb(19, 150, 219, alpha = alpha, maxColorValue = 255));
+            rgb(19, 150, 219, alpha = alpha, maxColorValue = 255))
     } else if (pal == "google") {
         col <- c(
             rgb(61, 121, 243, alpha = alpha, maxColorValue = 255),
             rgb(230, 53, 47, alpha = alpha, maxColorValue = 255),
             rgb(249, 185, 10, alpha = alpha, maxColorValue = 255),
-            rgb(52, 167, 75, alpha = alpha, maxColorValue = 255));
+            rgb(52, 167, 75, alpha = alpha, maxColorValue = 255))
     }
     if (!is.null(n)) {
-        col <- col[1:n];
+        col <- col[1:n]
     }
-    return(col);
+    return(col)
 }
 
 
@@ -541,7 +541,7 @@ GetColPal <- function(pal = c("apple", "google"), n = NULL, alpha = 1.0) {
 #'
 #' @export
 Unfactor <- function(df) {
-    idx <- sapply(df, is.factor);
-    df[idx] <- lapply(df[idx], as.character);
-    return(df);
+    idx <- sapply(df, is.factor)
+    df[idx] <- lapply(df[idx], as.character)
+    return(df)
 }
