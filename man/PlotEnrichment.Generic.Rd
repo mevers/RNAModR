@@ -4,8 +4,9 @@
 \alias{PlotEnrichment.Generic}
 \title{Generic function to perform enrichment analysis and plot results.}
 \usage{
-PlotEnrichment.Generic(mat, title = "", xlab = "", x.las = 1, x.cex = 1,
-  x.padj = 1, plotType = "l", revXaxis = FALSE, xAxisLblFmt = 0)
+PlotEnrichment.Generic(mat, title = "", xlab = "", x.las = 1,
+  x.cex = 1, x.padj = 1, plotType = "l", revXaxis = FALSE,
+  xAxisLblFmt = 0)
 }
 \arguments{
 \item{mat}{A \code{dataframe}; specifies the contingency table.}
@@ -46,4 +47,3 @@ Note: This function should not be invoked directly by the user.
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
 \keyword{internal}
-

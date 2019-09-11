@@ -27,4 +27,3 @@ returns a \code{dataframe} with the following data columns:
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
-

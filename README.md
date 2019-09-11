@@ -16,6 +16,25 @@ modifications, the non-uniformity in the actual distribution of cytosines across
 transcript sections makes a simple position permutation approach inappropriate for 
 generating null sites.
 
+
+---
+
+**NOTE**
+
+This is production code! Use it at your own risk. That means that documentation may be incomplete and functions may return unexpected errors. 
+
+[Update September 2019]
+
+Due to some substantial changes in functions/methods from some R/Bioconductor packages that RNAModR depends on, RNAModR's functionality is currently limited. Specifically,
+
+1. building a custom reference transcriptome is broken (but you can still use the pre-generated transcriptomes from the links below)
+2. `plotRelDistEnrichment()` is broken
+
+I appreciate any and all testing; for issues, please open an official [Issue](https://github.com/mevers/RNAModR/issues/new) on the GitHub project site.
+
+---
+
+
 ## Installing RNAModR 
 
 ### The github way (requires the [devtools](https://github.com/hadley/devtools) package)
@@ -61,16 +80,16 @@ generating null sites.
 
 2. If all package dependencies are met, install **RNAModR** with devtools
 
-   ```{r}
-if (!require("devtools")) install.packages("devtools");
-devtools::install_github("mevers/RNAModR", build_vignettes = FALSE);
-   ```
+    ```{r}
+    if (!require("devtools")) install.packages("devtools")
+    devtools::install_github("mevers/RNAModR", build_vignettes = FALSE)
+    ```
 
-You can force a re-install of RNAModR by adding 
+    You can force a re-install of RNAModR by adding 
 
-```{r} 
-devtools::install_github(..., force = TRUE);
-```
+    ```{r} 
+    devtools::install_github(..., force = TRUE)
+    ```
 
 ## Getting started
 The following lines of R code will load the **RNAModR** library, and plot the distribution of m6A sites [[Linder et al., Nature Methods 12, 767 (2015)](http://www.nature.com/nmeth/journal/v12/n8/abs/nmeth.3453.html)] across the 5'UTR, CDS and 3'UTR of the human hg38-based transcriptome.

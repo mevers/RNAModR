@@ -4,8 +4,8 @@
 \alias{GenerateNull}
 \title{Generate a list of null sites.}
 \usage{
-GenerateNull(locus, id = NULL, method = c("ntAbund", "perm"), nt = "C",
-  showPb = TRUE)
+GenerateNull(locus, id = NULL, method = c("ntAbund", "perm"),
+  nt = "C", showPb = TRUE)
 }
 \arguments{
 \item{locus}{A \code{txLoc} object.}
@@ -82,4 +82,3 @@ negSites <- GenerateNull(posSites, method = "ntAbund", nt = "A");
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
-

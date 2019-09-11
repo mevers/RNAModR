@@ -4,7 +4,8 @@
 \alias{PlotRelDistEnrichment}
 \title{Perform enrichment analysis of relative distances.}
 \usage{
-PlotRelDistEnrichment(locPos, locNeg, locRef, flank = 1000, binWidth = 20)
+PlotRelDistEnrichment(locPos, locNeg, locRef, flank = 1000,
+  binWidth = 20)
 }
 \arguments{
 \item{locPos}{A \code{txLoc} object.}
@@ -43,4 +44,3 @@ The bin width and window size can be adjusted with
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
-

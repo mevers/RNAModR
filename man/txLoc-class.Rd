@@ -28,7 +28,7 @@ upon which transcriptome-derived positions are based.}
 \item{\code{version}}{A character string; can be used to flag specific
 version, e.g. using the current system time & date.}
 }}
+
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
-

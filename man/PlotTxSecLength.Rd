@@ -4,8 +4,8 @@
 \alias{PlotTxSecLength}
 \title{Plot length distribution of transcript sections.}
 \usage{
-PlotTxSecLength(txBySec, asLog = TRUE, printMetrics = c("median", "mean"),
-  filter = NULL, outliers = FALSE, ...)
+PlotTxSecLength(txBySec, asLog = TRUE, printMetrics = c("median",
+  "mean"), filter = NULL, outliers = FALSE, ...)
 }
 \arguments{
 \item{txBySec}{A \code{list} of \code{GRangesList} objects;
@@ -35,4 +35,3 @@ GRangesList transcript features.
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
 \keyword{internal}
-

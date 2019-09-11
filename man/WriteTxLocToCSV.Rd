@@ -22,4 +22,3 @@ Write a txLoc object to a/multiple comma-separated-values file(s).
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
 \keyword{internal}
-

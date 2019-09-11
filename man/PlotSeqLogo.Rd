@@ -32,4 +32,3 @@ Use \code{filter} to specify specific transcript sections.
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
-

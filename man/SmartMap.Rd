@@ -49,4 +49,3 @@ txSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
-

@@ -19,4 +19,3 @@ Check if all entries in a character vector are empty.
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
 \keyword{internal}
-

@@ -27,13 +27,11 @@ with the same name (based on field \code{seqnames}). The
 return object is a list of distances, where every list
 element corresponds to a list element from \code{gr1} and
 \code{gr2}.
-Note that distances are given as signed integers
-\begin{equation}
- \hat{d} = \mathrm{sgn}(gr1, gr2) d
-\end{equation}
+Note that distances are given as signed integers: Negative
+distances correspond to pos(gr1) < pos(gr2), positive
+distances correspond to pos(gr1) > pos(gr2).
 }
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
 \keyword{internal}
-

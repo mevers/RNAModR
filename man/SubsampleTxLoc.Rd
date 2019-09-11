@@ -21,4 +21,3 @@ Subsample from a \code{txLoc} object.
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
 \keyword{internal}
-

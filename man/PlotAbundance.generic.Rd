@@ -4,9 +4,10 @@
 \alias{PlotAbundance.generic}
 \title{Generic function for plotting abundances (histograms).}
 \usage{
-PlotAbundance.generic(data, xmin = NULL, xmax = NULL, binWidth = NULL,
-  plotType = "s", lwd = 2, title = "", xlab = "", ylab = "Abundance",
-  doBootstrap = TRUE, nBS = 5000, doLowess = TRUE)
+PlotAbundance.generic(data, xmin = NULL, xmax = NULL,
+  binWidth = NULL, plotType = "s", lwd = 2, title = "",
+  xlab = "", ylab = "Abundance", doBootstrap = TRUE, nBS = 5000,
+  doLowess = TRUE)
 }
 \arguments{
 \item{data}{A vector of integers.}
@@ -38,4 +39,3 @@ Generic function for plotting abundances (histograms).
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
 \keyword{internal}
-

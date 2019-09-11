@@ -27,4 +27,3 @@ This is a low-level function that is being called from
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
 \keyword{internal}
-

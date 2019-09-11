@@ -5,8 +5,8 @@
 \title{Plot spatial distribution of loci from \code{txLoc} object.}
 \usage{
 PlotSpatialDistribution(locus, filter = NULL, nbreaks = 100,
-  absolute = FALSE, binWidth = NULL, posMax = 1000, doBootstrap = TRUE,
-  ...)
+  absolute = FALSE, binWidth = NULL, posMax = 1000,
+  doBootstrap = TRUE, ...)
 }
 \arguments{
 \item{locus}{A \code{txLoc} object.}
@@ -52,4 +52,3 @@ PlotSpatialDistribution(posSites,
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
-

@@ -4,8 +4,8 @@
 \alias{GetTxDb}
 \title{Download a new or load an existing reference transcriptome.}
 \usage{
-GetTxDb(genomeVersion = "hg38", standardChrOnly = TRUE, force = FALSE,
-  verbose = FALSE)
+GetTxDb(genomeVersion = "hg38", standardChrOnly = TRUE,
+  force = FALSE, verbose = FALSE)
 }
 \arguments{
 \item{genomeVersion}{A character string; refers to a specific
@@ -59,4 +59,3 @@ print(txdb);
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
 \keyword{internal}
-

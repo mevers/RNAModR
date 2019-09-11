@@ -25,4 +25,3 @@ file, and makes the objects assessible in the user's workspace.
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
 \keyword{internal}
-

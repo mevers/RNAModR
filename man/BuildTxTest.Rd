@@ -16,4 +16,3 @@ The function builds a transcriptome for testing purposes.
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
 \keyword{internal}
-

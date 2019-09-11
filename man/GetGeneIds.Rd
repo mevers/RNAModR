@@ -14,7 +14,7 @@ A \code{data.frame}. See 'Details'.
 }
 \description{
 Get different gene IDs for mapping between different gene
-annotations (Ensembl, Entrez, etc.). See 'Details'. 
+annotations (Ensembl, Entrez, etc.). See 'Details'.
 This is a low-level function that is being called from
 \code{BuildTx}.
 }
@@ -44,4 +44,3 @@ the following columns:
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
 \keyword{internal}
-

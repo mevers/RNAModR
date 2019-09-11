@@ -25,4 +25,3 @@ function \code{GenomicRanges::countOverlaps}.
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
-

@@ -19,4 +19,3 @@ Unfactor entries in a \code{data.frame}.
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
 \keyword{internal}
-

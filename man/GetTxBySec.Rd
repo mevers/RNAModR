@@ -4,8 +4,9 @@
 \alias{GetTxBySec}
 \title{Get transcript sections.}
 \usage{
-GetTxBySec(txdb, sections = c("Promoter", "5'UTR", "CDS", "3'UTR", "Intron"),
-  promUpstream = 1000, promDownstream = 0, verbose = FALSE)
+GetTxBySec(txdb, sections = c("Promoter", "5'UTR", "CDS", "3'UTR",
+  "Intron"), promUpstream = 1000, promDownstream = 0,
+  verbose = FALSE)
 }
 \arguments{
 \item{txdb}{A \code{TxDb} object.}
@@ -45,4 +46,3 @@ identical RefSeq ID exist.
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
 \keyword{internal}
-

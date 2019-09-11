@@ -4,8 +4,8 @@
 \alias{BuildTx}
 \title{Build a custom transcriptome.}
 \usage{
-BuildTx(genomeVersion = c("hg38", "hg19", "hg18", "mm10", "mm9", "mm8", "dm6",
-  "dm3", "dm2", "sacCer3", "sacCer2", "sacCer1"), force = FALSE)
+BuildTx(genomeVersion = c("hg38", "hg19", "hg18", "mm10", "mm9", "mm8",
+  "dm6", "dm3", "dm2", "sacCer3", "sacCer2", "sacCer1"), force = FALSE)
 }
 \arguments{
 \item{genomeVersion}{A character string; refers to a specific
@@ -18,15 +18,15 @@ transcriptome; this will overwrite existing data.}
 Build a custom, organism-specific transcriptome. See 'Details'.
 }
 \details{
-The function builds an organism-specific transcriptome containing 
+The function builds an organism-specific transcriptome containing
 one transcript per unique Entrez ID; the transcript is selected
 from all UCSC RefSeq annotation-based isoforms as the transcript
 with the longest CDS, and longest upstream/downstream adjoining
 UTRs. Transcript segments are stored per transcript section, and
 written into a \code{.RData} file.
 For most operations, the user will run this function once, and
-continue with further downstream analyses. Various RNAModR 
-routines will automatically load the transcriptome data to e.g. 
+continue with further downstream analyses. Various RNAModR
+routines will automatically load the transcriptome data to e.g.
 map sites to and from the transcriptome.
 Currently, RNAModR supports analyses of human, mouse, fruitfly
 and yeast data, based on different reference genome versions:
@@ -54,4 +54,3 @@ BuildTx("hg38");
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
-

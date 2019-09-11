@@ -33,4 +33,3 @@ on the minimum distance to the single entry from \code{ref}.
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
 \keyword{internal}
-

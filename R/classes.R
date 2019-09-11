@@ -30,16 +30,15 @@ setClass("txLoc",
                         version = "character"),
          prototype = prototype(
              loci = list(),
-             id = "",
-             refGenome = "",
-             version = ""),
-         );
+             id = NA_character_,
+             refGenome = NA_character_,
+             version = NA_character_)
+)
 
 
 ###########################################################################
 #################### GENERAL CLASS SLOT ACCESSORS #########################
 ###########################################################################
-
 
 #' Method "GetLoci" for S4 object txLoc.
 #'
@@ -139,50 +138,51 @@ setMethod("GetVersion",
 ###################### SPECIFIC CLASS ACCESSORS ###########################
 ###########################################################################
 
-#' Method "Info" for S4 object txLoc.
-#'
+#' Method "show" for S4 object txLoc.
+#' 
 #' Print summary information about \code{txLoc} object.
-#'
+#' 
 #' @param x A \code{txLoc} object.
 #' 
 #' @examples
 #' \dontrun{
 #' bedFile <- system.file("extdata",
 #'                        "miCLIP_m6A_Linder2015_hg38.bed",
-#'                        package = "RNAModR");
-#' sites <- ReadBED(bedFile);
-#' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
-#' Info(posSites);
+#'                        package = "RNAModR")
+#' sites <- ReadBED(bedFile)
+#' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38")
+#' posSites
 #' }
-#'
-#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' 
-#' @exportMethod Info
-setGeneric("Info", function(x) standardGeneric("Info"));
-
-#' @rdname Info
-setMethod("Info",
-          signature = "txLoc",
-          definition = function(x) {
-              cat("Object of class \"txLoc\".\n");
-              cat("\n");
-              cat(sprintf("ID               = %s\n", slot(x, "id")));
-              cat(sprintf("Reference genome = %s\n", slot(x, "refGenome")));
-              cat(sprintf("Version          = %s\n", slot(x, "version")));
-              cat(sprintf("Total # of sites = %i\n",
-                          sum(sapply(slot(x, "loci"), nrow))));
-              cat(sprintf("Package          = RNAModR"));
-              cat("\n");
-              loc <- slot(x, "loci");
-              nSec <- length(loc);
-              cat(sprintf("%i transcript sections: %s\n",
-                          nSec,
-                          paste0(names(loc), collapse = ", ")));
-              for (i in 1:nSec) {
-                  cat(sprintf(" %10s: Number of loci = %i\n", names(loc)[i],
-                              nrow(loc[[i]])));
-              }
-          });
+#' @author Maurits Evers, \email{maurits.evers@anu.edu.au}
+#' 
+#' @exportMethod show
+#' 
+#' @rdname show
+setMethod(
+    "show", 
+    "txLoc", 
+    function(object) {
+        cat("Object of class \"txLoc\".\n")
+        cat("\n")
+        cat(sprintf("ID               = %s\n", slot(object, "id")))
+        cat(sprintf("Reference genome = %s\n", slot(object, "refGenome")))
+        cat(sprintf("Version          = %s\n", slot(object, "version")))
+        cat(sprintf("Total # of sites = %i\n",
+                    sum(sapply(slot(object, "loci"), nrow))))
+        cat(sprintf("Package          = RNAModR (%s)", packageVersion("RNAModR")))
+        cat("\n")
+        loc <- slot(object, "loci")
+        nSec <- length(loc)
+        cat(sprintf("%i transcript sections: %s\n",
+                    nSec,
+                    paste0(names(loc), collapse = ", ")))
+        for (i in 1:nSec) {
+            cat(sprintf(" %10s: Number of loci = %i\n", names(loc)[i],
+                        nrow(loc[[i]])))
+        }
+    }
+)
 
 
 #' Method "GetNumberOfLoci" for S4 object txLoc.

@@ -4,8 +4,8 @@
 \alias{GetMotifLoc}
 \title{Get loci of motif(s).}
 \usage{
-GetMotifLoc(motif, refGenome = "hg38", filter = c("5'UTR", "CDS", "3'UTR"),
-  maxMM = 0, showPb = TRUE)
+GetMotifLoc(motif, refGenome = "hg38", filter = c("5'UTR", "CDS",
+  "3'UTR"), maxMM = 0, showPb = TRUE)
 }
 \arguments{
 \item{motif}{A character vector; specifies the motif(s)
@@ -42,4 +42,3 @@ on the size of the transcriptome and number of motifs.
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
-

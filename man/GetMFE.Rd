@@ -38,4 +38,3 @@ The function returns a \code{dataframe} with three columns:
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
-
