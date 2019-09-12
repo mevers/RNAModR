@@ -142,7 +142,7 @@ setMethod("GetVersion",
 #' 
 #' Print summary information about \code{txLoc} object.
 #' 
-#' @param x A \code{txLoc} object.
+#' @param object A \code{txLoc} object.
 #' 
 #' @examples
 #' \dontrun{
@@ -155,6 +155,8 @@ setMethod("GetVersion",
 #' }
 #' 
 #' @author Maurits Evers, \email{maurits.evers@anu.edu.au}
+#' 
+#' @importFrom utils packageVersion
 #' 
 #' @exportMethod show
 #' 
@@ -170,7 +172,7 @@ setMethod(
         cat(sprintf("Version          = %s\n", slot(object, "version")))
         cat(sprintf("Total # of sites = %i\n",
                     sum(sapply(slot(object, "loci"), nrow))))
-        cat(sprintf("Package          = RNAModR (%s)", packageVersion("RNAModR")))
+        cat(sprintf("Package          = RNAModR (%s)", utils::packageVersion("RNAModR")))
         cat("\n")
         loc <- slot(object, "loci")
         nSec <- length(loc)

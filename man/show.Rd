@@ -8,7 +8,7 @@
 \S4method{show}{txLoc}(object)
 }
 \arguments{
-\item{x}{A \code{txLoc} object.}
+\item{object}{A \code{txLoc} object.}
 }
 \description{
 Print summary information about \code{txLoc} object.

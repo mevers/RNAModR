@@ -744,7 +744,7 @@ GetEEJunct <- function(refGenome = "hg38", filter = "CDS") {
     locus <- GRanges()
     for (i in 1:length(sel)) {
         junct <- psetdiff(range(txBySec[[sel[i]]]), txBySec[[sel[i]]])
-        junct <- unlist(junct[elementLengths(junct) > 0])
+        junct <- unlist(junct[elementNROWS(junct) > 0])
         eej <- GRanges(
             seqnames(junct),
             IRanges(ifelse(strand(junct) == "+",

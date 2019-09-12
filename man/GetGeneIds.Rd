@@ -36,9 +36,15 @@ the following columns:
   \item ENTREZID: Entrez gene ID
   \item SYMBOL: Gene symbol
   \item ENSEMBL: Ensembl gene ID
-  \item UNIGENE: UniGene gene ID
   \item GENENAME: Gene name
 }
+Note that mapping between gene IDs is a many-to-many mapping process.
+For example, different transcript RefSeq IDs can belong to the same
+gene. Which transcripts are associated with which gene depends in
+turn on the gene reference system (RefSeq, Ensembl, etc.). On top of
+that, the same transcript may have >1 location in the reference
+genome: NM_000451 (EntrezID 6473) is annotated on chromosomes X and Y,
+NM_001001418 (EntrezID 414060) has two loci on chr17.
 }
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}
