@@ -405,10 +405,10 @@ GetTxBySec <- function(txdb,
                 intronsByTranscript(txdb, use.names = TRUE))
         } else if (grepl("Promoter", sections[i], ignore.case = TRUE)) {
             promoter <- suppressWarnings(
-                promoters(txdb,
+                unname(promoters(txdb,
                           columns = c("tx_id", "tx_name"),
                           upstream = promUpstream,
-                          downstream = promDownstream))
+                          downstream = promDownstream)))
             # Make sure we are still within valid transcript ranges
             promoter <- trim(promoter)
             sec <- GenomicRanges::split(promoter, promoter$tx_name)
@@ -562,12 +562,12 @@ CollapseTxBySec <- function(txBySec,
     cds <- txBySec[[whichCDS]]
     cds <- cds[order(names(cds), -sum(GenomicRanges::width(cds)))]
     cds <- cds[!duplicated(names(cds))]
-    geneData <- geneXID[which(geneXID[, 1] %in% names(cds)), ]
+    geneData <- geneXID[which(geneXID$REFSEQ %in% names(cds)), ]
     geneData$lengthCDS <- sum(GenomicRanges::width(
-        cds[match(geneData[, 1], names(cds))]))
-    geneData <- geneData[order(geneData[, 2], -geneData[, ncol(geneData)]), ]
-    geneData <- geneData[!duplicated(geneData[, 2]), ]
-    cds <- cds[which(names(cds) %in% geneData[, 1])]
+        cds[match(geneData$REFSEQ, names(cds))]))
+    geneData <- geneData[order(geneData$ENTREZID, -geneData$lengthCDS), ]
+    geneData <- geneData[!duplicated(geneData$ENTREZID), ]
+    cds <- cds[which(names(cds) %in% geneData$REFSEQ)]
     # (2) Collapse UTR's
     #      Step 1: Filter based on valid RefSeq ID from cds
     #       Note that UTR list will still contain duplicate RefSeq entries,
@@ -589,7 +589,7 @@ CollapseTxBySec <- function(txBySec,
         cat("Collapsing duplicate promoter entries\n")
         promoter <- txBySec[[whichPromoter]]
         # Expand multiple entries under the same ID
-        promoter <- as(unlist(promoter), "GRangesList")
+        promoter <- as(unlist(promoter), "CompressedGRangesList")
         promoter.match <- DedupeBasedOnNearestRef(promoter, utr5.match, showPb = TRUE)
     }
     # (3) Collapse introns (if included)
