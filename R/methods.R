@@ -39,7 +39,7 @@ SmartMap.ToTx <- function(locus,
                           txBySec,
                           seqBySec,
                           geneXID,
-                          ignore.strand = FALSE,
+                          ignore.strand = TRUE,
                           noFactors = TRUE,
                           showPb = FALSE) {
     # Map positions from locus to transcript regions.
@@ -61,6 +61,17 @@ SmartMap.ToTx <- function(locus,
         pb <- txtProgressBar(max = length(txBySec), style = 3, width = 60)
     for (i in 1:length(txBySec)) {
         if (showPb) setTxtProgressBar(pb, i)
+        # [UPDATE September 2019] mapToTranscripts is now more stringent in that it 
+        # requires seqlevels(locus) to be a subset of seqlevels(txBySec[[1]]@unlistData)
+        # In other words, if locus contains chromosomes that are _not_ included in
+        # txBySec this will throw a critical error.
+        # So we need to make sure that we only have entries in `locus` on chromosomes
+        # that are included as seqlevels of transcripts in `txBySec`
+        locus <- keepSeqlevels(
+            locus, 
+            intersect(seqlevels(txBySec[[i]]@unlistData), seqlevels(locus)),
+            pruning.mode = "coarse")
+        # Map to transcripts
         gr <- mapToTranscripts(locus, txBySec[[i]], ignore.strand = ignore.strand)
         idxLoc <- mcols(gr)$xHits
         idxTx  <- mcols(gr)$transcriptsHits
@@ -96,12 +107,12 @@ SmartMap.ToTx <- function(locus,
         }
         dataRef <- cbind(rep(names(txBySec)[i], nrow(dataRef)),
                              dataRef[, 1],
-                             geneXID[match(dataRef[, 1], geneXID[, 1]), ][, -1],
+                             geneXID[match(dataRef[, 1], geneXID$REFSEQ), ][, -1],
                              dataRef[, 2:ncol(dataRef)],
                              sum(width(txBySec[[i]][idxTx])),
                              dataSeq)
         colnames(dataRef) <- c("GENE_REGION", "GENE_REFSEQ", "GENE_ENTREZ",
-                               "GENE_SYMBOL", "GENE_ENSEMBL", "GENE_UNIGENE",
+                               "GENE_SYMBOL", "GENE_ENSEMBL", 
                                "GENE_NAME", "GENE_CHR", "GENE_START",
                                "GENE_STOP", "GENE_WIDTH", "GENE_STRAND",
                                "REGION_TXWIDTH", "REGION_SEQ")
@@ -795,7 +806,6 @@ GetEEJunct <- function(refGenome = "hg38", filter = "CDS") {
 #' @import GenomicRanges IRanges
 #' @importFrom Biostrings vmatchPattern
 #'
-#' @export
 GetMotifLoc <- function(motif, 
                         refGenome = "hg38", 
                         filter = c("5'UTR", "CDS", "3'UTR"), 
@@ -902,7 +912,6 @@ GetMotifLoc <- function(motif,
 #'
 #' @import Biostrings GenomicRanges IRanges
 #' 
-#' @export
 GetMFE <- function(data, colSeq, colId = NULL) {
     sq <- DNAStringSet(data[, colSeq])
     if (is.null(colId) || length(data[, colId]) != length(sq)) {
