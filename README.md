@@ -118,6 +118,24 @@ PlotSectionDistribution(posSites);
 ## Downloadable transcriptome data<a name="downloadTx"></a>
 You can download pre-constructed transcriptome data files for the following reference genome versions
 
+
+*Homo sapiens*
+
+1. [hg38](https://drive.google.com/open?id=1nBRsUWEq5FvoZmdYtGJWZhQCi2izajCr)
+2. [hg19](https://drive.google.com/open?id=1OQnsmuieQw7KUXKPy6C5UnZGuavooW06)
+3. [hg18](https://drive.google.com/open?id=18xufP2MQn39gTgkHob8dvOPXiPhKg_wc)
+
+*Mus musculus*
+
+1. [mm10](https://drive.google.com/open?id=17i3yHBjkL50K-o60mMFiP2SzhuW6v9nP)
+2. [mm9](https://drive.google.com/open?id=1fO3BSojCb_BIE8DzmEKHw1miJOJZt0Zr)
+3. [mm8](https://drive.google.com/open?id=1SqJEX0O6HL1baW8XHWkOMJr37AfAZ4q2)
+
+
+----
+
+Above files will work with the RNAModR version 0.1.1; for version 0.1.0 you may want to try the older transcriptome files. There's no guarantee that they will still work; major changes in `GenomicRanges` and other Bioconductor libraries may cause unpredictable behaviour and errors.
+
 *Homo sapiens*
 
 1. [hg38](https://drive.google.com/open?id=0B5_hfxBdKWHRVlBCTUlSazJfaWs)
@@ -129,6 +147,8 @@ You can download pre-constructed transcriptome data files for the following refe
 1. [mm10](https://drive.google.com/open?id=0B5_hfxBdKWHRYzliNkotN1NwSTQ)
 2. [mm9](https://drive.google.com/open?id=0B5_hfxBdKWHRdkNSMmNleVJUSm8)
 3. [mm8](https://drive.google.com/open?id=0B5_hfxBdKWHRMmN5WGRsRkpWcWc)
+
+----
 
 In order to use the transcriptome data you need to copy the RData file into your working directory.
 You can check that RNAModR correctly finds the transcriptome data by running e.g.
