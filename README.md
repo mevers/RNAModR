@@ -27,7 +27,7 @@ This is production code! Use it at your own risk. That means that documentation 
 
 Due to some substantial changes in functions/methods from some R/Bioconductor packages that RNAModR depends on, RNAModR's functionality is currently limited. Specifically,
 
-1. `BuildTx` (building a custom reference transcriptome) is broken (but you can still use the pre-generated transcriptomes from the links below); this seems to be related to major [changes in `GenomicRanges` version 1.32.0](https://github.com/Bioconductor/GenomicRanges/blob/master/NEWS), which 
+1. `BuildTx` (building a custom reference transcriptome) is broken (but you can still use the pre-generated transcriptomes from the links below); this seems to be related to major [changes in `GenomicRanges` version 1.32.0](https://github.com/Bioconductor/GenomicRanges/blob/master/NEWS) and changes in `RMariaDB` that completely [break functionality of `GenomicFeatures::makeTxDbFromUCSC`](https://github.com/r-dbi/RMariaDB/issues/135) (verified on MacOS Sierra). I am unsure how badly other OS are affected. A workaround/fix for MacOS Sierra (that should also work for other flavours) has been posted as part of [Issue #5](https://github.com/mevers/RNAModR/issues/5).
 2. `plotRelDistDistribution` and `plotRelDistEnrichment()` are broken; this is related to afore-mentioned changes in `GenomicRanges`, which introduced a `CompressedGRangesList` class as a replacement for the `GRangesList` class.
 
 I appreciate any and all testing; for issues, please open an official [Issue](https://github.com/mevers/RNAModR/issues/new) on the GitHub project site.
