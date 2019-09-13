@@ -9,8 +9,8 @@ ReadBED(file, collapseRange = TRUE)
 \arguments{
 \item{file}{A character string; specifies the input BED file.}
 
-\item{collapseRange}{A logical scalar; if \code{TRUE} loci
-spanning more than one nucleotide are collapsed to a single
+\item{collapseRange}{A logical scalar; should \code{TRUE} loci
+spanning more than one nucleotide be collapsed to a single
 nucleotide locus corresponding to the midpoint of the range;
 default is \code{TRUE}.}
 }
@@ -23,12 +23,14 @@ Read BED-formatted file. See 'Details'.
 \details{
 The function opens and reads in a BED6-formatted file, and 
 stores the annotation features in a \code{GRanges} object.
+Chromosome names must follow either UCSC (chr1, ..., chrM, chrX)
+or Ensembl naming conventions (1, ..., MT, X).
 }
 \examples{
 bedFile <- system.file("extdata",
                        "miCLIP_m6A_Linder2015_hg38.bed",
-                       package = "RNAModR");
-sites <- ReadBED(bedFile);
+                       package = "RNAModR")
+sites <- ReadBED(bedFile)
 
 }
 \author{

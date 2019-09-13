@@ -4,10 +4,12 @@
 #'
 #' The function opens and reads in a BED6-formatted file, and 
 #' stores the annotation features in a \code{GRanges} object.
+#' Chromosome names must follow either UCSC (chr1, ..., chrM, chrX)
+#' or Ensembl naming conventions (1, ..., MT, X).
 #'
 #' @param file A character string; specifies the input BED file.
-#' @param collapseRange A logical scalar; if \code{TRUE} loci
-#' spanning more than one nucleotide are collapsed to a single
+#' @param collapseRange A logical scalar; should \code{TRUE} loci
+#' spanning more than one nucleotide be collapsed to a single
 #' nucleotide locus corresponding to the midpoint of the range;
 #' default is \code{TRUE}.
 #'
@@ -16,8 +18,8 @@
 #' @examples
 #' bedFile <- system.file("extdata",
 #'                        "miCLIP_m6A_Linder2015_hg38.bed",
-#'                        package = "RNAModR");
-#' sites <- ReadBED(bedFile);
+#'                        package = "RNAModR")
+#' sites <- ReadBED(bedFile)
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #'
@@ -26,39 +28,48 @@
 #' 
 #' @export
 ReadBED <- function(file, collapseRange = TRUE) {
-    # Read BED file and convert to GRanges object.
-    #
-    # Args:
-    #   file: Input BED file
-    #
-    # Returns:
-    #   GRanges object
+
+    # Sanity checks
     if (!file.exists(file)) {
         stop(sprintf("File %s doesn't exist.", file))
     }
     bed <- read.table(file, header = FALSE)
-    if (ncol(bed) < 6) {
-        stop("Need at least 6 columns in BED file.")
+    if (ncol(bed) != 6) {
+        stop("[ERROR] File must be a 6 column BED file.")
     }
-    if (all(!grepl("chr", bed[, 1], ignore.case = TRUE))) {
-        bed[, 1] <- sprintf("chr%s", bed[, 1])
+    colnames(bed) <- c("chr", "start", "end", "id", "score", "strand")
+    
+    # Use UCSC chromosome names
+    if (all(!grepl("chr", bed$chr, ignore.case = TRUE))) {
+        bed$chr <- sprintf("chr%s", bed$chr)
     }
-    bed[, 1] <- gsub("chrMT", "chrM", bed[, 1])
-    bed <- bed[order(bed[, 1], bed[, 2]), ]
-    if (length(grep("\\.", bed[, 6])) > 0) {
-        bed[, 6] <- gsub("\\.", "*", bed[, 6])
+    bed$chr <- gsub("chrMT", "chrM", bed$chr)
+    
+    # Order BED file by chromosome then starting point
+    bed <- bed[order(bed$chr, bed$start), ]
+    
+    # Replace strand = "." with strand = "*"
+    if (length(grep("\\.", bed$strand)) > 0) {
+        bed$strand <- gsub("\\.", "*", bed$strand)
         warning(sprintf(
             "BED file %s contains entries without strand information.",
             file))
     }
+    
+    # Collapse ranges
     if (collapseRange == TRUE) {
-        bed[, 2] <- round(0.5 * (bed[, 2] + bed[, 3]))
-        bed[, 3] <- bed[, 2] + 1
+        bed$start <- floor(0.5 * (bed$start + bed$end))
+        bed$end <- bed$start + 1
     }
-    colnames(bed) <- c("chr", "start", "end", "id", "score", "strand")
-    gr <- GRanges(bed$chr, IRanges(bed$start + 1,bed$end), bed$strand,
-                  score = bed$score, id = bed$id)
-    return(gr)
+    
+    # Convert to GRanges
+    GRanges(
+        seqnames = bed$chr,
+        ranges = IRanges(bed$start + 1, bed$end),
+        strand = bed$strand,
+        score = bed$score,
+        id = bed$id)
+    
 }
 
 
