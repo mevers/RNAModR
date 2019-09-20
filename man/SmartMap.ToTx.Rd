@@ -4,7 +4,7 @@
 \alias{SmartMap.ToTx}
 \title{Map genome coordinates to transcript coordinates.}
 \usage{
-SmartMap.ToTx(locus, txBySec, seqBySec, geneXID, ignore.strand = TRUE,
+SmartMap.ToTx(locus, txBySec, seqBySec, geneXID, ignore.strand = FALSE,
   noFactors = TRUE, showPb = FALSE)
 }
 \arguments{

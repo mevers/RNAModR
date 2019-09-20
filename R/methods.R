@@ -39,7 +39,7 @@ SmartMap.ToTx <- function(locus,
                           txBySec,
                           seqBySec,
                           geneXID,
-                          ignore.strand = TRUE,
+                          ignore.strand = FALSE,
                           noFactors = TRUE,
                           showPb = FALSE) {
     # Map positions from locus to transcript regions.
@@ -61,6 +61,7 @@ SmartMap.ToTx <- function(locus,
         pb <- txtProgressBar(max = length(txBySec), style = 3, width = 60)
     for (i in 1:length(txBySec)) {
         if (showPb) setTxtProgressBar(pb, i)
+      
         # [UPDATE September 2019] mapToTranscripts is now more stringent in that it 
         # requires seqlevels(locus) to be a subset of seqlevels(txBySec[[1]]@unlistData)
         # In other words, if locus contains chromosomes that are _not_ included in
@@ -71,8 +72,19 @@ SmartMap.ToTx <- function(locus,
             locus, 
             intersect(seqlevels(txBySec[[i]]@unlistData), seqlevels(locus)),
             pruning.mode = "coarse")
-        # Map to transcripts
+        
+        # Map to transcripts; the output object has two metadata columns:
+        #   xHits = index of the mapped locus object
+        #   transcriptsHits = index of the txBySec[[i]] object
         gr <- mapToTranscripts(locus, txBySec[[i]], ignore.strand = ignore.strand)
+        
+        #tmp <- cbind(
+        #  setNames(DataFrame(gr)[1], "locus_in_tx"),
+        #  setNames(
+        #    DataFrame(locus[mcols(gr)$xHits]), 
+        #    c("locus_in_genome", names(mcols(locus)))),
+        #  geneXID[as.integer(match(seqnames(gr), geneXID$REFSEQ))], )
+        
         idxLoc <- mcols(gr)$xHits
         idxTx  <- mcols(gr)$transcriptsHits
         # THIS COULD DO WITH SOME TIDYING UP ...
@@ -245,8 +257,6 @@ SmartMap <- function(locus,
 #' @keywords internal
 #' 
 #' @import Biostrings GenomicRanges IRanges
-#'
-#' @export
 GetLocus.MapFromTranscripts <- function(gr, ref, seq, section, geneXID) {
     genomePos <- mapFromTranscripts(gr, ref)
     idxQuery <- mcols(genomePos)$xHits
@@ -691,32 +701,121 @@ GetGC <- function(locus, flank = 10) {
 }
 
 
-#' Get exon-exon junctions.
+#' Get exon-exon boundary sites from reference transcriptome
 #'
-#' Get exon-exon junctions from transcriptome. See 'Details'.
+#' Get exon-exon boundary sites from transcriptome. See 'Details'.
 #'
-#' The function extracts exon-exon junction positions from a
-#' reference transcriptome specified by \code{refGenome}, and 
-#' returns a \code{txLoc} object of exon-exon junctions.
-#' The position of an exon-exon junction is defined as the 
-#' position of the 3'-last nucleotide of an exon followed by
-#' an intron. 
+#' The function extracts exon-exon boundary sites (EEBS) from a 
+#' reference trancriptome specified by \code{refGenome}, and returns 
+#' a \code{GRanges} object. Boundary sites are defined as the 
+#' location of those exonic single nucleotides that are closest 
+#' upstream to the intronic donor site.
 #'
 #' @param refGenome A character string; specifies a specific
 #' reference genome assembly version based on which the matching
 #' transcriptome is loaded; default is \code{"hg38"}.
 #' @param filter A character vector; only consider transcript
 #' sections specified in \code{filter}; default is 
-#' \code{"CDS"}.
+#' \code{c("CDS", "5'UTR")}.
 #'
-#' @return A \code{txLoc} object. See 'Details'.
+#' @return A \code{GRanges} object. See 'Details'.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' 
 #' @import GenomicRanges IRanges
 #'
 #' @export
-GetEEJunct <- function(refGenome = "hg38", filter = "CDS") {
+GetEEJunct <- function(refGenome = "hg38", filter = c("CDS", "5'UTR")) {
+  
+  # Read transcriptome data
+  refTx <- sprintf("tx_%s.RData", refGenome)
+  if (!file.exists(refTx)) {
+    ss <- sprintf("Reference transcriptome for %s not found.", refGenome)
+    ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
+                  ss, refGenome)
+    stop(ss)
+  }
+  load(refTx)
+  requiredObj <- c("geneXID", "seqBySec", "txBySec")
+  if (!all(requiredObj %in% ls())) {
+    ss <- sprintf("Mandatory transcript objects not found.")
+    ss <- sprintf("%s\nNeed all of the following: %s",
+                  ss, paste0(requiredObj, collapse = ", "))
+    ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
+                  ss, refGenome)
+    stop(ss)
+  }
+  geneXID <- get("geneXID")
+  seqBySec <- get("seqBySec")
+  txBySec <- get("txBySec")
+  
+  # Filter regions
+  if (is.null(filter)) {
+    filter <- c("5'UTR", "CDS", "3'UTR")
+  }
+  
+  # Create a list of GRanges for the acceptor/donor splice sites
+  locus <- lapply(setNames(filter, filter), function(region) {
+    
+    # Get introns as the regions that are not annotated
+    junct <- setdiff(range(txBySec[[region]]), txBySec[[region]])
+    
+    # Remove transcripts without introns and unlist
+    junct <- unlist(junct[elementNROWS(junct) > 0])
+    
+    # Collapse ranges to start position (strand-specific)
+    # corresponding to splicing donor sites
+    junct <- resize(
+      junct, width = 1, fix = "start", ignore.strand = F, use.names = T)
+    
+    # Shift position 1 nucleotide upstream (strand-specific) 
+    # of splicing donor site and add score & id metadata columns
+    # (This is to make sure that we are consistent with the BED6 format)
+    junct <- promoters(junct, upstream = 1, downstream = 0)
+    mcols(junct)$score = 0
+    mcols(junct)$id = sprintf("upstream_donor|%s|%s", names(junct), region)
+
+    # Remove names and return
+    names(junct) <- NULL
+    junct
+  })      
+  
+  # Concatenate list of GRanges, unname GRanges and return
+  gr <- unlist(as(locus, "GRangesList"))
+  names(gr) <- NULL
+  gr
+  
+}
+
+
+#' Get splicing sites from reference transcriptome
+#'
+#' Get splicing sites from transcriptome. See 'Details'.
+#'
+#' The function extracts splicing sites from a reference
+#' trancriptome specified by \code{refGenome}, and returns a
+#' \code{GRanges} object. Splicing sites are identified as 
+#' either donor (splicing site at the 5' end of the intron)
+#' or acceptor (splicing site at the 3' end of the intron)
+#' site.
+#'
+#' @param refGenome A character string; specifies a specific
+#' reference genome assembly version based on which the matching
+#' transcriptome is loaded; default is \code{"hg38"}.
+#' @param filter A character vector; only consider transcript
+#' sections specified in \code{filter}; default is 
+#' \code{c("CDS", "5'UTR")}.
+#'
+#' @return A \code{GRanges} object. See 'Details'.
+#'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' 
+#' @import GenomicRanges IRanges
+#'
+#' @export
+GetSplicingSites <- function(refGenome = "hg38", filter = c("CDS", "5'UTR")) {
+    
+    # Read transcriptome data
     refTx <- sprintf("tx_%s.RData", refGenome)
     if (!file.exists(refTx)) {
         ss <- sprintf("Reference transcriptome for %s not found.", refGenome)
@@ -737,40 +836,46 @@ GetEEJunct <- function(refGenome = "hg38", filter = "CDS") {
     geneXID <- get("geneXID")
     seqBySec <- get("seqBySec")
     txBySec <- get("txBySec")
+    
+    # Filter regions
     if (is.null(filter)) {
         filter <- c("5'UTR", "CDS", "3'UTR")
     }
-    sel <- which(names(txBySec) %in% filter)
-    locus <- GRanges()
-    for (i in 1:length(sel)) {
-        junct <- psetdiff(range(txBySec[[sel[i]]]), txBySec[[sel[i]]])
-        junct <- unlist(junct[elementNROWS(junct) > 0])
-        eej <- GRanges(
-            seqnames(junct),
-            IRanges(ifelse(strand(junct) == "+",
-                           start(junct) - 1,
-                           end(junct) + 1),
-                    ifelse(strand(junct) == "+",
-                           start(junct) - 1,
-                           end(junct) + 1)),
-            strand(junct),
-            score = 0,
-            id = sprintf("eej|%s|%s",
-                gene = names(junct),
-                section = names(txBySec)[sel[i]]))
-        locus <- append(locus, eej)
-    }
-    locusInTx.list <- SmartMap.ToTx(
-        locus, txBySec, seqBySec, geneXID,
-        ignore.strand = FALSE,
-        showPb = TRUE)
-    obj <- new("txLoc",
-               loci = locusInTx.list,
-               id = "eej",
-               refGenome = refGenome,
-               version = as.character(Sys.Date()))
-    obj <- FilterTxLoc(obj, filter)
-    return(obj)
+
+    # Create a list of GRanges for the acceptor/donor splice sites
+    locus <- lapply(setNames(filter, filter), function(region) {
+      
+      # Get introns as the regions that are not annotated
+      junct <- setdiff(range(txBySec[[region]]), txBySec[[region]])
+      
+      # Remove transcripts without introns and unlist
+      junct <- unlist(junct[elementNROWS(junct) > 0])
+      
+      # Collapse ranges to start/end position (strand-specific)
+      # corresponding to splicing donor and acceptor sites
+      # Add score and id metadata columns to make sure that we are
+      # consistent with the BED6 format
+      junct <- unlist(as(mapply(
+        function(fix, type) {
+          eej <- resize(
+            junct, width = 1, fix = fix, ignore.strand = F, use.names = T)
+          mcols(eej)$id = sprintf("%s|%s|%s", type, names(eej), region)
+          eej
+        },
+        c("start", "end"),
+        c("donor", "acceptor") 
+      ), "GRangesList"))
+      
+      # Remove names and return
+      names(junct) <- NULL
+      junct
+    })      
+    
+    # Concatenate list of GRanges, unname GRanges and return
+    gr <- unlist(as(locus, "GRangesList"))
+    names(gr) <- NULL
+    gr
+
 }
 
 
