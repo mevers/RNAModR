@@ -21,7 +21,7 @@ See 'Details'.
 \details{
 The function checks if entries from two \code{txLoc} objects
 are based on the same reference genome _and_ contain entries
-for the same transcript sections.
+for the same transcript regions
 }
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}

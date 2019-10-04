@@ -1,213 +1,11 @@
-#' Plot length distribution of transcript sections.
+#' Plot piechart of the number of loci in every transcript region
 #'
-#' Plot length distribution of transcript sections from list of
-#' GRangesList transcript features.
+#' Plot piechart of the number of loci in every transcript region.
 #'
-#' @param txBySec A \code{list} of \code{GRangesList} objects;
-#' specifies the list of transcript sections.
-#' @param asLog A logical scalar; if \code{TRUE} plot length
-#' distribution on a log scale; Default is \code{TRUE}.
-#' @param printMetrics A character string; specifies which metrics
-#' should be printed as part of the box labels; default is
-#' \code{"median"}.
-#' @param filter A character vector; only plot length distributions
-#' of transcript sections specified in \code{filter}; if \code{NULL}
-#' plot all sections; default is \code{NULL}.
-#' @param outliers A logical scalar; if \code{TRUE} show outliers in
-#' boxplot; default is \code{FALSE}.
-#' @param ... Any additional parameters passed to \code{axis}.
+#' @param txLoc A \code{txLoc} object.
 #'
-#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
-#' @keywords internal
-#'
-#' @import GenomicRanges IRanges
-#' @importFrom graphics boxplot
+#' @return \code{NULL}.
 #' 
-#' @export
-PlotTxSecLength <- function(txBySec,
-                            asLog = TRUE,
-                            printMetrics = c("median", "mean"),
-                            filter = NULL,
-                            outliers = FALSE,
-                            ...) {
-    # Plot length distribution of transcript features.
-    #
-    # Args:
-    #   txBySec: List of GRangesList transcript features.
-    #   asLog: Plot length distribution on log scale. Default is TRUE.
-    #   printMetrics: Output median and mad of length (TRUE),
-    #          or mean and sd (FALSE). Default is TRUE.
-    #   filter: Only plot transcript regions specified in filter.
-    #   outliers: Show outliers in boxplot. Default is FALSE.
-    #   ...: Additional parameters passed to x-axis.
-    #
-    # Returns:
-    #   NULL
-    par(mfrow = c(1, 1))
-    printMetrics <- match.arg(printMetrics)
-    len <- lapply(txBySec, function(x) sum(width(x)))
-    cdsIdx <- grep("CDS", names(txBySec), ignore.case = TRUE)
-    if (length(cdsIdx) > 0) {
-        metaData <- slot(txBySec[[cdsIdx]], "metadata")$genomeInfo
-        refOrganism <- metaData[[grep("Organism", names(metaData))]]
-        refGenome <- metaData[[grep("Genome", names(metaData))]]
-        refSource <- metaData[[grep("Data source", names(metaData))]]
-        len[["CDS_exon"]] <- IRanges::unlist(width(txBySec[[cdsIdx]]))
-    } else {
-        ss <- sprintf("No CDS entry in txBySec. Could not infer organism meta information.\n")
-        stop(ss)
-    }
-    intronIdx <- grep("(Intron|Intronic)",
-                      names(txBySec),
-                      ignore.case = TRUE)
-    if (length(intronIdx) > 0) {
-        len[[intronIdx]] <- IRanges::unlist(width(txBySec[[intronIdx]]))
-    }
-    if (!is.null(filter)) {
-        len <- len[which(names(len) %in% filter)]
-    }
-    labels <- sprintf("%s\nmedian = %i nt\nmad = %i nt",
-                      names(len),
-                      round(sapply(len, stats::median)),
-                      round(sapply(len, stats::mad)))
-    if (printMetrics == "mean") {
-        labels <- sprintf("%s\nmean = %i nt\nsd = %i nt",
-                          names(len),
-                          round(sapply(len, mean)),
-                          round(sapply(len, stats::sd)))
-    } else if (printMetrics == "none") {
-        labels <- sprintf("%s", names(len))
-    }
-    ylab <- "Length [nt]"
-    if (asLog) {
-        len <- lapply(len,log10)
-        ylab <- "log10 Length"
-    }
-    par(font.main = 1)
-    boxplot(len, names = rep("", length(len)),
-            xaxt = "n", ylab = ylab,
-            main = sprintf("%s (version = %s, source = %s)",
-                refOrganism,
-                refGenome,
-                refSource),
-            font.main = 1,
-            outline = outliers)
-    axis(1, at = 1:length(len),
-         labels = labels,
-         padj = 1, cex.axis = 0.7, ...)
-}
-
-
-#' Plot length distribution of transcript sections.
-#'
-#' Plot length distribution of transcript sections.
-#'
-#' @param txBySec A \code{list} of \code{GRangesList} objects;
-#' specifies the list of transcript sections.
-#' @param asLog A logical scalar; if \code{TRUE} plot length
-#' distribution on a log scale; Default is \code{TRUE}.
-#' @param printMetrics A character string; specifies which metrics
-#' should be printed as part of the box labels; default is \code{"median"}.
-#' @param filter A character vector; only plot transcript sections
-#' specified in \code{filter}; if \code{NULL} plot all sections; default
-#' is \code{NULL}.
-#' @param ... Any additional parameters passed to \code{axis}.
-#'
-#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
-#' @keywords internal
-#'
-#' @import GenomicRanges IRanges
-#' @importFrom grDevices rainbow
-#'
-#' @export
-PlotTxSecLength.bean <- function(txBySec,
-                                 asLog = TRUE,
-                                 printMetrics = c("median", "mean"),
-                                 filter = NULL,
-                                 ...) {
-    # Plot length distribution of transcript features.
-    #
-    # Args:
-    #   txBySec: List of GRangesList transcript features.
-    #   asLog: Plot length distribution on log scale. Default is TRUE.
-    #   printMetrics: Output median and mad of length (TRUE),
-    #          or mean and sd (FALSE). Default is TRUE.
-    #   filter: Only plot transcript regions specified in filter.
-    #   outliers: Show outliers in boxplot. Default is FALSE.
-    #   ...: Additional parameters passed to x-axis.
-    #
-    # Returns:
-    #   NULL
-    par(mfrow = c(1, 1))
-    printMetrics <- match.arg(printMetrics)
-    len <- lapply(txBySec, function(x) sum(width(x)))
-    cdsIdx <- grep("CDS", names(txBySec), ignore.case = TRUE)
-    if (length(cdsIdx) > 0) {
-        metaData <- slot(txBySec[[cdsIdx]], "metadata")$genomeInfo
-        refOrganism <- metaData[[grep("Organism", names(metaData))]]
-        refGenome <- metaData[[grep("Genome", names(metaData))]]
-        refSource <- metaData[[grep("Data source", names(metaData))]]
-        len[["CDS_exon"]] <- IRanges::unlist(width(txBySec[[cdsIdx]]))
-    } else {
-        cat("No CDS entry in %s. Could not infer organism meta information",
-            deparse(substitute(txBySec)))
-    }
-    intronIdx <- grep("(Intron|Intronic)",
-                      names(txBySec),
-                      ignore.case = TRUE)
-    if (length(intronIdx) > 0) {
-        len[[intronIdx]] <- IRanges::unlist(width(txBySec[[intronIdx]]))
-    }
-    if (!is.null(filter)) {
-        len <- len[which(names(len) %in% filter)]
-    }
-    labels <- sprintf("%s\nmedian = %i nt\nmad = %i nt",
-                      names(len),
-                      round(sapply(len, stats::median)),
-                      round(sapply(len, stats::mad)))
-    if (printMetrics == "mean") {
-        labels <- sprintf("%s\nmean = %i nt\nsd = %i nt",
-                          names(len),
-                          round(sapply(len, mean)),
-                          round(sapply(len, stats::sd)))
-    } else if (printMetrics == "none") {
-        labels <- sprintf("%s", names(len))
-    }
-    ylab <- "Length [nt]"
-    if (asLog) {
-        len <- lapply(len,log10)
-        ylab <- "log10 Length"
-    }
-    par(font.main = 1)
-    col <- AddAlpha(rainbow(length(len)))
-    col <- split(cbind(col, rgb(0, 0, 0, 0.2)), col)
-    beanplot(len,
-             ll = 0.02,
-             bw = "nrd0",
-             border = NA,
-             col = as.list(col),
-             show.names = FALSE,
-             ylab = ylab,
-             main = sprintf("%s (version = %s, source = %s)",
-                 refOrganism,
-                 refGenome,
-                 refSource),
-             font.main = 1,
-             method = "jitter")
-    axis(1, at = 1:length(len),
-         labels = labels,
-         padj = 1, cex.axis = 0.7, ...)
-}
-
-
-#' Plot piechart of the number of loci in every transcript section.
-#'
-#' Plot piechart of the number of loci in every transcript section.
-#'
-#' @param locus A \code{txLoc} object.
-#' @param filter A character vector; only consider transcript sections
-#' specified in \code{filter}; if \code{NULL} consider all sections. 
-#'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #'
 #' @importFrom graphics pie
@@ -216,31 +14,32 @@ PlotTxSecLength.bean <- function(txBySec,
 #' \dontrun{
 #' bedFile <- system.file("extdata",
 #'                        "miCLIP_m6A_Linder2015_hg38.bed",
-#'                        package = "RNAModR");
-#' sites <- ReadBED(bedFile);
-#' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
-#' PlotSectionDistribution(posSites);
+#'                        package = "RNAModR")
+#' sites <- ReadBED(bedFile)
+#' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38")
+#' PlotSectionDistribution(posSites)
 #' }
 #'
 #' @export
-PlotSectionDistribution <- function(locus, filter = NULL) {
-    # Plot piechart of the mumber of loci in every transcript section.
-    #
-    # Args:
-    #   locus: A txLoc object.
-    #
-    # Returns:
-    #   NULL
-    id <- GetId(locus)
-    locus <- FilterTxLoc(locus, filter)
-    N <- GetNumberOfLoci(locus)
-    labels <- names(GetLoci(locus))
+PlotSectionDistribution <- function(txLoc) {
+
+    # Sanity checks
+    CheckClass(txLoc, "txLoc")
+  
+    # Get numbers and plot
+    N <- GetNumberOfLoci(txLoc)
+    labels <- names(N)
     percentage <- N / sum(N) * 100.0
-    labels <- sprintf("%s %2.1f%% (%i)", labels, percentage, N)
-    pie(N, labels = labels, col = GetColPal("apple", length(N)),
-        main = sprintf("Distribution of %i %s sites across transcript sections",
-            sum(N), id),
+    labels <- sprintf("%s: %2.1f%% (%i)", labels, percentage, N)
+    pie(
+        N, 
+        labels = labels, 
+        col = GetColPal("apple", length(N)),
+        main = sprintf(
+          "Distribution of %i %s sites across transcript sections",
+          sum(N), GetId(txLoc)),
         font.main = 1)
+    
 }
 
 
@@ -249,8 +48,7 @@ PlotSectionDistribution <- function(locus, filter = NULL) {
 #' Plot spatial distribution of loci from a \code{txLoc} object within every
 #' transcript region.
 #'
-#' @param locus A \code{txLoc} object.
-#' @param filter Only plot loci in transcript regions specified in filter.
+#' @param txLoc A \code{txLoc} object.
 #' @param nbreaks Number of spatial bins. Default is 100.
 #' @param absolute Plot spatial distribution in absolute coordinates.
 #' Default is \code{FALSE}.
@@ -263,6 +61,8 @@ PlotSectionDistribution <- function(locus, filter = NULL) {
 #' sites within transcript region. Default is \code{TRUE}.
 #' @param ... Additional parameters passed to plot.
 #'
+#' @return \code{NULL}.
+#' 
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #'
 #' @examples
@@ -280,8 +80,7 @@ PlotSectionDistribution <- function(locus, filter = NULL) {
 #' }
 #' 
 #' @export
-PlotSpatialDistribution <- function(locus,
-                                    filter = NULL,
+PlotSpatialDistribution <- function(txLoc,
                                     nbreaks = 100,
                                     absolute = FALSE,
                                     binWidth = NULL,
@@ -290,18 +89,18 @@ PlotSpatialDistribution <- function(locus,
                                     ...) {
 
     # Sanity check
-    CheckClass(locus, "txLoc")
-    id <- GetId(locus)
-    refGenome <- GetRef(locus)
-    locus <- GetLoci(locus)
-    if (!is.null(filter)) {
-        locus <- locus[which(names(locus) %in% filter)]
-    }
+    CheckClass(txLoc, "txLoc")
+  
+    # Get id and loci
+    id <- GetId(txLoc)
+    loci <- GetLoci(txLoc)
+
+    # Determine figure panel layout and binwidth
     if (!absolute) {
-        if (length(locus) < 4) {
-            par(mfrow = c(1, length(locus)))
+        if (length(loci) < 4) {
+            par(mfrow = c(1, length(loci)))
         } else {
-            par(mfrow = c(ceiling(length(locus) / 2), 2))
+            par(mfrow = c(ceiling(length(loci) / 2), 2))
         }
         breaks <- seq(0.0, 1.0, length.out = nbreaks)
         bw <- 1.0 / nbreaks
@@ -311,7 +110,7 @@ PlotSpatialDistribution <- function(locus,
 #        }
         bwString <- sprintf("bw = %3.2f", bw)
     } else {
-        par(mfrow = c(length(locus), 2))
+        par(mfrow = c(length(loci), 2))
         breaks <- seq(1, posMax, length.out = nbreaks)
         bw <- round((posMax - 1) / nbreaks)
 #        if (!is.null(binWidth)) {
@@ -320,14 +119,19 @@ PlotSpatialDistribution <- function(locus,
 #        }
         bwString <- sprintf("bw = %i nt", bw)
     }
-    for (i in 1:length(locus)) {
+    
+    for (i in 1:length(loci)) {
+      
         # Store site positions
         #  (1) relative to 5'start, and
         #  (2) relative to 3'end.
-        pos <- list("5p" = locus[[i]]$TXSTART,
-                    "3p" = locus[[i]]$REGION_TXWIDTH - locus[[i]]$TXSTART + 1)
+        pos <- with(loci[[i]], list(
+          "5p" = start(locus_in_tx_region),
+          "3p" = tx_region_width - end(locus_in_tx_region) + 1))
+      
         if (!absolute) {
-            pos <- lapply(pos, function(x) x / locus[[i]]$REGION_TXWIDTH)
+            
+            pos <- lapply(pos, function(x) x / loci[[i]]$tx_region_width)
             if (grepl("(5'UTR|UTR5|5pUTR|Promoter)", names(locus)[i],
                       ignore.case = TRUE)) {
                 pos <- pos["3p"]
@@ -354,7 +158,7 @@ PlotSpatialDistribution <- function(locus,
                  xlim = xrange[[j]],
                  main = sprintf("%s in %s\nN = %i",
                      id,
-                     names(locus)[i],
+                     names(loci)[i],
                      length(pos[[j]])),
                  font.main = 1,
                  ...)
@@ -599,63 +403,54 @@ PlotEnrichment.Generic <- function(mat,
 }
 
 
-#' Perform transcript section enrichment analysis and plot results.
+#' Perform enrichment analysis of sites per transcript region and plot results.
 #'
-#' Perform transcript section enrichment analysis and plot results.
+#' Perform enrichment analysis of the number of positive sites in 
+#' \code{txLoc.pos} relative to the number of null sites in \code{txLoc.neg}
+#' per transript region and plot results.
 #' Enrichment/depletion is evaluated using (multiple) Fisher's exact test(s).
 #' Multiple hypothesis testing correction is applied following the method of
 #' Bejamini and Hochberg.
 #'
-#' @param locPos A \code{txLoc} object. These should be the positive control sites.
-#' @param locNeg A \code{txLoc} object. These should be the negative control sites.
-#' @param filter Only plot loci in transcript regions specified in filter.  Default is NULL.
+#' @param txLoc.pos A \code{txLoc} object. These correspond to the positive 
+#' sites.
+#' @param txLoc.neg A \code{txLoc} object. These correspond to the negative
+#' (null) sites.
 #' @param xAxisLblFmt Plot extended axis labels. Default is 2. See ??? for details.
 #'
+#' @return \code{NULL}.
+#' 
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #'
 #' @examples
 #' \dontrun{
 #' bedFile <- system.file("extdata",
 #'                        "miCLIP_m6A_Linder2015_hg38.bed",
-#'                        package = "RNAModR");
-#' sites <- ReadBED(bedFile);
-#' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
-#' negSites <- GenerateNull(posSites, method = "nuclAbundance");
-#' PlotSectionEnrichment(posSites, negSites,
-#'                       filter = c("5'UTR", "CDS", "3'UTR"));
+#'                        package = "RNAModR")
+#' sites <- ReadBED(bedFile)
+#' pos <- SmartMap(sites, id = "m6A", refGenome = "hg38")
+#' neg <- GenerateNull(pos, method = "nuclAbundance")
+#' PlotSectionEnrichment(
+#'     FilterTxLoc(pos, c("5'UTR", "CDS", "3'UTR")),
+#'     FilterTxLoc(neg, c("5'UTR", "CDS", "3'UTR")))
 #' }
 #'
 #' @export
-PlotSectionEnrichment <- function(locPos,
-                                  locNeg,
-                                  filter = NULL,
+PlotSectionEnrichment <- function(txLoc.pos,
+                                  txLoc.neg,
                                   xAxisLblFmt = 2) {
-    # Perform transcript section enrichment analysis and plot results.
-    #
-    # Args:
-    #   locPos: A txLoc object of the positive control sites.
-    #   locNeg: A txLoc object of the negative control sites.
-    #   filter: Only plot loci in transcript regions specified in filter.
-    #
-    # Returns:
-    #   NULL
-    CheckClassTxLocConsistency(locPos, locNeg)
-    idPos <- GetId(locPos)
-    idNeg <- GetId(locNeg)
-    refGenome <- GetRef(locPos)
-    locPos <- GetLoci(locPos)
-    locNeg <- GetLoci(locNeg)
-    if (!is.null(filter)) {
-        locPos <- locPos[which(names(locPos) %in% filter)]
-        locNeg <- locNeg[which(names(locNeg) %in% filter)]
-    }
-    ctsPos <- sapply(locPos, nrow)
-    ctsNeg <- sapply(locNeg, nrow)
+
+    # Sanity check
+    CheckClassTxLocConsistency(txLoc.pos, txLoc.neg)
+
+    # Get counts and plot
+    ctsPos <- sapply(GetLoci(txLoc.pos), nrow)
+    ctsNeg <- sapply(GetLoci(txLoc.neg), nrow)
     ctsMat <- rbind(ctsPos, ctsNeg)
-    rownames(ctsMat) <- c(idPos, idNeg)
+    rownames(ctsMat) <- c(GetId(txLoc.pos), GetId(txLoc.neg))
     title <- sprintf("N(%s) = %i, N(%s) = %i",
-                     idPos, sum(ctsPos),
-                     idNeg, sum(ctsNeg))
+                     GetId(txLoc.pos), sum(ctsPos),
+                     GetId(txLoc.neg), sum(ctsNeg))
     par(mfrow = c(1,1))
     ret <- PlotEnrichment.Generic(
         ctsMat,
@@ -665,95 +460,103 @@ PlotSectionEnrichment <- function(locPos,
         xAxisLblFmt = xAxisLblFmt)
 }
 
+
 #' Perform spatial enrichment analysis and plot results.
 #'
-#' Perform spatial enrichment analysis and plot results.
+#' Perform enrichment analysis of the spatial distribution of positive sites in 
+#' \code{txLoc.pos} relative to the distribution of null sites in 
+#' \code{txLoc.neg} per transcript region and plot results.
 #' Enrichment/depletion is evaluated using (multiple) Fisher's exact test(s).
 #' Multiple hypothesis testing correction is applied following the method of
 #' Bejamini and Hochberg.
 #'
-#' @param locPos A \code{txLoc} object. These should be the positive control sites.
-#' @param locNeg A \code{txLoc} object. These should be the negative control sites.
-#' @param filter Only plot loci in transcript regions specified in filter.
+#' @param txLoc.pos A \code{txLoc} object. These correspond to the positive 
+#' sites.
+#' @param txLoc.neg A \code{txLoc} object. These correspond to the negative
+#' (null) sites.
 #' @param binWidth Spatial bin width. Default is 20 nt.
 #' @param posMax Evaluate enrichment within a window given by \code{posMax}.
 #' Default is 1000 nt.
 #'
+#' @return \code{NULL}.
+#' 
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #'
 #' @examples
 #' \dontrun{
 #' bedFile <- system.file("extdata",
 #'                        "miCLIP_m6A_Linder2015_hg38.bed",
-#'                        package = "RNAModR");
-#' sites <- ReadBED(bedFile);
-#' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
-#' negSites <- GenerateNull(posSites, method = "permutation");
-#' PlotSpatialEnrichment(posSites, negSites,
-#'                       filter = c("5'UTR", "CDS", "3'UTR"));
+#'                        package = "RNAModR")
+#' sites <- ReadBED(bedFile)
+#' pos <- SmartMap(sites, id = "m6A", refGenome = "hg38")
+#' null <- GenerateNull(posSites, method = "permutation")
+#' PlotSpatialEnrichment(
+#'     FilterTxLoc(pos, c("5'UTR", "CDS", "3'UTR")),
+#'     FilterTxLoc(neg, c("5'UTR", "CDS", "3'UTR")))
 #' }
 #'
 #' @export
-PlotSpatialEnrichment <- function(locPos,
-                                  locNeg,
-                                  filter = NULL,
+PlotSpatialEnrichment <- function(txLoc.pos,
+                                  txLoc.neg,
                                   binWidth = 20,
                                   posMax = 1000) {
-    # Perform spatial enrichment analysis and plot results.
-    #
-    # Args:
-    #   locPos: A txLoc object of the positive control sites.
-    #   locNeg: A txLoc object of the negative control sites.
-    #   filter: Only plot loci in transcript regions specified in filter.
-    #   binWidth: Spatial bin width. Default is 20 nt.
-    #   posMax: Evaluate enrichment within a window given by posMax.
-    #           Default is 1kb.
-    #
-    # Returns:
-    #   NULL
-    CheckClassTxLocConsistency(locPos, locNeg)
-    idPos <- GetId(locPos)
-    idNeg <- GetId(locNeg)
-    refGenome <- GetRef(locPos)
-    locPos <- GetLoci(locPos)
-    locNeg <- GetLoci(locNeg)
-    if (!is.null(filter)) {
-        locPos <- locPos[which(names(locPos) %in% filter)]
-        locNeg <- locNeg[which(names(locNeg) %in% filter)]
-    }
-    par(mfrow = c(length(locPos), 2))
+
+    # Sanity check
+    CheckClassTxLocConsistency(txLoc.pos, txLoc.neg)
+  
+    # Determine figure panel layout and number of breaks
+    par(mfrow = c(length(GetLoci(txLoc.pos)), 2))
     breaks <- seq(0, posMax, by = binWidth)
-    for (i in 1:length(locPos)) {
-        posPos <- list("5p" = locPos[[i]]$TXSTART,
-                       "3p" = locPos[[i]]$REGION_TXWIDTH - locPos[[i]]$TXSTART + 1)
-        posNeg <- list("5p" = locNeg[[i]]$TXSTART,
-                       "3p" = locNeg[[i]]$REGION_TXWIDTH - locNeg[[i]]$TXSTART + 1)
-        posPos <- lapply(posPos, function(x) x[x <= posMax])
-        posNeg <- lapply(posNeg, function(x) x[x <= posMax])
-        revAxis <- list(FALSE, TRUE)
-        xlab <- list("Absolute position (relative to 5' start) [nt]",
-                     "Absolute position (relative to 3' end) [nt]")
-        for (j in 1:length(posPos)) {
-            ctsPos <- table(cut(posPos[[j]], breaks = breaks))
-            ctsNeg <- table(cut(posNeg[[j]], breaks = breaks))
-            ctsMat <- as.matrix(rbind(ctsPos, ctsNeg))
-            rownames(ctsMat) <- c(idPos, idNeg)
-            title <- sprintf("%s\nN(%s) = %i, N(%s) = %i, bw = %i nt, window = %i nt",
-                             names(locPos)[i],
-                             idPos,
-                             sum(ctsPos),
-                             idNeg,
-                             sum(ctsNeg),
-                             binWidth,
-                             posMax)
-            tmp <- PlotEnrichment.Generic(ctsMat,
-                                          title = title,
-                                          xlab = xlab[[j]],
-                                          x.las = 1, x.cex = 0.8, x.padj = 0,
-                                          revXaxis = revAxis[[j]],
-                                          xAxisLblFmt = 3)
-        }
-    }
+    
+    # Plot
+    invisible(mapply(
+        function(loci.pos, loci.neg, region) {
+            
+            # 
+            pos.pos <- with(loci.pos, list(
+              "5p" = start(locus_in_tx_region),
+              "3p" = tx_region_width - end(locus_in_tx_region) + 1))
+            pos.neg <- with(loci.neg, list(
+              "5p" = start(locus_in_tx_region),
+              "3p" = tx_region_width - end(locus_in_tx_region) + 1))
+            
+            #
+            pos.pos <- lapply(pos.pos, function(x) x[x <= posMax])
+            pos.neg <- lapply(pos.neg, function(x) x[x <= posMax])
+
+            # Set axis properties            
+            revAxis <- list(FALSE, TRUE)
+            xlab <- list("Absolute position (relative to 5' start) [nt]",
+                         "Absolute position (relative to 3' end) [nt]")
+
+            # Plot
+            for (j in 1:length(pos.pos)) {
+                ctsPos <- table(cut(pos.pos[[j]], breaks = breaks))
+                ctsNeg <- table(cut(pos.neg[[j]], breaks = breaks))
+                ctsMat <- as.matrix(rbind(ctsPos, ctsNeg))
+                rownames(ctsMat) <- c(GetId(txLoc.pos), GetId(txLoc.neg))
+                title <- sprintf(
+                    "%s\nN(%s) = %i, N(%s) = %i, bw = %i nt, window = %i nt",
+                    region,
+                    GetId(txLoc.pos),
+                    sum(ctsPos),
+                    GetId(txLoc.neg),
+                    sum(ctsNeg),
+                    binWidth,
+                    posMax)
+                tmp <- PlotEnrichment.Generic(
+                    ctsMat,
+                    title = title,
+                    xlab = xlab[[j]],
+                    x.las = 1, x.cex = 0.8, x.padj = 0,
+                    revXaxis = revAxis[[j]],
+                    xAxisLblFmt = 3)
+            }
+        },
+        GetLoci(txLoc.pos),
+        GetLoci(txLoc.neg),
+        names(GetLoci(txLoc.pos))))
+    
 }
 
 
@@ -783,8 +586,6 @@ PlotSpatialEnrichment <- function(locPos,
 #' negSites <- GenerateNull(posSites, method = "permutation");
 #' PlotSpatialRatio(posSites, negSites, c("3'UTR", "CDS", "5'UTR"));
 #' }
-#' 
-#' @export
 PlotSpatialRatio <- function(locPos, locNeg,
                              filter = NULL,
                              binWidth = 20,
@@ -922,8 +723,6 @@ PlotSpatialRatio <- function(locPos, locNeg,
 #'
 #' @importFrom beanplot beanplot
 #' @importFrom stats t.test wilcox.test
-#' 
-#' @export
 PlotGC <- function(loc1, loc2,
                    flank = 10,
                    filter = NULL,

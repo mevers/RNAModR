@@ -34,7 +34,6 @@ posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
 negSites <- GenerateNull(posSites, method = "permutation");
 PlotSpatialRatio(posSites, negSites, c("3'UTR", "CDS", "5'UTR"));
 }
-
 }
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}

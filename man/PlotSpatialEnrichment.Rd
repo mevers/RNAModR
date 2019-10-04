@@ -4,23 +4,28 @@
 \alias{PlotSpatialEnrichment}
 \title{Perform spatial enrichment analysis and plot results.}
 \usage{
-PlotSpatialEnrichment(locPos, locNeg, filter = NULL, binWidth = 20,
+PlotSpatialEnrichment(txLoc.pos, txLoc.neg, binWidth = 20,
   posMax = 1000)
 }
 \arguments{
-\item{locPos}{A \code{txLoc} object. These should be the positive control sites.}
+\item{txLoc.pos}{A \code{txLoc} object. These correspond to the positive 
+sites.}
 
-\item{locNeg}{A \code{txLoc} object. These should be the negative control sites.}
-
-\item{filter}{Only plot loci in transcript regions specified in filter.}
+\item{txLoc.neg}{A \code{txLoc} object. These correspond to the negative
+(null) sites.}
 
 \item{binWidth}{Spatial bin width. Default is 20 nt.}
 
 \item{posMax}{Evaluate enrichment within a window given by \code{posMax}.
 Default is 1000 nt.}
 }
+\value{
+\code{NULL}.
+}
 \description{
-Perform spatial enrichment analysis and plot results.
+Perform enrichment analysis of the spatial distribution of positive sites in 
+\code{txLoc.pos} relative to the distribution of null sites in 
+\code{txLoc.neg} per transcript region and plot results.
 Enrichment/depletion is evaluated using (multiple) Fisher's exact test(s).
 Multiple hypothesis testing correction is applied following the method of
 Bejamini and Hochberg.
@@ -29,12 +34,13 @@ Bejamini and Hochberg.
 \dontrun{
 bedFile <- system.file("extdata",
                        "miCLIP_m6A_Linder2015_hg38.bed",
-                       package = "RNAModR");
-sites <- ReadBED(bedFile);
-posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
-negSites <- GenerateNull(posSites, method = "permutation");
-PlotSpatialEnrichment(posSites, negSites,
-                      filter = c("5'UTR", "CDS", "3'UTR"));
+                       package = "RNAModR")
+sites <- ReadBED(bedFile)
+pos <- SmartMap(sites, id = "m6A", refGenome = "hg38")
+null <- GenerateNull(posSites, method = "permutation")
+PlotSpatialEnrichment(
+    FilterTxLoc(pos, c("5'UTR", "CDS", "3'UTR")),
+    FilterTxLoc(neg, c("5'UTR", "CDS", "3'UTR")))
 }
 
 }

@@ -108,7 +108,7 @@ CheckClassTxLocRef <- function(obj1, obj2) {
 #'
 #' The function checks if entries from two \code{txLoc} objects
 #' are based on the same reference genome _and_ contain entries
-#' for the same transcript sections.
+#' for the same transcript regions
 #' 
 #' @param obj1 A \code{txLoc} object.
 #' @param obj2 A \code{txLoc} object.

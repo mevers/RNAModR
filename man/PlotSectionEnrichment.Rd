@@ -2,21 +2,26 @@
 % Please edit documentation in R/plot.R
 \name{PlotSectionEnrichment}
 \alias{PlotSectionEnrichment}
-\title{Perform transcript section enrichment analysis and plot results.}
+\title{Perform enrichment analysis of sites per transcript region and plot results.}
 \usage{
-PlotSectionEnrichment(locPos, locNeg, filter = NULL, xAxisLblFmt = 2)
+PlotSectionEnrichment(txLoc.pos, txLoc.neg, xAxisLblFmt = 2)
 }
 \arguments{
-\item{locPos}{A \code{txLoc} object. These should be the positive control sites.}
+\item{txLoc.pos}{A \code{txLoc} object. These correspond to the positive 
+sites.}
 
-\item{locNeg}{A \code{txLoc} object. These should be the negative control sites.}
-
-\item{filter}{Only plot loci in transcript regions specified in filter.  Default is NULL.}
+\item{txLoc.neg}{A \code{txLoc} object. These correspond to the negative
+(null) sites.}
 
 \item{xAxisLblFmt}{Plot extended axis labels. Default is 2. See ??? for details.}
 }
+\value{
+\code{NULL}.
+}
 \description{
-Perform transcript section enrichment analysis and plot results.
+Perform enrichment analysis of the number of positive sites in 
+\code{txLoc.pos} relative to the number of null sites in \code{txLoc.neg}
+per transript region and plot results.
 Enrichment/depletion is evaluated using (multiple) Fisher's exact test(s).
 Multiple hypothesis testing correction is applied following the method of
 Bejamini and Hochberg.
@@ -25,12 +30,13 @@ Bejamini and Hochberg.
 \dontrun{
 bedFile <- system.file("extdata",
                        "miCLIP_m6A_Linder2015_hg38.bed",
-                       package = "RNAModR");
-sites <- ReadBED(bedFile);
-posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
-negSites <- GenerateNull(posSites, method = "nuclAbundance");
-PlotSectionEnrichment(posSites, negSites,
-                      filter = c("5'UTR", "CDS", "3'UTR"));
+                       package = "RNAModR")
+sites <- ReadBED(bedFile)
+pos <- SmartMap(sites, id = "m6A", refGenome = "hg38")
+neg <- GenerateNull(pos, method = "nuclAbundance")
+PlotSectionEnrichment(
+    FilterTxLoc(pos, c("5'UTR", "CDS", "3'UTR")),
+    FilterTxLoc(neg, c("5'UTR", "CDS", "3'UTR")))
 }
 
 }

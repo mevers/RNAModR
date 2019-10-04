@@ -4,15 +4,10 @@
 \alias{PlotSpatialDistribution}
 \title{Plot spatial distribution of loci from a \code{txLoc} object.}
 \usage{
-PlotSpatialDistribution(locus, filter = NULL, nbreaks = 100,
-  absolute = FALSE, binWidth = NULL, posMax = 1000,
-  doBootstrap = TRUE, ...)
+PlotSpatialDistribution(txLoc, nbreaks = 100, absolute = FALSE,
+  binWidth = NULL, posMax = 1000, doBootstrap = TRUE, ...)
 }
 \arguments{
-\item{locus}{A \code{txLoc} object.}
-
-\item{filter}{Only plot loci in transcript regions specified in filter.}
-
 \item{nbreaks}{Number of spatial bins. Default is 100.}
 
 \item{absolute}{Plot spatial distribution in absolute coordinates.
@@ -29,6 +24,11 @@ the transcript feature. Default is 1000 nt.}
 sites within transcript region. Default is \code{TRUE}.}
 
 \item{...}{Additional parameters passed to plot.}
+
+\item{locus}{A \code{txLoc} object.}
+}
+\value{
+\code{NULL}.
 }
 \description{
 Plot spatial distribution of loci from a \code{txLoc} object within every

@@ -981,7 +981,6 @@ GetMotifLoc <- function(motif,
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #'
 #' @import Biostrings GenomicRanges IRanges
-#' 
 GetMFE <- function(data, colSeq, colId = NULL) {
     sq <- DNAStringSet(data[, colSeq])
     if (is.null(colId) || length(data[, colId]) != length(sq)) {

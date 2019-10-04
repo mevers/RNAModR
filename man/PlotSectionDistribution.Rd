@@ -2,27 +2,27 @@
 % Please edit documentation in R/plot.R
 \name{PlotSectionDistribution}
 \alias{PlotSectionDistribution}
-\title{Plot piechart of the number of loci in every transcript section.}
+\title{Plot piechart of the number of loci in every transcript region}
 \usage{
-PlotSectionDistribution(locus, filter = NULL)
+PlotSectionDistribution(txLoc)
 }
 \arguments{
-\item{locus}{A \code{txLoc} object.}
-
-\item{filter}{A character vector; only consider transcript sections
-specified in \code{filter}; if \code{NULL} consider all sections.}
+\item{txLoc}{A \code{txLoc} object.}
+}
+\value{
+\code{NULL}.
 }
 \description{
-Plot piechart of the number of loci in every transcript section.
+Plot piechart of the number of loci in every transcript region.
 }
 \examples{
 \dontrun{
 bedFile <- system.file("extdata",
                        "miCLIP_m6A_Linder2015_hg38.bed",
-                       package = "RNAModR");
-sites <- ReadBED(bedFile);
-posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
-PlotSectionDistribution(posSites);
+                       package = "RNAModR")
+sites <- ReadBED(bedFile)
+posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38")
+PlotSectionDistribution(posSites)
 }
 
 }
