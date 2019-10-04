@@ -4,49 +4,58 @@
 \alias{SmartMap.ToTx}
 \title{Map genome coordinates to transcript coordinates.}
 \usage{
-SmartMap.ToTx(locus, txBySec, seqBySec, geneXID, ignore.strand = FALSE,
-  noFactors = TRUE, showPb = FALSE)
+SmartMap.ToTx(gr, txBySec, seqBySec, geneXID, ignore.strand = FALSE,
+  showPb = FALSE)
 }
 \arguments{
-\item{locus}{A \code{GRanges} object; specifies the list of
-genomic features to be mapped.}
+\item{gr}{A \code{GRanges} object; specifies the list of genomic features to 
+be mapped.}
 
-\item{txBySec}{A \code{list} of \code{GRangesList} objects;
-specifies the reference transcriptome; the object is usually
-a result of running \code{BuildTx}.}
+\item{txBySec}{A \code{list} of \code{GRangesList} objects; specifies the 
+reference transcriptome; the object is usually a result of running 
+\code{BuildTx}.}
 
-\item{seqBySec}{A \code{list} of \code{DNAStringSet} objects;
-sequences of (some or all) segments from \code{txBySec};
-the object is usually a result of running \code{BuildTx}.}
+\item{seqBySec}{A \code{list} of \code{DNAStringSet} objects; sequences of 
+(some or all) segments from \code{txBySec}; the object is usually a result 
+of running \code{BuildTx}.}
 
-\item{geneXID}{A \code{data.frame}; specifies different gene
-IDs; the object is usually a result of running \code{BuildTx}.}
+\item{geneXID}{A \code{DataFrame}; specifies different gene IDs; the object 
+is usually a result of running \code{BuildTx}.}
 
-\item{ignore.strand}{A logical scalar; if \code{TRUE} strand
-information is ignored when mapping genome coordinates to
-transcript coordinates; default is \code{FALSE}.}
-
-\item{noFactors}{A logical scalar; if \code{TRUE}, the return
-object contains no \code{factors}; default is \code{TRUE}.}
+\item{ignore.strand}{A logical scalar; if \code{TRUE} strand information is 
+ignored when mapping genome coordinates to transcript coordinates; default 
+is \code{FALSE}.}
 
 \item{showPb}{A logical scalar; if \code{TRUE} show a progress
 bar; default is \code{FALSE}.}
 }
 \value{
-A \code{list} of \code{data.frame} objects. See
-'Details'.
+A \code{list} of \code{data.frame} objects. See 'Details'.
 }
 \description{
-Map genome coordinates to transcript coordinates. See
-'Details'.
-This is a low-level function that is being called from
-\code{SmartMap}.
+Map genome coordinates to transcript coordinates. See 'Details'.
+This is a low-level function that is being called from \code{SmartMap}. 
+There is no guarantee that this function will get exported in future
+releases of RNAModR. Use at your own risk.
 }
 \details{
-The function maps genomic coordinates from \code{locus} to
-transcript section coordinates from \code{txBySec}. The
-function returns a \code{list} of \code{data.frame} objects
-with additional gene ID and sequence information.
+The function maps genomic coordinates from \code{gr} to transcript region
+coordinates from \code{txBySec}. The function returns a \code{list} of
+\code{DataFrame} objects, each with the following columns:
+\enumerate{
+    \item \code{locus_in_txx_region}: A \code{GRanges} object
+    \item \code{locus_in_genome}: A \code{GRanges} object
+    \item \code{score}: A \code{numeric} vector
+    \item \code{id}: A \code{character} vector
+    \item \code{tx_region}: A \code{character} vector
+    \item \code{tx_region_width}: An \code{integer} vector
+    \item \code{tx_region_sequence}: A \code{DNAStringSet} object
+    \item \code{tx_refseq}: A \code{character} vector
+    \item \code{gene_entrez}: A \code{character} vector
+    \item \code{gene_symbol}: A \code{character} vector
+    \item \code{gene_ensembl}: A \code{character} vector
+    \item \code{gene_name}: A \code{character} vector
+}
 }
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}

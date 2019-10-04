@@ -33,7 +33,7 @@ ReadBED <- function(file, collapseRange = TRUE) {
     if (!file.exists(file)) {
         stop(sprintf("File %s doesn't exist.", file))
     }
-    bed <- read.table(file, header = FALSE)
+    bed <- read.table(file, header = FALSE, stringsAsFactors = FALSE)
     if (ncol(bed) != 6) {
         stop("[ERROR] File must be a 6 column BED file.")
     }
@@ -67,36 +67,9 @@ ReadBED <- function(file, collapseRange = TRUE) {
         seqnames = bed$chr,
         ranges = IRanges(bed$start + 1, bed$end),
         strand = bed$strand,
-        score = bed$score,
+        score = as.numeric(bed$score),
         id = bed$id)
     
-}
-
-
-#' Write a \code{list} of \code{GRangesList} to a BED file.
-#'
-#' Write a \code{list} of \code{GRangesList} to a BED file.
-#' One file per transcript region is generated.
-#'
-#' @param txFeatures A \code{list} of \code{GRangesList} objects.
-#'
-#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
-#' @keywords internal
-#' 
-#' @importFrom rtracklayer export
-#' 
-#' @export
-WriteFeatToBED <- function(txFeatures) {
-    # Write list of GRangesList transcript features to BED file.
-    #
-    # Args:
-    #   txFeatures: List of GRangesList transcript features.
-    #
-    # Returns:
-    #   NULL
-    for (i in 1:length(txFeatures)) {
-        rtracklayer::export(txFeatures[[i]], sprintf("%s.bed", names(txFeatures)[i]))
-    }
 }
 
 
@@ -104,19 +77,16 @@ WriteFeatToBED <- function(txFeatures) {
 #'
 #' Write \code{txLoc} object to a BED file. See 'Details'.
 #'
-#' The function writes entries from a \code{txLoc} object to a 6-column
-#' BED file (BED6). Note that this process is not "splice-aware", i.e. 
-#' if an entry spans an intron the BED entry gives the left and right-most 
-#' genomic coordinate of the feature. If \code{file = NULL}, entries will 
-#' be written to  \code{sites.bed}. If \code{noChrName = TRUE}, chromosome 
-#' names in column 1 of the BED file will be written without "chr".
+#' The function writes entries from a \code{txLoc} object to a 6-column BED 
+#' file (BED6). Note that this process is not "splice-aware", i.e. if an entry 
+#' spans an intron the BED entry gives the left and right-most genomic 
+#' coordinate of the feature. If \code{file = NULL}, entries will be written to  
+#' \code{sites.bed}.
 #' 
-#' @param locus A \code{txLoc} object.
+#' @param txLoc A \code{txLoc} object.
 #' @param file A character string; specifies the filename of the output 
 #' BED file. If \code{NULL}, then \code{file = "sites.bed"}; default is
 #' \code{NULL}.
-#' @param noChrName A logical scalar; if \code{TRUE}, chromosome names
-#' will be written without "chr"; default is \code{FALSE}. 
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #'
@@ -124,113 +94,114 @@ WriteFeatToBED <- function(txFeatures) {
 #' \dontrun{
 #' bedFile <- system.file("extdata",
 #'                        "miCLIP_m6A_Linder2015_hg38.bed",
-#'                        package = "RNAModR");
-#' sites <- ReadBED(bedFile);
-#' txSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
-#' WriteTxLocToBED(txSites);
+#'                        package = "RNAModR")
+#' sites <- ReadBED(bedFile)
+#' txSites <- SmartMap(sites, id = "m6A", refGenome = "hg38")
+#' WriteBED(txSites)
 #' }
 #' 
 #' @importFrom utils write.table
 #' 
 #' @export
-WriteTxLocToBED <- function(locus,
-                            file = NULL,
-                            noChrName = FALSE) {
-    # Save transcript features in BED file.
-    #
-    # Args:
-    #   locus: List of dataframes with mapped features aross different
-    #          transcript regions
-    #   file: Filename. If file is NULL then output is written to site.bed.
-    #         Default is NULL.
-    #   formatChr: Format of chr column in BED file. Default is "noChrName".
-    #
-    # Returns:
-    #    NULL
-    CheckClass(locus, "txLoc")
-    id <- GetId(locus)
-    locus <- GetLoci(locus)
-    BED <- vector()
-    for (i in 1:length(locus)) {
-        feat <- locus[[i]][, c("CHR", "START", "STOP", "ID", "SCORE", "STRAND")]
-        if (is.numeric(feat[, 2]) && is.numeric(feat[, 3])) {
-            if (noChrName == TRUE) {
-                feat[, 1] <- gsub("chr", "", feat[ ,1])
-            }
-            feat[, 2] <- feat[ ,2] - 1
-            feat[, 4] <- sprintf("%s|%s|%s",
-                                 feat[, 4],
-                                 locus[[i]][, c("GENE_ENSEMBL")],
-                                 names(locus)[i])
-            BED <- rbind(BED, feat)
-        } else {
-            ss <- sprintf("Skipping %s.\n", names(locus)[i])
-            warning(ss)
-        }
-    }
-    BED <- BED[order(BED[, 1], BED[, 2]), ]
+WriteBED <- function(txLoc, file = NULL) {
+
+    # Sanity checks
+    CheckClass(txLoc, "txLoc")
+    
+    # Quieten R CMD check concerns regarding "no visible binding for global
+    # variable ..."
+    locus_in_genome <- id <- tx_region <- tx_refseq <- NULL
+
+    # Get loci
+    loci <- GetLoci(txLoc)
+    
+    # Extract BED6 entries from txLoc object and row-bind into `data.frame`
+    lst <- lapply(loci, function(locus) 
+        with(locus, data.frame(
+            seqnames = seqnames(locus_in_genome),
+            start = start(locus_in_genome) - 1L,
+            end = end(locus_in_genome),
+            id = paste(GetId(txLoc), id, tx_region, tx_refseq, sep = "|"),
+            score = score,
+            strand = strand(locus_in_genome))))
+    df <- do.call(rbind, lst)
+    
+    # Sort entries
+    df <- df[order(df[, 1], df[, 2]), ]
+        
+    # Output file name
     if (is.null(file)) {
-        if (nchar(id) > 0) {
-            file <- sprintf("sites_%s.bed", id)
+        if (nchar(GetId(txLoc)) > 0) {
+            file <- sprintf("sites_%s.bed", GetId(txLoc))
         } else {
             file <- "sites.bed"
         }
     }
-    write.table(BED, file = file,
-                sep = "\t", quote = FALSE,
-                col.names = FALSE, row.names = FALSE)
+
+    # Write to file
+    write.table(
+        df, 
+        file = file,
+        sep = "\t", 
+        quote = FALSE,
+        col.names = FALSE, 
+        row.names = FALSE)
+    cat(sprintf("Output in file %s.\n", file))
+
 }
 
 
 #' Write txLoc object to CSV file.
 #'
-#' Write a txLoc object to a/multiple comma-separated-values file(s).
+#' Write a \code{txLoc} object to a comma-separated-values file.
 #' 
-#' @param locus A \code{txLoc} object.
+#' @param txLoc A \code{txLoc} object.
 #' @param file Filename of output CSV file. If NULL then file = "sites.csv".
 #' @param withSeq If TRUE then include full sequence. Default is FALSE.
-#' @param withGC If TRUE then include GC content. Default is FALSE.
+#' @param withGC If TRUE then include GC content. Default is FALSE. Unused.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
-#' @keywords internal
 #'
 #' @importFrom utils write.csv
 #' 
 #' @export
-WriteTxLocToCSV <- function(locus,
-                            file = NULL, 
-                            withSeq = FALSE, 
-                            withGC = FALSE) {
-    # Save list of dataframes with mapped features across different
-    # transcript regions to csv file
-    #
-    # Args:
-    #   locus: List of dataframes with mapped features across different
-    #          transcript regions
-    #   file: Filename. If file is NULL then output is written to site.csv.
-    #         Default is NULL.
-    #
-    # Returns:
-    #   NULL
-    CheckClass(locus, "txLoc")
-    locus <- GetLoci(locus)
-    CSV <- vector()
-    selCol <- c("GENE_REGION", "REGION_TXWIDTH", "GENE_REFSEQ",
-                "GENE_ENTREZ", "GENE_SYMBOL", "GENE_ENSEMBL",
-                "GENE_UNIGENE", "ID", "CHR", "START", "STOP", "STRAND")
-    if (withSeq) {
-        selCol <- c(selCol, "REGION_SEQ")
-    }
-    for (i in 1:length(locus)) {
-        data <- locus[[i]][, selCol]
-        CSV <- rbind(CSV, data)
-    }
-    CSV <- CSV[order(CSV[, 8], CSV[, 9]), ]
+WriteCSV <- function(txLoc,
+                     file = NULL, 
+                     withSeq = FALSE, 
+                     withGC = FALSE) {
+
+    # Sanity checks
+    CheckClass(txLoc, "txLoc")
+
+    # Get loci
+    loci <- GetLoci(txLoc)
+
+    # Convert entries in columns to `data.frame`
+    lst <- lapply(loci, function(locus) {
+        if (!withSeq) 
+            as.data.frame(locus[, -match("tx_region_sequence", names(locus))])
+        else
+            as.data.frame(locus)
+    })
+    df <- do.call(rbind, lst)    
+   
+    # Output file name
     if (is.null(file)) {
-        file <- "sites.csv"
+        if (nchar(GetId(txLoc)) > 0) {
+            file <- sprintf("sites_%s.csv", GetId(txLoc))
+        } else {
+            file <- "sites.csv"
+        }
     }
-    write.csv(CSV, file = file,
-              row.names = FALSE, quote = FALSE)
+    
+    # Write to file
+    write.csv(
+        df, 
+        file = file,
+        row.names = FALSE, 
+        quote = FALSE)
+    cat(sprintf("Output in file %s.\n", file))
+    
 }
 
 
@@ -251,8 +222,6 @@ WriteTxLocToCSV <- function(locus,
 #' @return A \code{dataframe} object. See 'Details'.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
-#' 
-#' @export
 ReadDBN <- function(file) {
     if (!file.exists(file)) {
         ss <- sprintf("Could not open %s.", file)

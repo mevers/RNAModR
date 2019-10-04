@@ -10,7 +10,7 @@ GetGeneIds(txdb)
 \item{txdb}{A \code{TxDb} object.}
 }
 \value{
-A \code{data.frame}. See 'Details'.
+A \code{DataFrame}. See 'Details'.
 }
 \description{
 Get different gene IDs for mapping between different gene
@@ -19,24 +19,23 @@ This is a low-level function that is being called from
 \code{BuildTx}.
 }
 \details{
-The function extracts the genome assembly version from
-the \code{TxDb} object, and loads the suitable genome wide
-annotation package. For example, if \code{TxDb} is based
-on \code{"hg38"}, the function loads \code{org.Hs.eg.db}.
-Various IDs (Ensembl, Unigene, gene symbols) are extracted
-from the annotation package by mapping RefSeq IDs from
-\code{TxDb} via \code{mapIds} from the \code{AnnotationDbi}
-package. Please note that column entries are not necessarily
-unique: For example, two different Ensembl IDs might have the
-same Entrez ID. The return object is a \code{data.frame} with
-the following columns:
+The function extracts the genome assembly version from the \code{TxDb} 
+object, and loads the suitable genome wide annotation package. For example, 
+if \code{TxDb} is based on \code{"hg38"}, the function loads 
+\code{org.Hs.eg.db}. 
+Various IDs (Ensembl, gene symbols) are extracted from the annotation 
+package by mapping RefSeq IDs from \code{TxDb} via \code{mapIds} from 
+the \code{AnnotationDbi} package. Please note that column entries are not 
+necessarily unique: For example, two different Ensembl IDs might have the
+same Entrez ID. The return object is a \code{data.frame} with the following 
+columns:
 \itemize{
-  \item REFSEQ: RefSeq Accession number; these entries are unique
+  \item tx_refseq: RefSeq Accession number; these entries are unique
   and refer to the mRNA transcript
-  \item ENTREZID: Entrez gene ID
-  \item SYMBOL: Gene symbol
-  \item ENSEMBL: Ensembl gene ID
-  \item GENENAME: Gene name
+  \item gene_entrez: Entrez gene ID
+  \item gene_symbol: Gene symbol
+  \item gene_ensembl: Ensembl gene ID
+  \item gene_name: Gene name
 }
 Note that mapping between gene IDs is a many-to-many mapping process.
 For example, different transcript RefSeq IDs can belong to the same

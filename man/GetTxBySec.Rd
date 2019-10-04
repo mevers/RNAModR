@@ -4,16 +4,15 @@
 \alias{GetTxBySec}
 \title{Get transcript sections.}
 \usage{
-GetTxBySec(txdb, sections = c("Promoter", "5'UTR", "CDS", "3'UTR",
-  "Intron"), promUpstream = 1000, promDownstream = 0,
-  verbose = FALSE)
+GetTxBySec(txdb, sections = c("Promoter", "5'UTR", "CDS", "3'UTR"),
+  promUpstream = 1000, promDownstream = 0, verbose = FALSE)
 }
 \arguments{
 \item{txdb}{A \code{TxDb} object.}
 
 \item{sections}{A character vector; specifies which transcript
 sections should be extracted from \code{txdb}; default is
-\code{c("Promoter", "5'UTR", "CDS", "3'UTR", "Intron")}.}
+\code{c("Promoter", "5'UTR", "CDS", "3'UTR")}.}
 
 \item{promUpstream}{An integer; specifies the number of
 nucleotides to be included upstream of 5'UTR start as part of

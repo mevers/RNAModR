@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.R
 \name{PlotSpatialDistribution}
 \alias{PlotSpatialDistribution}
-\title{Plot spatial distribution of loci from \code{txLoc} object.}
+\title{Plot spatial distribution of loci from a \code{txLoc} object.}
 \usage{
 PlotSpatialDistribution(locus, filter = NULL, nbreaks = 100,
   absolute = FALSE, binWidth = NULL, posMax = 1000,
@@ -31,21 +31,21 @@ sites within transcript region. Default is \code{TRUE}.}
 \item{...}{Additional parameters passed to plot.}
 }
 \description{
-Plot spatial distribution of loci from \code{txLoc} object within every
-transcript section.
+Plot spatial distribution of loci from a \code{txLoc} object within every
+transcript region.
 }
 \examples{
 \dontrun{
 bedFile <- system.file("extdata",
                        "miCLIP_m6A_Linder2015_hg38.bed",
-                       package = "RNAModR");
-sites <- ReadBED(bedFile);
-posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
-PlotSpatialDistribution(posSites);
+                       package = "RNAModR")
+sites <- ReadBED(bedFile)
+posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38")
+PlotSpatialDistribution(posSites)
 PlotSpatialDistribution(posSites,
                         absolute = TRUE,
                         filter = c("5'UTR", "CDS", "3'UTR"),
-                        ylim = c(0, 200));
+                        ylim = c(0, 200))
 }
 
 }

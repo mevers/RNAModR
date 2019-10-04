@@ -4,16 +4,11 @@
 \alias{GetTxSeq}
 \title{Get sequences for transcript segments.}
 \usage{
-GetTxSeq(txBySec, skipIntrons = TRUE)
+GetTxSeq(txBySec)
 }
 \arguments{
 \item{txBySec}{A \code{list} of \code{GRangesList} objects;
 output of function \code{GetTxBySec} or \code{CollapseTxBySec}.}
-
-\item{skipIntrons}{A logical scalar; if \code{TRUE} sequences
-based on introns are not extracted; this is usually a good idea
-as long intronic sequences can lead to large memory imprints
-(and file sizes if objects are saved).}
 }
 \value{
 A \code{list} of \code{DNAStringSet} objects.

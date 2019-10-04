@@ -1,144 +1,135 @@
 #' Map genome coordinates to transcript coordinates.
 #'
-#' Map genome coordinates to transcript coordinates. See
-#' 'Details'.
-#' This is a low-level function that is being called from
-#' \code{SmartMap}.
+#' Map genome coordinates to transcript coordinates. See 'Details'.
+#' This is a low-level function that is being called from \code{SmartMap}. 
+#' There is no guarantee that this function will get exported in future
+#' releases of RNAModR. Use at your own risk.
 #'
-#' The function maps genomic coordinates from \code{locus} to
-#' transcript section coordinates from \code{txBySec}. The
-#' function returns a \code{list} of \code{data.frame} objects
-#' with additional gene ID and sequence information.
+#' The function maps genomic coordinates from \code{gr} to transcript region
+#' coordinates from \code{txBySec}. The function returns a \code{list} of
+#' \code{DataFrame} objects, each with the following columns:
+#' \enumerate{
+#'     \item \code{locus_in_txx_region}: A \code{GRanges} object
+#'     \item \code{locus_in_genome}: A \code{GRanges} object
+#'     \item \code{score}: A \code{numeric} vector
+#'     \item \code{id}: A \code{character} vector
+#'     \item \code{tx_region}: A \code{character} vector
+#'     \item \code{tx_region_width}: An \code{integer} vector
+#'     \item \code{tx_region_sequence}: A \code{DNAStringSet} object
+#'     \item \code{tx_refseq}: A \code{character} vector
+#'     \item \code{gene_entrez}: A \code{character} vector
+#'     \item \code{gene_symbol}: A \code{character} vector
+#'     \item \code{gene_ensembl}: A \code{character} vector
+#'     \item \code{gene_name}: A \code{character} vector
+#' }
 #' 
-#' @param locus A \code{GRanges} object; specifies the list of
-#' genomic features to be mapped.
-#' @param txBySec A \code{list} of \code{GRangesList} objects;
-#' specifies the reference transcriptome; the object is usually
-#' a result of running \code{BuildTx}.
-#' @param seqBySec A \code{list} of \code{DNAStringSet} objects;
-#' sequences of (some or all) segments from \code{txBySec};
-#' the object is usually a result of running \code{BuildTx}.
-#' @param geneXID A \code{data.frame}; specifies different gene
-#' IDs; the object is usually a result of running \code{BuildTx}.
-#' @param ignore.strand A logical scalar; if \code{TRUE} strand
-#' information is ignored when mapping genome coordinates to
-#' transcript coordinates; default is \code{FALSE}.
-#' @param noFactors A logical scalar; if \code{TRUE}, the return
-#' object contains no \code{factors}; default is \code{TRUE}.
+#' @param gr A \code{GRanges} object; specifies the list of genomic features to 
+#' be mapped.
+#' @param txBySec A \code{list} of \code{GRangesList} objects; specifies the 
+#' reference transcriptome; the object is usually a result of running 
+#' \code{BuildTx}.
+#' @param seqBySec A \code{list} of \code{DNAStringSet} objects; sequences of 
+#' (some or all) segments from \code{txBySec}; the object is usually a result 
+#' of running \code{BuildTx}.
+#' @param geneXID A \code{DataFrame}; specifies different gene IDs; the object 
+#' is usually a result of running \code{BuildTx}.
+#' @param ignore.strand A logical scalar; if \code{TRUE} strand information is 
+#' ignored when mapping genome coordinates to transcript coordinates; default 
+#' is \code{FALSE}.
 #' @param showPb A logical scalar; if \code{TRUE} show a progress
 #' bar; default is \code{FALSE}.
 #'
-#' @return A \code{list} of \code{data.frame} objects. See
-#' 'Details'.
+#' @return A \code{list} of \code{data.frame} objects. See 'Details'.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
-#' @keywords internal
 #' 
-#' @export
-SmartMap.ToTx <- function(locus,
+#' @importFrom S4Vectors DataFrame
+#' 
+#' @keywords internal
+SmartMap.ToTx <- function(gr,
                           txBySec,
                           seqBySec,
                           geneXID,
                           ignore.strand = FALSE,
-                          noFactors = TRUE,
                           showPb = FALSE) {
-    # Map positions from locus to transcript regions.
-    #
-    # Args:
-    #   locus: Loci of genomic features to be mapped as GRanges object.
-    #   txBySec: List of GRangesList transcript features.
-    #   seqBySec: List of DNAStringSet sequences.
-    #   geneXID: Dataframe of cross-referencing gene IDs.
-    #   ignore.strand: Ignore strand information during mapping.
-    #                  Default is FALSE.
-    #   noFactors: No (character) factors in output. Default is TRUE.
-    #
-    # Returns:
-    #   List of dataframes with mapped transcript coordinates for all
-    #   features in locus.
-    locusInTx.list <- list()
+
+    # Initialise progress bar if `showPb == TRUE`
     if (showPb == TRUE)
         pb <- txtProgressBar(max = length(txBySec), style = 3, width = 60)
-    for (i in 1:length(txBySec)) {
-        if (showPb) setTxtProgressBar(pb, i)
+
+    # Map to different `txBySec` regions and return `list` of `DataFrame`s
+    lst <- lapply(
+        setNames(1:length(txBySec), names(txBySec)), 
+        function(i) {
+    
+            if (showPb) setTxtProgressBar(pb, i)
       
-        # [UPDATE September 2019] mapToTranscripts is now more stringent in that it 
-        # requires seqlevels(locus) to be a subset of seqlevels(txBySec[[1]]@unlistData)
-        # In other words, if locus contains chromosomes that are _not_ included in
-        # txBySec this will throw a critical error.
-        # So we need to make sure that we only have entries in `locus` on chromosomes
-        # that are included as seqlevels of transcripts in `txBySec`
-        locus <- keepSeqlevels(
-            locus, 
-            intersect(seqlevels(txBySec[[i]]@unlistData), seqlevels(locus)),
-            pruning.mode = "coarse")
+            region <- names(txBySec)[i]
+      
+            # [UPDATE September 2019] `mapToTranscripts` is now more stringent
+            # in that it requires `seqlevels(gr)` to be a subset of 
+            # `seqlevels(txBySec[[i]]@unlistData)`. In other words, if `gr` 
+            # contains chromosomes that are _not_ included in `txBySec` this 
+            # will  throw a  critical error. So we need to make sure that we 
+            # only have  entries in `gr` on chromosomes that are included as 
+            # seqlevels of transcripts in `txBySec`
+            gr <- keepSeqlevels(
+                gr, 
+                intersect(
+                  seqlevels(txBySec[[region]]@unlistData), 
+                  seqlevels(gr)),
+                pruning.mode = "coarse")
+            
+            # Map to transcripts; the output object has two metadata columns:
+            #   xHits = index of the mapped `gr` object
+            #   transcriptsHits = index of the `txBySec[[i]]` object
+            hits <- mapToTranscripts(
+              gr, 
+              txBySec[[region]], 
+              ignore.strand = ignore.strand)
+            
+            # Return DataFrame with columns
+            #   locus_in_tx_region: <GRanges>
+            #   locus_in_genome:    <GRanges>
+            #   score:              <numeric>
+            #   id:                 <character>
+            #   tx_region:          <character>
+            #   tx_region_width:    <integer>
+            #   tx_region_sequence: <DNAStringSet>
+            #   tx_refseq:          <character>
+            #   gene_entrez:        <character>
+            #   gene_symbol:        <character>
+            #   gene_ensembl:       <character>
+            #   gene_name:          <character>
+            cbind(
+              setNames(
+                DataFrame(
+                  granges(hits, use.names = F, use.mcols = F)), 
+                "locus_in_tx_region"),
+              setNames(
+                DataFrame(
+                  granges(gr[mcols(hits)$xHits], use.names = F, use.mcols = F)), 
+                "locus_in_genome"),
+              setNames(
+                mcols(gr[mcols(hits)$xHits]),
+                c("score", "id")),
+              setNames(DataFrame(
+                region, 
+                sum(width(txBySec[[region]][mcols(hits)$transcriptsHits]))),
+                c("tx_region", "tx_region_width")),
+              setNames(DataFrame(
+                seqBySec[[region]][match(
+                  seqnames(hits), names(seqBySec[[region]]))]),
+                "tx_region_sequence"),
+              geneXID[match(seqnames(hits), geneXID$tx_refseq), ])
         
-        # Map to transcripts; the output object has two metadata columns:
-        #   xHits = index of the mapped locus object
-        #   transcriptsHits = index of the txBySec[[i]] object
-        gr <- mapToTranscripts(locus, txBySec[[i]], ignore.strand = ignore.strand)
-        
-        #tmp <- cbind(
-        #  setNames(DataFrame(gr)[1], "locus_in_tx"),
-        #  setNames(
-        #    DataFrame(locus[mcols(gr)$xHits]), 
-        #    c("locus_in_genome", names(mcols(locus)))),
-        #  geneXID[as.integer(match(seqnames(gr), geneXID$REFSEQ))], )
-        
-        idxLoc <- mcols(gr)$xHits
-        idxTx  <- mcols(gr)$transcriptsHits
-        # THIS COULD DO WITH SOME TIDYING UP ...
-        # Collate data from mapping, locus, txBySec, seqBySec and geneXID
-#        idxSeq <- which(names(txBySec)[i] == names(seqBySec))
-#        dataMap <- GenomicRanges::as.data.frame(gr)
-#        dataLoc <- GenomicRanges::as.data.frame(locus[idxLoc])
-#        dataTx <-  GenomicRanges::as.data.frame(range(txBySec[[i]][idxTx]))
-#        if (length(idxSeq) > 0) {
-#            dataSeq <- seqBySec[[idxSeq]][match(
-#                dataMap[, 1],
-#                names(seqBySec[[idxSeq]]))]
-#            dataSeq <- as.character(dataSeq)
-#        } else {
-#            dataSeq <- rep("", nrow(dataTx))
-#        }
-#        dataID <-  geneXID[match(dataMap[, 1], geneXID[, 1]), ]
-        locusInTx <- GenomicRanges::as.data.frame(gr)[, 1:4]
-        colnames(locusInTx) <- c("REFSEQ", "TXSTART", "TXEND", "TXWIDTH")
-        dataQuery <- GenomicRanges::as.data.frame(locus[idxLoc])
-        colnames(dataQuery) <- c("CHR", "START", "STOP", "WIDTH",
-                                 "STRAND", "SCORE", "ID")
-        dataRef <- GenomicRanges::as.data.frame(
-            range(txBySec[[i]][idxTx]))[, -1]
-        idxSeq <- which(names(txBySec)[i] == names(seqBySec))
-        if (length(idxSeq) > 0) {
-            dataSeq <- as.character(seqBySec[[idxSeq]][match(
-                dataRef[, 1],
-                names(seqBySec[[idxSeq]]))])
-        } else {
-            dataSeq <- rep("", nrow(dataRef))
         }
-        dataRef <- cbind(rep(names(txBySec)[i], nrow(dataRef)),
-                             dataRef[, 1],
-                             geneXID[match(dataRef[, 1], geneXID$REFSEQ), ][, -1],
-                             dataRef[, 2:ncol(dataRef)],
-                             sum(width(txBySec[[i]][idxTx])),
-                             dataSeq)
-        colnames(dataRef) <- c("GENE_REGION", "GENE_REFSEQ", "GENE_ENTREZ",
-                               "GENE_SYMBOL", "GENE_ENSEMBL", 
-                               "GENE_NAME", "GENE_CHR", "GENE_START",
-                               "GENE_STOP", "GENE_WIDTH", "GENE_STRAND",
-                               "REGION_TXWIDTH", "REGION_SEQ")
-        locusInTx <- cbind(locusInTx,
-                           dataQuery,
-                           dataRef)
-        if (noFactors) {
-            locusInTx <- Unfactor(locusInTx)
-        }
-        locusInTx.list[[length(locusInTx.list) + 1]] <- locusInTx
-    }
+    )
+    
     if (showPb) close(pb)
-    names(locusInTx.list) <- names(txBySec)
-    return(locusInTx.list)
+
+    lst
+    
 }
 
 
@@ -146,25 +137,23 @@ SmartMap.ToTx <- function(locus,
 #'
 #' Map genome coordinates to transcript coordinates.
 #'
-#' The function maps genomic coordinates from \code{locus} to
-#' transcript section coordinates. The function automatically
-#' loads a reference transcriptome based on \code{refGenome}.
-#' An error is thrown if a reference transcriptome could not
-#' be found. This usually means that \code{BuildTx} was not yet
-#' run successfully.
+#' The function maps genomic coordinates from \code{locus} to transcript 
+#' section coordinates. The function automatically loads a reference 
+#' transcriptome based on \code{refGenome}. An error is produced if a reference 
+#' transcriptome could not be found. This usually means that \code{BuildTx} was 
+#' not yet run successfully.
 #' The function returns a \code{txLoc} object of mapped positions.
 #'
-#' @param locus A \code{GRanges} object; specifies the list of
-#' of genomic features to be mapped.
-#' @param id A character string; specifies a name for loci from
-#' \code{locus}; if \code{NULL} then \code{id = ""}; default is
-#' \code{NULL}.
-#' @param refGenome A character string; specifies a specific
-#' reference genome assembly version based on which the matching
-#' transcriptome is loaded; default is \code{"hg38"}.
-#' @param ignore.strand A logical scalar; if \code{TRUE} strand
-#' information is ignored when mapping genome coordinates to
-#' transcript coordinates; default is \code{FALSE}.
+#' @param gr A \code{GRanges} object; specifies the list of of genomic features 
+#' to be mapped.
+#' @param id A character string; specifies a name for loci from \code{gr}; if 
+#' \code{NULL} then \code{id = ""}; default is \code{NULL}.
+#' @param refGenome A character string; specifies a specific reference genome 
+#' assembly version based on which the matching transcriptome is loaded; 
+#' default is \code{"hg38"}.
+#' @param ignore.strand A logical scalar; if \code{TRUE} strand information is 
+#' ignored when mapping genome coordinates to transcript coordinates; default 
+#' is \code{FALSE}.
 #'
 #' @return A \code{txLoc} object. See 'Details'.
 #'
@@ -176,29 +165,21 @@ SmartMap.ToTx <- function(locus,
 #' \dontrun{
 #' bedFile <- system.file("extdata",
 #'                        "miCLIP_m6A_Linder2015_hg38.bed",
-#'                        package = "RNAModR");
-#' sites <- ReadBED(bedFile);
-#' txSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
+#'                        package = "RNAModR")
+#' sites <- ReadBED(bedFile)
+#' txSites <- SmartMap(sites, id = "m6A", refGenome = "hg38")
 #' }
 
 #' @export
-SmartMap <- function(locus,
+SmartMap <- function(gr,
                      id = NULL,
                      refGenome = "hg38",
                      ignore.strand = FALSE) {
-    # User function to map positions from locus to transcript regions.
-    #
-    # Args:
-    #   locus: GRanges object of loci of genomic features.
-    #   id: Identifier for loci. Default is NULL.
-    #   refGenome: reference genome/transcriptome version
-    #   ignore.strand: Ignore strand during mapping. Default is FALSE.
-    #
-    # Returns:
-    #   txLoc object.
-    #
-    # Load reference transcriptome
-    CheckClass(locus, "GRanges")
+
+    # Sanity check
+    CheckClass(gr, "GRanges")
+    
+    # Load transcriptome data
     refTx <- sprintf("tx_%s.RData", refGenome)
     if (!file.exists(refTx)) {
         ss <- sprintf("Reference transcriptome for %s not found.", refGenome)
@@ -219,24 +200,25 @@ SmartMap <- function(locus,
     geneXID <- get("geneXID")
     seqBySec <- get("seqBySec")
     txBySec <- get("txBySec")
+    
     # Map coordinates to transcript
-    locusInTx.list <- SmartMap.ToTx(
-        locus, txBySec, seqBySec, geneXID, 
+    loci <- SmartMap.ToTx(
+        gr, txBySec, seqBySec, geneXID, 
         ignore.strand = ignore.strand,
         showPb = TRUE)
-    if (is.null(id)) {
-        id = ""
-    }
-    obj <- new("txLoc",
-               loci = locusInTx.list,
-               id = id,
-               refGenome = refGenome,
-               version = as.character(Sys.Date()))
-    return(obj)
+
+    # Return `txLoc` object
+    new("txLoc",
+        loci = loci,
+        id = if (is.null(id)) "" else id,
+        refGenome = refGenome,
+        version = as.character(Sys.Date()))
+
 }
 
+
 #' Construct \code{txLoc}-suitable \code{dataframe} object from
-#' mapping transcript loci to genomic loci.
+#' mapping transcript loci to genomic loci. (CURRENTLY BROKEN)
 #' 
 #' Construct \code{txLoc}-suitable \code{dataframe} object from
 #' mapping transcript loci to genomic loci.
@@ -301,47 +283,46 @@ GetLocus.MapFromTranscripts <- function(gr, ref, seq, section, geneXID) {
 #' \code{txLoc} object.
 #' Two different methods can be employed:
 #' \enumerate{
-#' \item \code{method = "ntAbund"}: Null sites are generated based
-#' on the position of all non-modified nucleotides of type \code{nt} 
-#' in those transcript sections that also contain a modified site of
-#' the same type and as specified in \code{locus}. 
-#' For example, if \code{locus} contains a list of m$^{6}$A sites, 
-#' the list of null sites consists of all non-methylated adenosines 
-#' in those transcripts that contain at least one m$^{6}$A site.
-#' \item \code{method = "perm"}: Null sites are generated by 
-#' permuting the position of sites from \code{locus} uniformly within
-#' the corresponding transcript section. Note that this will generate
-#' a list of null sites with the same abundance ratios across 
-#' transcript sections as the list of sites from \code{locus}. It is
-#' therefore not useful for assessing an enrichment of sites within
-#' a particular transcript section.
-#' }
-#' It is import to emphasise that any downstream enrichment analysis
-#' may depend critically on the choice of the null distribution. 
-#' For example, a position permution-based null distribution may not 
-#' be a valid null distribution, if the nucleotide position 
-#' distribution is highly non-uniform across a transcript section. 
-#' This is the case e.g. for the spatial distribution of cytosines 
-#' within and across the 5'UTR, CDS and/or 3'UTR. In this case, a
-#' better null distribution would be to consider all cytosines
-#' in transcript sections that also contain a site in \code{locus}.
-#' This can be achieved with \code{method = "ntAbund"}. A still 
-#' better list of null sites would be based on all \emph{expressed} 
-#' and non-modified cytosines based on the same sequencing data that
-#' was used to identify modified cytosines. 
+#' \item \code{method = "ntAbund"}: Null sites are generated based on the
+#' position of all non-modified nucleotides of type \code{nt} in those
+#' transcript sections that also contain a modified site of the same type and
+#' as specified in \code{locus}. 
+#' For example, if \code{locus} contains a list of m$^{6}$A sites, the list of
+#' null sites consists of all non-methylated adenosines in those transcripts
+#' that contain at least one m$^{6}$A site.
+#' \item \code{method = "perm"}: Null sites are generated by randomly permuting
+#' the position of sites from \code{locus} uniformly within the corresponding 
+#' transcript section. Note that this will generate a list of null sites with 
+#' the same abundance ratios across  transcript sections as the list of sites 
+#' from \code{locus}. It is therefore not useful for assessing an enrichment of 
+#' sites within a particular transcript section. In fact, this method should 
+#' not be used and is included purely for paedagogical purposes (to demonstrate 
+#' the importance of a sensible null distribution). It is likely that this 
+#' method will be removed from future RNAModR versions.
+#' 
+#' It is import to emphasise that any downstream enrichment analysis may depend
+#' critically on the choice of the null distribution. For example, a position 
+#' permution-based null distribution may not be a valid null distribution, if 
+#' the distribution of nucleotides is highly non-uniform across a transcript 
+#' section. This is the case e.g. for the spatial distribution of cytosines 
+#' within and across the 5'UTR, CDS and/or 3'UTR. In this case, a permutation-
+#' based distribution of cytosines will not give a sensible null distribution.
+#' Instead, a sensible null distribution can be derived from the position of 
+#' all cytosines in the relevant transcript region containing the methylated 
+#' cytosine site in \code{locus}. \code{method = "ntAbund"} generates a list of 
+#' null sites using this approach.
 #'
-#' @param locus A \code{txLoc} object.
-#' @param id A character string; identifier for null sites; if
-#' \code{NULL} then id = \code{"null"}; default is \code{NULL}.
-#' @param method A character string; specifies the method used
-#' to generate null distribution; if \code{method == "ntAbund"}
-#' the position of all nucleotides specified by \code{nt} will
-#' be used as null sites; if \code{method == "perm"} then null
-#' sites will be generated by uniform-randomly shuffling candidate
-#' positions from \code{locus} within the corresponding transcript
-#' region; default is \code{"ntAbund"}.
-#' @param nt A single character; if \code{method == "ntAbund"},
-#' use \code{nt} to derive distribution of null sites.
+#' @param txLoc A \code{txLoc} object.
+#' @param id A character string; identifier for null sites; if \code{NULL} then 
+#' \code{id = "null"}; default is \code{NULL}.
+#' @param method A character string; specifies the method used to the generate 
+#' null distribution; if \code{method == "ntAbund"} the position of all 
+#' nucleotides specified by \code{nt} will be used as null sites; if 
+#' \code{method == "perm"} (DEPRECATED, see 'Details') then null sites will be 
+#' generated by uniform-randomly shuffling candidatepositions from \code{locus} 
+#' within the corresponding transcript region; default is \code{"ntAbund"}.
+#' @param nt A single character; if \code{method == "ntAbund"}, use \code{nt} 
+#' to derive distribution of null sites.
 #' @param showPb A logical scalar; if \code{TRUE} show a progress
 #' bar; default is \code{TRUE}.
 #'
@@ -352,52 +333,44 @@ GetLocus.MapFromTranscripts <- function(gr, ref, seq, section, geneXID) {
 #' @import GenomicRanges IRanges
 #' @importFrom utils setTxtProgressBar txtProgressBar
 #' @importFrom stats runif setNames
+#' @importFrom S4Vectors DataFrame
 #' 
 #' @examples
 #' \dontrun{
 #' bedFile <- system.file("extdata",
 #'                        "miCLIP_m6A_Linder2015_hg38.bed",
-#'                        package = "RNAModR");
-#' sites <- ReadBED(bedFile);
-#' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
-#' negSites <- GenerateNull(posSites, method = "ntAbund", nt = "A");
+#'                        package = "RNAModR")
+#' sites <- ReadBED(bedFile)
+#' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38")
+#' negSites <- GenerateNull(posSites, method = "ntAbund", nt = "A")
 #' }
 #'
 #' @export
-GenerateNull <- function(locus,
+GenerateNull <- function(txLoc,
                          id = NULL,
                          method = c("ntAbund", "perm"),
                          nt = "C",
                          showPb = TRUE)  {
-    # Generate null distribuion of SNM's across different transcript regions.
-    #
-    # Args:
-    #   locus: List of dataframes with mapped SNM's across different
-    #          transcript regions.
-    #   method: Method used to generate null distribution.
-    #           If method == "ntAbund" then the distribution of all
-    #           nucleotides specified by nucleotide will be used as null sites.
-    #           If method == "perm" then null sites will be generated
-    #           by uniformly randomly permuting candidate positions from locus
-    #           within transcript region. Default is "ntAbund".
-    #   nt: Nucleotide to be used for deriving a list of null sites,
-    #               if method == "ntAbund"
-    #   showPb: If TRUE, show progress bar
-    #
-    # Returns:
-    #    A txLoc object. Note that genome coordinates are not available for
-    #    null sites.
-    CheckClass(locus, "txLoc")
+
+    # Sanity checks
+    CheckClass(txLoc, "txLoc")
     method <- match.arg(method)
-    refGenome <- GetRef(locus)
+    refGenome <- GetRef(txLoc)
     if (is.null(id)) {
-        id <- sprintf("null_%s", GetId(locus))
+        id <- sprintf("null_%s", GetId(txLoc))
     }
-    locus <- GetLoci(locus)
-    locusNull.list <- list()
+    
+    # Quieten R CMD check concerns regarding "no visible binding for global
+    # variable ..."
+    tx_region_sequence <- tx_refseq <- NULL
+    
+    # Get loci from `txLoc` object
+    loci.pos <- GetLoci(txLoc)
+
+    # Load transcriptome data for `method == "ntAbund"`
     if (method == "ntAbund") {
-# FIX THIS!!!
-#            LoadRefTx(refGenome, geneXID, seqBySec, txBySec)
+        
+        # Load transcriptome data
         refTx <- sprintf("tx_%s.RData", refGenome)
         if (!file.exists(refTx)) {
             ss <- sprintf("Reference transcriptome for %s not found.", refGenome)
@@ -418,89 +391,81 @@ GenerateNull <- function(locus,
         geneXID <- get("geneXID")
         seqBySec <- get("seqBySec")
         txBySec <- get("txBySec")
+        
     }
+    
+    # Activate progressbar if `showPb == TRUE`
     if (showPb == TRUE)
-        pb <- txtProgressBar(max = length(locus), style = 3, width = 60)
-    for (i in 1:length(locus)) {
-        if (showPb) setTxtProgressBar(pb, i)
-        if (method == "ntAbund") {
-            seqData <- locus[[i]][!duplicated(locus[[i]][, 1]),
-                                  c("REFSEQ", "GENE_CHR", "GENE_START",
-                                    "GENE_STOP", "STRAND", "REGION_SEQ")]
-            if (all(grepl("\\w+", seqData$REGION_SEQ))) {
-                # Positive sites that should be excluded from null
-                exclude <- locus[[i]][, c("REFSEQ", "TXSTART")]
-                # All sites of a specific nucleotide
-                txPos <- gregexpr(nt, seqData$REGION_SEQ)
-                names(txPos) <- seqData$REFSEQ
-                txPos <- data.frame(
-                    ID = rep(names(txPos), sapply(txPos, length)),
-                    x = unlist(txPos), stringsAsFactors = FALSE)
-                # Exclude positive sites
-                txPos <- rbind(txPos, setNames(exclude, names(txPos)))
-                txPos <- txPos[!duplicated(txPos, fromLast = FALSE) &
-                               !duplicated(txPos, fromLast = TRUE), ]
-                rownames(txPos) <- seq(1, nrow(txPos))
-                # Map sites back to genome
-                gr <- GRanges(txPos$ID, IRanges(txPos$x, txPos$x))
-                idxSec <- which(names(locus)[i] == names(txBySec))
-                genomePos <- mapFromTranscripts(gr, txBySec[[idxSec]])
-                genomePos <- as.data.frame(genomePos);           
-            } else {
-                sec <- names(locus)[i]
-                ss <- sprintf("Cannot generate null for %s", sec)
-                ss <- sprintf("%s: Missing sequence information.", ss)
-                ss <- sprintf("%s\nEither exclude %s from downstream analysis",
-                              ss, sec)
-                ss <- sprintf("%s, or use different null.", ss)
-                warning(ss)
-                txPos <- cbind.data.frame(
-                    ID = seqData$REFSEQ,
-                    x = rep("*", nrow(seqData)))
-                genomePos <- cbind.data.frame(
-                    start = rep("*", nrow(seqData)),
-                    end = rep("*", nrow(seqData)),
-                    width = rep(1, nrow(seqData)))
-            }
-            idxSeq <- match(txPos$ID, seqData$REFSEQ)
-            idxLoc <- match(txPos$ID, locus[[i]]$GENE_REFSEQ)
-            locusNull <- cbind.data.frame(
-                txPos, txPos$x, rep(1, nrow(txPos)),
-                seqData$GENE_CHR[idxSeq],
-                genomePos$start,
-                genomePos$end,
-                genomePos$width,
-                seqData$STRAND[idxSeq],
-                rep(0, nrow(txPos)),
-                rep(sprintf("nucl_%s", nt), nrow(txPos)),
-                locus[[i]][idxLoc, 12:ncol(locus[[i]])]);      
-            colnames(locusNull) <- colnames(locus[[i]])
-            locusNull <- Unfactor(locusNull)
-        } else if (method == "perm") {
-            locusNull <- locus[[i]]
-            locusNull$TXSTART <- apply(
-                locusNull, 1, function(x) {
-                    round(runif(1,
-                                min = 1,
-                                max = as.numeric(x["REGION_TXWIDTH"]) - 1))})
-            locusNull$TXEND <- locusNull$TXSTART
-            locusNull[, c("CHR", "START", "STOP",
-                          "WIDTH", "STRAND", "SCORE")] <- matrix(
-                              "*",
-                              nrow = nrow(locusNull),
-                              ncol = 6)
-            locusNull$ID <- "unif_perm"
-        }
-        locusNull.list[[length(locusNull.list) + 1]] <- locusNull
-    }
+        pb <- txtProgressBar(max = length(loci.pos), style = 3, width = 60)
+
+    loci <- mapply(
+        function(i, sec) {
+        
+          # Update progress bar
+          if (showPb) setTxtProgressBar(pb, i)
+        
+          # Loci of positive sites for region i
+          locus.pos <- loci.pos[[i]]
+        
+          # Get sequence data for unique RefSeq transcript regions
+          # Returns a DNAStringSet object
+          unique_tx_region_sequence <- with(
+            locus.pos,
+            tx_region_sequence[!duplicated(tx_refseq)])
+        
+          # Extract position of all `nt`s inside every sequence
+          mindex <- vmatchPattern(nt, unique_tx_region_sequence)
+        
+          # Exclude positive sites from null sites
+          gr <- subsetByOverlaps(
+            GRanges(mindex), 
+            locus.pos$locus_in_tx_region, 
+            invert = TRUE)
+        
+          # Map sites from transcriptomic to genomic coordinates
+          hits <- mapFromTranscripts(gr, sec)
+          
+          # Copy genomic strand information to tx data
+          strand(gr) <- strand(hits)
+        
+          # Return DataFrame with columns
+          #   locus_in_tx_region: <GRanges>
+          #   locus_in_genome:    <GRanges>
+          #   score:              <numeric>
+          #   id:                 <character>
+          #   tx_region:          <character>
+          #   tx_region_width:    <integer>
+          #   tx_region_sequence: <DNAStringSet>
+          #   tx_refseq:          <character>
+          #   gene_entrez:        <character>
+          #   gene_symbol:        <character>
+          #   gene_ensembl:       <character>
+          #   gene_name:          <character>
+          cbind(
+            setNames(DataFrame(gr[mcols(hits)$xHits]), "locus_in_tx_region"),
+            setNames(
+              DataFrame(granges(hits, use.names = FALSE, use.mcols = FALSE)), 
+              "locus_in_genome"),
+            setNames(DataFrame(
+              rep(0, length(gr)),
+              paste0(seqnames(hits), ":", start(hits), "-", end(hits))), 
+              c("score", "id")),
+            locus.pos[match(
+              seqnames(gr[mcols(hits)$xHits]), locus.pos$tx_refseq), -(1:4)])
+
+      },
+      setNames(seq_along(loci.pos), names(loci.pos)),
+      txBySec[names(loci.pos)])
+    
     if (showPb) close(pb)
-    names(locusNull.list) <- names(locus)
-    obj <- new("txLoc",
-               loci = locusNull.list,
-               id = id,
-               refGenome = refGenome,
-               version = as.character(Sys.Date()))
-    return(obj)
+    
+    # Return `txLoc` object
+    new("txLoc",
+        loci = loci,
+        id = id,
+        refGenome = refGenome,
+        version = as.character(Sys.Date()))
+
 }
 
 

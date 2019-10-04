@@ -3,7 +3,7 @@
 \name{GetLocus.MapFromTranscripts}
 \alias{GetLocus.MapFromTranscripts}
 \title{Construct \code{txLoc}-suitable \code{dataframe} object from
-mapping transcript loci to genomic loci.}
+mapping transcript loci to genomic loci. (CURRENTLY BROKEN)}
 \usage{
 GetLocus.MapFromTranscripts(gr, ref, seq, section, geneXID)
 }

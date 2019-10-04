@@ -244,10 +244,10 @@ PlotSectionDistribution <- function(locus, filter = NULL) {
 }
 
 
-#' Plot spatial distribution of loci from \code{txLoc} object.
+#' Plot spatial distribution of loci from a \code{txLoc} object.
 #'
-#' Plot spatial distribution of loci from \code{txLoc} object within every
-#' transcript section.
+#' Plot spatial distribution of loci from a \code{txLoc} object within every
+#' transcript region.
 #'
 #' @param locus A \code{txLoc} object.
 #' @param filter Only plot loci in transcript regions specified in filter.
@@ -269,14 +269,14 @@ PlotSectionDistribution <- function(locus, filter = NULL) {
 #' \dontrun{
 #' bedFile <- system.file("extdata",
 #'                        "miCLIP_m6A_Linder2015_hg38.bed",
-#'                        package = "RNAModR");
-#' sites <- ReadBED(bedFile);
-#' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38");
-#' PlotSpatialDistribution(posSites);
+#'                        package = "RNAModR")
+#' sites <- ReadBED(bedFile)
+#' posSites <- SmartMap(sites, id = "m6A", refGenome = "hg38")
+#' PlotSpatialDistribution(posSites)
 #' PlotSpatialDistribution(posSites,
 #'                         absolute = TRUE,
 #'                         filter = c("5'UTR", "CDS", "3'UTR"),
-#'                         ylim = c(0, 200));
+#'                         ylim = c(0, 200))
 #' }
 #' 
 #' @export
@@ -288,25 +288,8 @@ PlotSpatialDistribution <- function(locus,
                                     posMax = 1000,
                                     doBootstrap = TRUE,
                                     ...) {
-    # Plot the spatial distribution of features across different
-    # transcript regions.
-    #
-    # Args:
-    #   locus: List of dataframes with mapped features across different
-    #          transcript regions.
-    #   filter: Only plot loci in transcript regions specified in filter.
-    #   nbreaks: Number of spatial bins.
-    #   absolute: Plot as a function of absolute coordinates.
-    #             Default is FALSE.
-    #   binWidth: Spatial bin width. Overrides nbreaks if not NULL.
-    #   posMax: If absolute == TRUE, plot up distribution up to
-    #                   this distance. Default is 1000 nt.
-    #   doBootstrap: Calculate bootstrap CI (only if absolute == FALSE).
-    #                Default is TRUE.
-    #   ...: Additional parameters passed to plot.
-    #
-    # Returns:
-    #   NULL
+
+    # Sanity check
     CheckClass(locus, "txLoc")
     id <- GetId(locus)
     refGenome <- GetRef(locus)

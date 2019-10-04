@@ -210,24 +210,23 @@ GetTxDb <- function(genomeVersion = "hg38",
 #' This is a low-level function that is being called from
 #' \code{BuildTx}.
 #'
-#' The function extracts the genome assembly version from
-#' the \code{TxDb} object, and loads the suitable genome wide
-#' annotation package. For example, if \code{TxDb} is based
-#' on \code{"hg38"}, the function loads \code{org.Hs.eg.db}.
-#' Various IDs (Ensembl, Unigene, gene symbols) are extracted
-#' from the annotation package by mapping RefSeq IDs from
-#' \code{TxDb} via \code{mapIds} from the \code{AnnotationDbi}
-#' package. Please note that column entries are not necessarily
-#' unique: For example, two different Ensembl IDs might have the
-#' same Entrez ID. The return object is a \code{data.frame} with
-#' the following columns:
+#' The function extracts the genome assembly version from the \code{TxDb} 
+#' object, and loads the suitable genome wide annotation package. For example, 
+#' if \code{TxDb} is based on \code{"hg38"}, the function loads 
+#' \code{org.Hs.eg.db}. 
+#' Various IDs (Ensembl, gene symbols) are extracted from the annotation 
+#' package by mapping RefSeq IDs from \code{TxDb} via \code{mapIds} from 
+#' the \code{AnnotationDbi} package. Please note that column entries are not 
+#' necessarily unique: For example, two different Ensembl IDs might have the
+#' same Entrez ID. The return object is a \code{data.frame} with the following 
+#' columns:
 #' \itemize{
-#'   \item REFSEQ: RefSeq Accession number; these entries are unique
+#'   \item tx_refseq: RefSeq Accession number; these entries are unique
 #'   and refer to the mRNA transcript
-#'   \item ENTREZID: Entrez gene ID
-#'   \item SYMBOL: Gene symbol
-#'   \item ENSEMBL: Ensembl gene ID
-#'   \item GENENAME: Gene name
+#'   \item gene_entrez: Entrez gene ID
+#'   \item gene_symbol: Gene symbol
+#'   \item gene_ensembl: Ensembl gene ID
+#'   \item gene_name: Gene name
 #' }
 #' Note that mapping between gene IDs is a many-to-many mapping process.
 #' For example, different transcript RefSeq IDs can belong to the same
@@ -239,7 +238,7 @@ GetTxDb <- function(genomeVersion = "hg38",
 #'
 #' @param txdb A \code{TxDb} object.
 #'
-#' @return A \code{data.frame}. See 'Details'.
+#' @return A \code{DataFrame}. See 'Details'.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
@@ -295,12 +294,11 @@ GetGeneIds <- function(txdb) {
         stop(sprintf("Unknown genome %s.", genomeVersion))
     }
     
-    # Get transcripts from TxDb database; RefSeq transcript ID and Entrez gene ID
-    # as metadata columns
-    # Store REFSEQ and ENTREZID in DataFrame geneXID
-    tx <- transcripts(txdb, c("TXNAME", "GENEID"))
-    geneXID <- setNames(mcols(tx), c("REFSEQ", "ENTREZID"))
-    geneXID$ENTREZID <- as.character(geneXID$ENTREZID)
+    # Get transcripts from TxDb database; RefSeq transcript ID and Entrez 
+    # gene ID as metadata columns
+    # Store gene_refseq and gene_entrez in `DataFrame` geneXID
+    geneXID <- mcols(transcripts(txdb, c("TXNAME", "GENEID")))
+    geneXID$GENEID <- as.character(geneXID$GENEID)
 
     # Get various gene identifiers from OrgDb database and merge with
     # geneXID DataFrame
@@ -312,13 +310,21 @@ GetGeneIds <- function(txdb) {
         geneXID, 
         suppressMessages(select(
             refDb, 
-            keys = geneXID$ENTREZID, 
+            keys = geneXID$GENEID, 
             columns = identifier, 
             keytype = "ENTREZID")),
-        by = "ENTREZID",
-        sort = FALSE)[c(2:1,3:5)]
+        by.x = "GENEID", by.y = "ENTREZID",
+        sort = FALSE)[c(2:1, 3:5)]
     
-    return(geneXID[!duplicated(geneXID), ])
+    # Set column names
+    geneXID <- setNames(
+        geneXID,
+        c(
+            "tx_refseq", "gene_entrez", "gene_symbol", 
+            "gene_ensembl", "gene_name"))
+    
+    # Return `DataFrame`
+    geneXID[!duplicated(geneXID), ]
 }
 
 
@@ -338,7 +344,7 @@ GetGeneIds <- function(txdb) {
 #' @param txdb A \code{TxDb} object.
 #' @param sections A character vector; specifies which transcript
 #' sections should be extracted from \code{txdb}; default is
-#' \code{c("Promoter", "5'UTR", "CDS", "3'UTR", "Intron")}.
+#' \code{c("Promoter", "5'UTR", "CDS", "3'UTR")}.
 #' @param promUpstream An integer; specifies the number of
 #' nucleotides to be included upstream of 5'UTR start as part of
 #' the promoter.
@@ -359,8 +365,7 @@ GetTxBySec <- function(txdb,
                            "Promoter",
                            "5'UTR",
                            "CDS",
-                           "3'UTR",
-                           "Intron"),
+                           "3'UTR"),
                        promUpstream = 1000,
                        promDownstream = 0,
                        verbose = FALSE) {
@@ -380,8 +385,7 @@ GetTxBySec <- function(txdb,
     validFeat <- c("Promoter",
                    "CDS", "coding",
                    "5pUTR", "5'UTR", "UTR5",
-                   "3pUTR", "3'UTR", "UTR3",
-                   "Intron", "Intronic")
+                   "3pUTR", "3'UTR", "UTR3")
     isValidFeat <- grepl(sprintf("(%s)", paste0(validFeat, collapse = "|")),
                          sections, ignore.case = TRUE)
     if (!all(isValidFeat)) {
@@ -400,9 +404,6 @@ GetTxBySec <- function(txdb,
         } else if (grepl("(3pUTR|3'UTR|UTR3)", sections[i], ignore.case = TRUE)) {
             sec <- suppressWarnings(
                 threeUTRsByTranscript(txdb, use.names = TRUE))
-        } else if (grepl("(Intron|Intronic)", sections[i], ignore.case = TRUE)) {
-            sec <- suppressWarnings(
-                intronsByTranscript(txdb, use.names = TRUE))
         } else if (grepl("Promoter", sections[i], ignore.case = TRUE)) {
             promoter <- suppressWarnings(
                 unname(promoters(txdb,
@@ -553,7 +554,6 @@ CollapseTxBySec <- function(txBySec,
         stop("Transcript feature list does not contain 3'UTR entries.")
     }
     whichPromoter <- grep("Promoter", sections, ignore.case = TRUE)
-    whichIntron <- grep("(Intron|Intronic)", sections, ignore.case = TRUE)
     # (1) Collapse CDS:
     #      Step 1: Same RefSeq ID, multiple identical genomic copies
     #       Example: RefSeq ID = NM_000513
@@ -562,12 +562,12 @@ CollapseTxBySec <- function(txBySec,
     cds <- txBySec[[whichCDS]]
     cds <- cds[order(names(cds), -sum(GenomicRanges::width(cds)))]
     cds <- cds[!duplicated(names(cds))]
-    geneData <- geneXID[which(geneXID$REFSEQ %in% names(cds)), ]
+    geneData <- geneXID[which(geneXID$tx_refseq %in% names(cds)), ]
     geneData$lengthCDS <- sum(GenomicRanges::width(
-        cds[match(geneData$REFSEQ, names(cds))]))
-    geneData <- geneData[order(geneData$ENTREZID, -geneData$lengthCDS), ]
-    geneData <- geneData[!duplicated(geneData$ENTREZID), ]
-    cds <- cds[which(names(cds) %in% geneData$REFSEQ)]
+        cds[match(geneData$tx_refseq, names(cds))]))
+    geneData <- geneData[order(geneData$gene_entrez, -geneData$lengthCDS), ]
+    geneData <- geneData[!duplicated(geneData$gene_entrez), ]
+    cds <- cds[which(names(cds) %in% geneData$tx_refseq)]
     # (2) Collapse UTR's
     #      Step 1: Filter based on valid RefSeq ID from cds
     #       Note that UTR list will still contain duplicate RefSeq entries,
@@ -592,12 +592,6 @@ CollapseTxBySec <- function(txBySec,
         promoter <- as(unlist(promoter), "CompressedGRangesList")
         promoter.match <- DedupeBasedOnNearestRef(promoter, utr5.match, showPb = TRUE)
     }
-    # (3) Collapse introns (if included)
-    if (length(whichIntron) > 0) {
-        cat("Collapsing duplicate introns entries\n")
-        intron <- txBySec[[whichIntron]]
-        intron.match <- DedupeBasedOnNearestRef(intron, cds, showPb = TRUE)
-    }
     # Generate return object
     txBySec.collapsed <- list()
     for (i in 1:length(txBySec)) {
@@ -607,8 +601,6 @@ CollapseTxBySec <- function(txBySec,
             feat <- utr5.match
         } else if (grepl("(3pUTR|3'UTR|UTR3)", sections[i], ignore.case = TRUE)) {
             feat <- utr3.match
-        } else if (grepl("(Intron|Intronic)", sections[i], ignore.case = TRUE)) {
-            feat <- intron.match
         } else if (grepl("Promoter", sections[i], ignore.case = TRUE)) {
             feat <- promoter.match
         }
@@ -672,10 +664,6 @@ PerformSanityCheck <- function(txBySec) {
 #'
 #' @param txBySec A \code{list} of \code{GRangesList} objects;
 #' output of function \code{GetTxBySec} or \code{CollapseTxBySec}.
-#' @param skipIntrons A logical scalar; if \code{TRUE} sequences
-#' based on introns are not extracted; this is usually a good idea
-#' as long intronic sequences can lead to large memory imprints
-#' (and file sizes if objects are saved).
 #'
 #' @return A \code{list} of \code{DNAStringSet} objects.
 #'
@@ -683,17 +671,8 @@ PerformSanityCheck <- function(txBySec) {
 #' @keywords internal
 #'
 #' @export
-GetTxSeq <- function(txBySec,
-                     skipIntrons = TRUE) {
-    # Get a list of sequences for every feature from the list
-    # of transcript sections
-    #
-    # Args:
-    #   txBySec: List of GRangesList transcript sections.
-    #   skipIntrons: If TRUE, skip intron sequences.
-    #
-    # Returns:
-    #   List of DNAStringSet sequences
+GetTxSeq <- function(txBySec) {
+
     genomeVersion <- unique(unlist(lapply(txBySec, function(x) genome(x))))
     if (grepl("^hg", genomeVersion)) {
         genomePkg <- sprintf("BSgenome.Hsapiens.UCSC.%s", genomeVersion)
@@ -727,14 +706,6 @@ GetTxSeq <- function(txBySec,
         stop(sprintf("[ERROR] Unknown genome %s.",genomeVersion))
     }
     sections <- names(txBySec)
-    if (skipIntrons == TRUE) {
-        whichIntrons <- grep("(Intron|Intronic)",
-                             sections, ignore.case = TRUE)
-        if (length(whichIntrons) > 0) {
-            cat("Skipping introns.\n")
-            sections <- sections[-whichIntrons]
-        }
-    }
     txSequences<-list()
     pb <- txtProgressBar(min = 0,
                          max = length(sections),
@@ -864,42 +835,40 @@ BuildTx <- function(genomeVersion = c(
 #' @keywords internal
 #'
 #' @import GenomicRanges GenomicFeatures RSQLite
-#'
-#' @export
-BuildTxTest <- function() {
-# Generate txBySec
-    sections <- c("5'UTR", "CDS", "3'UTR")
-    tx <- data.frame(tx_id = seq(1,3),
-                     tx_name=sprintf("tx%i",seq(1,3)),
-                     tx_chrom="chr1",
-                     tx_strand=c("-", "+", "+"),
-                     tx_start=c(1, 2001, 3001),
-                     tx_end=c(999, 2199, 5199))
-    splice <-  data.frame(tx_id = c(1L, 2L, 2L, 2L, 3L, 3L),
-                          exon_rank=c(1, 1, 2, 3, 1, 2),
-                          exon_start=c(1, 2001, 2101, 2131, 3001, 4001),
-                          exon_end=c(999, 2085, 2144, 2199, 3601, 5199),
-                          cds_start=c(1, 2022, 2101, 2131, 3201, 4001),
-                          cds_end=c(999, 2085, 2144, 2193, 3601, 4501))
-    genes <- cbind.data.frame(tx_name = sprintf("tx%i", seq(1,3)),
-                              gene_id = sprintf("gene%i", seq(1,3)))
-    chrominfo <- cbind.data.frame(chrom = "chr1", length = 5199, is_circular = FALSE)
-    txdb <- makeTxDb(tx, splice, genes = genes, chrominfo = chrominfo)
-    txBySec <- list(fiveUTRsByTranscript(txdb, use.names = TRUE),
-                    cdsBy(txdb, by = "tx", use.names = TRUE),
-                    threeUTRsByTranscript(txdb, use.names = TRUE))
-    names(txBySec) <- sections
-# Generate genome
-    bases <- c("A", "C", "G", "T")
-    genome <- DNAString(paste(sample(bases, 5199, replace = TRUE), collapse = ""))
-# Generate seqBySec
-    seqBySec <- lapply(txBySec, function(x) extractTranscriptSeqs(genome, ranges(x)))
-# Generate geneXID
-    geneXID <- cbind.data.frame(REFSEQ = sprintf("tx%i", seq(1, 3)),
-                                ENTREZID = seq(1000, 3000, length.out = 3),
-                                SYMBOL = sprintf("gene%i", seq(1, 3)),
-                                ENSEMBL = sprintf("ENSEMBL%i", seq(1, 3)),
-                                UNIGENE = sprintf("UNIGENE%i", seq(1,3)),
-                                GENENAME = sprintf("name%i", seq(1,3)))
-    save(geneXID, txBySec, seqBySec, file = "tx_test.RData", compress = "gzip")
-}
+#BuildTxTest <- function() {
+## Generate txBySec
+#    sections <- c("5'UTR", "CDS", "3'UTR")
+#    tx <- data.frame(tx_id = seq(1,3),
+#                     tx_name=sprintf("tx%i",seq(1,3)),
+#                     tx_chrom="chr1",
+#                     tx_strand=c("-", "+", "+"),
+#                     tx_start=c(1, 2001, 3001),
+#                     tx_end=c(999, 2199, 5199))
+#    splice <-  data.frame(tx_id = c(1L, 2L, 2L, 2L, 3L, 3L),
+#                          exon_rank=c(1, 1, 2, 3, 1, 2),
+#                          exon_start=c(1, 2001, 2101, 2131, 3001, 4001),
+#                          exon_end=c(999, 2085, 2144, 2199, 3601, 5199),
+#                          cds_start=c(1, 2022, 2101, 2131, 3201, 4001),
+#                          cds_end=c(999, 2085, 2144, 2193, 3601, 4501))
+#    genes <- cbind.data.frame(tx_name = sprintf("tx%i", seq(1,3)),
+#                              gene_id = sprintf("gene%i", seq(1,3)))
+#    chrominfo <- cbind.data.frame(chrom = "chr1", length = 5199, is_circular = FALSE)
+#    txdb <- makeTxDb(tx, splice, genes = genes, chrominfo = chrominfo)
+#    txBySec <- list(fiveUTRsByTranscript(txdb, use.names = TRUE),
+#                    cdsBy(txdb, by = "tx", use.names = TRUE),
+#                    threeUTRsByTranscript(txdb, use.names = TRUE))
+#    names(txBySec) <- sections
+## Generate genome
+#    bases <- c("A", "C", "G", "T")
+#    genome <- DNAString(paste(sample(bases, 5199, replace = TRUE), collapse = ""))
+## Generate seqBySec
+#    seqBySec <- lapply(txBySec, function(x) extractTranscriptSeqs(genome, ranges(x)))
+## Generate geneXID
+#    geneXID <- cbind.data.frame(REFSEQ = sprintf("tx%i", seq(1, 3)),
+#                                ENTREZID = seq(1000, 3000, length.out = 3),
+#                                SYMBOL = sprintf("gene%i", seq(1, 3)),
+#                                ENSEMBL = sprintf("ENSEMBL%i", seq(1, 3)),
+#                                UNIGENE = sprintf("UNIGENE%i", seq(1,3)),
+#                                GENENAME = sprintf("name%i", seq(1,3)))
+#    save(geneXID, txBySec, seqBySec, file = "tx_test.RData", compress = "gzip")
+#}
