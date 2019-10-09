@@ -23,6 +23,9 @@ that are allowed during the motif matching; default is 0.}
 \item{showPb}{A logical scalar; if \code{TRUE} show a progress bar; default
 is \code{TRUE}.}
 }
+\value{
+A \code{txLoc} object.
+}
 \description{
 Get loci of motif(s) from transcriptome. See 'Details'.
 }

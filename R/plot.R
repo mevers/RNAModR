@@ -517,7 +517,7 @@ PlotSpatialEnrichment <- function(txLoc.pos,
     breaks <- seq(0, posMax, by = binWidth)
 
     # Plot
-    invisible(mapply(
+    invisible(Map(
         function(loci.pos, loci.neg, region) {
 
             # Store site positions
@@ -546,7 +546,7 @@ PlotSpatialEnrichment <- function(txLoc.pos,
                 ctsMat <- as.matrix(rbind(ctsPos, ctsNeg))
                 rownames(ctsMat) <- c(GetId(txLoc.pos), GetId(txLoc.neg))
                 title <- sprintf(
-                    "%s\nN(%s) = %i, N(%s) = %i, bw = %i nt, window = %i nt",
+                    "%s\nN(%s) = %i, N(%s) = %i\nbw = %i nt, window = %i nt",
                     region,
                     GetId(txLoc.pos),
                     sum(ctsPos),
@@ -701,22 +701,22 @@ PlotSpatialRatio <- function(locPos, locNeg,
 
 #' Plot GC content.
 #'
-#' Plot and assess the difference in the distributions of GC content within 
+#' Plot and assess the difference in the distributions of GC content within
 #' a window around sites from two \code{txLoc} objects. See 'Details'.
 #'
-#' The function calculates the GC content within a window around every site 
-#' from two \code{txLoc} objects. The window is defined by extending the 
-#' position of every \code{txLoc} site upstream and downstream by \code{flank} 
+#' The function calculates the GC content within a window around every site
+#' from two \code{txLoc} objects. The window is defined by extending the
+#' position of every \code{txLoc} site upstream and downstream by \code{flank}
 #' nucleotides (if possible).
-#' The means of the resulting GC content distributions are assessed using a 
-#' two-sample two-tailed t-test. If \code{norm_region = TRUE}, the GC content 
+#' The means of the resulting GC content distributions are assessed using a
+#' two-sample two-tailed t-test. If \code{norm_region = TRUE}, the GC content
 #' in the window is normalised to the GC content of the entire transcript
 #' region. If \code{downsample = TRUE}, the number of windows/sites from the
 #' \emph{second} \code{txLoc2} object is downsampled to match the number of
 #' windows/sites from the \code{txLoc1} object. This is useful (and therefore
 #' the default setting) when comparing the GC distribution around positive
 #' and null sites, as the list of null sites is often significantly larger than
-#' that of the positive sites. 
+#' that of the positive sites.
 #' Note that this function calls \code{GetGC}, which performs the sequence
 #' extraction and GC calculation. See \code{?GetGC} for details.
 #'
@@ -724,7 +724,7 @@ PlotSpatialRatio <- function(locPos, locNeg,
 #' @param txLoc2 A \code{txLoc} object.
 #' @param flank An \code{integer} scalar; see 'Details'.
 #' @param norm_region A \code{logical} scalar; if \code{TRUE} normalise the GC
-#' content in the window to the GC content of the corresponding transcript 
+#' content in the window to the GC content of the corresponding transcript
 #' region; default is \code{FALSE}.
 #' @param downsample A \code{logical} scalar; if \code{TRUE}, subsample sites
 #' from \code{txLoc2} to match the number of sites per transcript region from
@@ -739,7 +739,7 @@ PlotSpatialRatio <- function(locPos, locNeg,
 #'
 #' @importFrom beanplot beanplot
 #' @importFrom stats t.test wilcox.test
-#' 
+#'
 #' @export
 PlotGC <- function(txLoc1, txLoc2,
                    flank = 10,
@@ -755,15 +755,15 @@ PlotGC <- function(txLoc1, txLoc2,
     refGenome <- GetRef(txLoc1)
 
     # Downsample txLoc2 to txLoc1
-    if (downsample == TRUE) 
+    if (downsample == TRUE)
         txLoc2 <- DownsampleTxLoc(txLoc2, txLoc1, seed = seed)
-    
+
     # Get GC content of window around sites and transcript region
     dataGC1 <- GetGC(txLoc1, flank = flank)
     dataGC2 <- GetGC(txLoc2, flank = flank)
-    
+
     df <- data.frame()
-    
+
     namesBean <- vector()
     for (i in 1:length(dataGC1)) {
         GC1 <- dataGC1[[i]][, "GC_window"]
@@ -789,7 +789,7 @@ PlotGC <- function(txLoc1, txLoc2,
               rep(sprintf("%s %s", names(dataGC2)[i], id2), length(GC2))),
             stringsAsFactors = FALSE))
     }
-    
+
     levels <- unique(df[, 2])
     levels <- levels[c(grep("Promoter", levels),
                        grep("5'UTR", levels),
@@ -924,15 +924,15 @@ PlotAbundance.generic <- function(data,
 #' Plot distribution of relative distances between sites
 #' from two \code{txLoc} objects. See 'Details'.
 #'
-#' The function calculates minimum distances per transcript region, between 
-#' entries from \code{txLoc} relative to \code{txLocRef}. Relative distances 
-#' are shown within a window (-\code{flank}, \code{flank}), where negative 
-#' distances correspond to a feature from \code{txLoc} that is upstream of a 
+#' The function calculates minimum distances per transcript region, between
+#' entries from \code{txLoc} relative to \code{txLocRef}. Relative distances
+#' are shown within a window (-\code{flank}, \code{flank}), where negative
+#' distances correspond to a feature from \code{txLoc} that is upstream of a
 #' site from \code{txLocRef}, and positive distances indicate a feature from
 #' \code{txLoc} that is downstream of a site from \code{txLocRef}. Relative
-#' distances are binned in bins of \code{binWidth} nt, and shown as an 
-#' abundance histogram. If \code{doBootstrap = TRUE}, 95% confidence intervals 
-#' are calculated and shown, based on an empirical bootstrap of relative 
+#' distances are binned in bins of \code{binWidth} nt, and shown as an
+#' abundance histogram. If \code{doBootstrap = TRUE}, 95% confidence intervals
+#' are calculated and shown, based on an empirical bootstrap of relative
 #' distances.
 #'
 #' @param txLoc A \code{txLoc} object.
@@ -955,7 +955,7 @@ PlotRelDistDistribution <- function(txLoc,
                                     flank = 1000,
                                     binWidth = 20,
                                     doBootstrap = TRUE) {
-    
+
     # Sanity checks
     CheckClass(txLoc, "txLoc")
     CheckClass(txLocRef, "txLoc")
@@ -964,12 +964,12 @@ PlotRelDistDistribution <- function(txLoc,
     # Get ids
     id <- GetId(txLoc)
     idRef <- GetId(txLocRef)
-    
+
     # Convert sites to `list` of `GRanges`
     lst <- TxLoc2GRangesList(txLoc, method = "tx_region")
     lstRef <- TxLoc2GRangesList(txLocRef, method = "tx_region")
-    
-    # Calculate distances    
+
+    # Calculate distances
     lstDist <- GetRelDistNearest(lst, lstRef)
 
     # Determine figure panel layout
@@ -978,15 +978,15 @@ PlotRelDistDistribution <- function(txLoc,
     } else {
         par(mfrow = c(ceiling(length(lstDist) / 2), 2))
     }
-    
+
     # Set breaks & binwidth
     breaks <- seq(-flank, flank, by = binWidth)
     bwString <- sprintf("bw = %3.2f", binWidth)
-    
+
 
     invisible(Map(
         function(dist, region) {
-            
+
             # Filter distances that are within window [-flank, flank]
             if (flank > 0) dist <- dist[abs(dist) <= flank]
 
@@ -1008,7 +1008,7 @@ PlotRelDistDistribution <- function(txLoc,
 
         },
         lstDist, names(lstDist)))
-    
+
 }
 
 
@@ -1017,26 +1017,26 @@ PlotRelDistDistribution <- function(txLoc,
 #' Perform enrichment analysis and plot results of two relative
 #' distance distributions. See 'Details'.
 #'
-#' The function calculates minimum distances per transcript region, between 
-#' entries from \code{txLoc1} relative to \code{txLocRef}, and \code{txLoc2} 
-#' relative to \code{txLocRef}. 
-#' Enrichment/depletion is assessed using multiple Fisher's exact tests on the 
-#' counts per distance bin relative to the counts in all other bins within the 
-#' window defined by (-\code{flank}, \code{flank}). Resulting enrichment plots 
-#' show odds-ratios (including 95\% confidence intervals) and associated 
-#' p-values as a function of relative distance bins. Negative distances 
-#' indicate sites from \code{txLoc1} and \code{txLoc2} that are \emph{upstream} 
-#' of sites from \code{txLocRef}; positive distances correspond to sites from 
-#' \code{txLoc1} and \code{txLoc2} that are \emph{downstream} of 
-#' \code{txLocRef}. The bin width and window size can be adjusted with 
+#' The function calculates minimum distances per transcript region, between
+#' entries from \code{txLoc1} relative to \code{txLocRef}, and \code{txLoc2}
+#' relative to \code{txLocRef}.
+#' Enrichment/depletion is assessed using multiple Fisher's exact tests on the
+#' counts per distance bin relative to the counts in all other bins within the
+#' window defined by (-\code{flank}, \code{flank}). Resulting enrichment plots
+#' show odds-ratios (including 95\% confidence intervals) and associated
+#' p-values as a function of relative distance bins. Negative distances
+#' indicate sites from \code{txLoc1} and \code{txLoc2} that are \emph{upstream}
+#' of sites from \code{txLocRef}; positive distances correspond to sites from
+#' \code{txLoc1} and \code{txLoc2} that are \emph{downstream} of
+#' \code{txLocRef}. The bin width and window size can be adjusted with
 #' \code{flank} and \code{binWidth}.
 #'
 #' @param txLoc1 A \code{txLoc} object.
 #' @param txLoc2 A \code{txLoc} object.
 #' @param txLocRef A \code{txLoc} object.
-#' @param flank An \code{integer} scalar; specifies the absolute maximum 
+#' @param flank An \code{integer} scalar; specifies the absolute maximum
 #' relative distance used as a cutoff; default is \code{1000}.
-#' @param binWidth An \code{integer} scalar; specifies the spatial width by 
+#' @param binWidth An \code{integer} scalar; specifies the spatial width by
 #' which distances will be binned; default is \code{20}.
 #'
 #' @return \code{NULL}.
@@ -1066,7 +1066,7 @@ PlotRelDistEnrichment <- function(txLoc1,
     lst2 <- TxLoc2GRangesList(txLoc2, method = "tx_region")
     lstRef <- TxLoc2GRangesList(txLocRef, method = "tx_region")
 
-    # Calculate distances    
+    # Calculate distances
     lstDist1 <- GetRelDistNearest(lst1, lstRef)
     lstDist2 <- GetRelDistNearest(lst2, lstRef)
 
@@ -1076,7 +1076,7 @@ PlotRelDistEnrichment <- function(txLoc1,
     } else {
         par(mfrow = c(ceiling(length(lstDist1) / 2), 2))
     }
-    
+
     # Set breaks & binwidth
     breaks <- seq(-flank, flank, by = binWidth)
     bwString <- sprintf("bw = %3.2f", binWidth)
@@ -1110,10 +1110,10 @@ PlotRelDistEnrichment <- function(txLoc1,
                 xlab = sprintf("Distance relative to %s [nt]", idRef),
                 x.las = 1, x.cex = 0.8, x.padj = 0,
                 xAxisLblFmt = 3)
-            
+
         },
         lstDist1, lstDist2, names(lstDist1)))
-        
+
 }
 
 
@@ -1121,13 +1121,13 @@ PlotRelDistEnrichment <- function(txLoc1,
 #'
 #' Plot sequence logo.
 #'
-#' The function determines the sequence logo within a window defined by 
-#' extending sites from \code{txLoc} upstream and downstream by \code{flank} 
+#' The function determines the sequence logo within a window defined by
+#' extending sites from \code{txLoc} upstream and downstream by \code{flank}
 #' nucleotides.
 #'
 #' @param txLoc A \code{txLoc} object.
 #' @param flank An \code{integer} scalar; see 'Details'.
-#' @param ylim An \code{integer} vector; specifies limits for the y-axis; 
+#' @param ylim An \code{integer} vector; specifies limits for the y-axis;
 #' automatically determined if \code{ymin = NULL}; default is \code{c(0, 2)}.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
@@ -1147,9 +1147,9 @@ PlotSeqLogo <- function(txLoc, flank = 5, ylim = c(0, 2)) {
         par(mfrow = c(ceiling(length(GetRegions(txLoc)) / 2), 2))
     }
 
-    mapply(
+    invisible(Map(
         function(locus, region) {
-            
+
             # Define window coordinates
             x1 <- start(locus$locus_in_tx_region) - flank
             x2 <- start(locus$locus_in_tx_region) + flank
@@ -1159,7 +1159,7 @@ PlotSeqLogo <- function(txLoc, flank = 5, ylim = c(0, 2)) {
             # and we don't have to worry about start < 0 arguments
             seq_window <- substr(
                 locus$tx_region_sequence, start = x1, stop = x2)
-            
+
             # Only keep sequences that have the width 2 * flank + 1
             seq_window <- seq_window[nchar(seq_window) == 2 * flank + 1L]
 
@@ -1167,7 +1167,7 @@ PlotSeqLogo <- function(txLoc, flank = 5, ylim = c(0, 2)) {
             # We only keep the first 4 rows to avoid any non-ACGT bases which
             # would show up in rows > 4
             mat <- consensusMatrix(seq_window, as.prob = TRUE)[1:4, ]
-            
+
             # Convert to `data.frame` and calculate Shannon entropy
             df <- as.data.frame(t(mat))
             df$pos <- seq(-flank, flank, by = 1)
@@ -1181,7 +1181,7 @@ PlotSeqLogo <- function(txLoc, flank = 5, ylim = c(0, 2)) {
                 G = df$G * df$height,
                 T = df$T * df$height,
                 pos = df$pos)
-            
+
             # Plot
             title <- sprintf("%s, N(%s)=%i\nSequence logo in %i nt window",
                              region,
@@ -1200,8 +1200,8 @@ PlotSeqLogo <- function(txLoc, flank = 5, ylim = c(0, 2)) {
                    fill = GetColPal("google", 4),
                    legend = c("A", "C", "G", "T"),
                    bty = "n")
-            
+
         },
-        GetLoci(txLoc), GetRegions(txLoc))
-    
+        GetLoci(txLoc), GetRegions(txLoc)))
+
 }

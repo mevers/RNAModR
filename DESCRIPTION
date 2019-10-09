@@ -25,7 +25,8 @@ Depends:
     R (>= 3.5.0)
 Suggests:
     knitr,
-    testthat
+    testthat,
+    rmarkdown
 License: GPL-3 | file LICENSE
 LazyData: false
 RoxygenNote: 6.1.1

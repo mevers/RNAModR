@@ -4,13 +4,13 @@
 #'
 #' The function calls \code{require} to load a package.
 #' If the package can be loaded it returns \code{TRUE},
-#' else \code{FALSE}. 
+#' else \code{FALSE}.
 #'
 #' @param lib A character string; package to be loaded.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
-#' 
+#'
 #' @return A logical scalar.
 SafeLoad <- function(lib) {
     # Safe-loading an R package.
@@ -30,7 +30,7 @@ SafeLoad <- function(lib) {
 #' Check if object has class classType.
 #'
 #' Check if object has class classType.
-#' 
+#'
 #' @param object An R object.
 #' @param classType String of class type for toplevel.
 #' @param classType2 String of class type for level 2.
@@ -39,7 +39,7 @@ SafeLoad <- function(lib) {
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
-#' 
+#'
 #' @export
 CheckClass <- function(object, classType = NULL, classType2 = NULL) {
     # Check that object is of type classType
@@ -70,7 +70,7 @@ CheckClass <- function(object, classType = NULL, classType2 = NULL) {
 
 #' Check if entries of two \code{txLoc} objects are based on the
 #' same reference genome.
-#' 
+#'
 #' Check if entries of two \code{txLoc} objects are based on the
 #' same reference genome.
 #'
@@ -81,14 +81,14 @@ CheckClass <- function(object, classType = NULL, classType2 = NULL) {
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
-#' 
+#'
 #' @export
 CheckClassTxLocRef <- function(obj1, obj2) {
 
     # Sanity checks
     CheckClass(obj1, "txLoc")
     CheckClass(obj2, "txLoc")
-    
+
     # Check that reference genome versions match
     obj1Name <- deparse(substitute(obj1))
     obj2Name <- deparse(substitute(obj2))
@@ -110,9 +110,9 @@ CheckClassTxLocRef <- function(obj1, obj2) {
 #' Check if entries of two \code{txLoc} objects are consistent.
 #' See 'Details'.
 #'
-#' The function checks if the reference genome and transcript regions from 
+#' The function checks if the reference genome and transcript regions from
 #' two \code{txLoc} objects match.
-#' 
+#'
 #' @param obj1 A \code{txLoc} object.
 #' @param obj2 A \code{txLoc} object.
 #'
@@ -120,7 +120,7 @@ CheckClassTxLocRef <- function(obj1, obj2) {
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
-#' 
+#'
 #' @export
 CheckClassTxLocConsistency <- function(obj1, obj2) {
 
@@ -137,7 +137,7 @@ CheckClassTxLocConsistency <- function(obj1, obj2) {
             obj2Name)
         ss <- sprintf(
             "%s\n  Regions in %s: %s",
-            ss, obj1Name, paste(GetRegions(obj1), collapse = ", ")) 
+            ss, obj1Name, paste(GetRegions(obj1), collapse = ", "))
         ss <- sprintf(
             "%s\n  Regions in %s: %s",
             ss, obj2Name, paste(GetRegions(obj2), collapse = ", "))
@@ -162,7 +162,7 @@ CheckClassTxLocConsistency <- function(obj1, obj2) {
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
-#' 
+#'
 #' @export
 LoadRefTx <- function(refGenome = "hg38", env = .GlobalEnv) {
     refTx <- sprintf("tx_%s.RData", refGenome)
@@ -201,15 +201,15 @@ LoadRefTx <- function(refGenome = "hg38", env = .GlobalEnv) {
 #' \code{txLoc} object.
 #'
 #' @return A \code{txLoc} object.
-#' 
+#'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
-#' 
+#'
 #' @export
 FilterTxLoc <- function(txLoc, filter = NULL) {
 
     # Sanity check
     CheckClass(txLoc, "txLoc")
-    
+
     # Get all slots from the `txLoc` object
     id <- GetId(txLoc)
     refGenome <- GetRef(txLoc)
@@ -218,7 +218,7 @@ FilterTxLoc <- function(txLoc, filter = NULL) {
 
     # Filter regions
     if (!is.null(filter)) loci <- loci[which(names(loci) %in% filter)]
-    
+
     # Return `txLoc` object
     new("txLoc",
         loci = loci,
@@ -231,24 +231,24 @@ FilterTxLoc <- function(txLoc, filter = NULL) {
 
 #' Downsample a \code{txLoc} object.
 #'
-#' Downsample a \code{txLoc1} object based on the number of sites per region 
-#' from a \code{txLoc2} object. 
+#' Downsample a \code{txLoc1} object based on the number of sites per region
+#' from a \code{txLoc2} object.
 #'
 #' @param txLoc1 A \code{txLoc} object; this is the \code{txLoc} object that
 #' will be downsampled.
 #' @param txLoc2 A \code{txLoc} object; this is the \code{txLoc} object that
 #' will be used as a target for the downsampling.
 #' @param seed A single value, interpreted as an \code{integer}, or \code{NULL};
-#' this is to ensure reproducibility when subsampling \code{txLoc2} sites; 
+#' this is to ensure reproducibility when subsampling \code{txLoc2} sites;
 #' default is \code{NULL}.
 #'
 #' @return A \code{txLoc} object.
-#' 
+#'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
-#' 
+#'
 #' @export
 DownsampleTxLoc <- function(txLoc1, txLoc2, seed = NULL) {
-    
+
     # Sanity check
     CheckClassTxLocConsistency(txLoc1, txLoc2)
     objname1 <- deparse(substitute(txLoc1))
@@ -259,7 +259,7 @@ DownsampleTxLoc <- function(txLoc1, txLoc2, seed = NULL) {
             objname1,
             objname2)
         ss <- sprintf(
-            "%s: %s", 
+            "%s: %s",
             ss,
             sprintf(
                 "There are more sites in %s than in %s!",
@@ -267,11 +267,11 @@ DownsampleTxLoc <- function(txLoc1, txLoc2, seed = NULL) {
                 objname1))
         stop(ss)
     }
-        
+
     # Add "_downsampled" to id slot of `txLoc1`
     id <- GetId(txLoc1)
     id <- sprintf("%s_downsampled", id)
-    
+
     # Get reference genome and version slots from `txLoc1`
     refGenome <- GetRef(txLoc1)
     version <- GetVersion(txLoc1)
@@ -280,11 +280,11 @@ DownsampleTxLoc <- function(txLoc1, txLoc2, seed = NULL) {
     if (!is.null(seed)) set.seed(seed)
 
     # Subsample
-    loci <- mapply(
+    loci <- Map(
         function(loci1, loci2) loci1[sample.int(nrow(loci1), nrow(loci2)), ],
         GetLoci(txLoc1),
         GetLoci(txLoc2))
-    
+
     # Return `txLoc` object
     new("txLoc",
         loci = loci,
@@ -298,7 +298,7 @@ DownsampleTxLoc <- function(txLoc1, txLoc2, seed = NULL) {
 #' Subsample a \code{txLoc} object.
 #'
 #' Subsample a \code{txLoc1} object based on a vector of fractions for every
-#' transcript region. 
+#' transcript region.
 #'
 #' @param txLoc A \code{txLoc} object; this is the \code{txLoc} object from
 #' which the subsampled \code{txLoc} will be created.
@@ -306,16 +306,16 @@ DownsampleTxLoc <- function(txLoc1, txLoc2, seed = NULL) {
 #' that will be sampled from every transcript region. Note that the length
 #' of \code{fractions} has to match the length of \code{GetRegions(txLoc)}.
 #' @param seed A single value, interpreted as an \code{integer}, or \code{NULL};
-#' this is to ensure reproducibility when subsampling \code{txLoc2} sites; 
+#' this is to ensure reproducibility when subsampling \code{txLoc2} sites;
 #' default is \code{NULL}.
 #'
 #' @return A \code{txLoc} object.
-#' 
+#'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
-#' 
+#'
 #' @export
 SubsampleTxLoc <- function(txLoc, fractions, seed = NULL) {
-    
+
     # Sanity check
     CheckClass(txLoc, "txLoc")
     objname <- deparse(substitute(txLoc))
@@ -326,37 +326,37 @@ SubsampleTxLoc <- function(txLoc, fractions, seed = NULL) {
         stop(ss)
     }
     if (any(fractions > 1)) {
-        ss <- "Entries in `fractions` need to be numbers from [0, 1]!" 
+        ss <- "Entries in `fractions` need to be numbers from [0, 1]!"
         stop(ss)
     }
 
     # Add "_subsampled" to id slot of `txLoc`
     id <- GetId(txLoc)
     id <- sprintf("%s_subsampled", id)
-    
+
     # Get reference genome and version slots from `txLoc`
     refGenome <- GetRef(txLoc)
     version <- GetVersion(txLoc)
-    
+
     # If required, set fixed random seed
     if (!is.null(seed)) set.seed(seed)
-    
+
     # Subsample
-    loci <- mapply(
+    loci <- Map(
         function(loci, frac) {
             idx <- sample.int(nrow(loci), round(frac * nrow(loci)))
             loci[idx, ]
         },
         GetLoci(txLoc),
         fractions)
-    
+
     # Return `txLoc` object
     new("txLoc",
         loci = loci,
         id = id,
         refGenome = refGenome,
         version = version)
-    
+
 }
 
 
@@ -369,7 +369,7 @@ SubsampleTxLoc <- function(txLoc, fractions, seed = NULL) {
 #' object. Coordinates can be either genomic coordinates
 #' (\code{method = "genome"}) or transcript region coordinates
 #' (\code{method = "tx_region"}).
-#' 
+#'
 #' @param txLoc A \code{txLoc} object.
 #' @param method A character string; specifies whether coordinates
 #' are genome (\code{method = "genome"}) or transcriptome coordinates
@@ -379,7 +379,7 @@ SubsampleTxLoc <- function(txLoc, fractions, seed = NULL) {
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
-#' 
+#'
 #' @importFrom S4Vectors DataFrame
 TxLoc2GRangesList <- function(txLoc, method = c("tx_region", "genome")) {
 
@@ -400,7 +400,7 @@ TxLoc2GRangesList <- function(txLoc, method = c("tx_region", "genome")) {
             id = locus$id)
         gr
     })
-    
+
 }
 
 
@@ -411,22 +411,22 @@ TxLoc2GRangesList <- function(txLoc, method = c("tx_region", "genome")) {
 #' \code{GRanges} objects. See 'Details'.
 #'
 #' The function uses \code{GenomicRanges::distanceToNearest} to return the
-#' nearest distances between the start positions of a \code{GRanges} object 
-#' from \code{lst1} and the corresponding \code{GRanges} object from 
+#' nearest distances between the start positions of a \code{GRanges} object
+#' from \code{lst1} and the corresponding \code{GRanges} object from
 #' \code{lst2} with the same name (based on field \code{seqnames}).
 #' Note that distances are given as signed \code{integer}s: Negative
 #' distances correspond to pos(gr1) < pos(gr2), positive
 #' distances correspond to pos(gr1) > pos(gr2).
-#' 
+#'
 #'
 #' @param lst1 A \code{list} of \code{GRanges} object.
 #' @param lst2 A \code{list} of \code{GRanges} object.
 #'
 #' @return A list of \code{integer} vectors. See 'Details'.
-#' 
+#'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
-#' 
+#'
 #' @import GenomicRanges
 #' @importFrom S4Vectors queryHits subjectHits
 GetRelDistNearest <- function(lst1, lst2) {
@@ -437,16 +437,16 @@ GetRelDistNearest <- function(lst1, lst2) {
     stopifnot(identical(names(lst1), names(lst2)))
 
     # Calculate nearest distances from start
-    lst <- mapply(
+    lst <- Map(
         function(gr1, gr2) {
-            
+
             # Collapse range of gr1 and gr2 to the start coordinate
             end(gr1) <- start(gr1)
             end(gr2) <- start(gr2)
-            
+
             # Calculate distance to nearest
             hits <- distanceToNearest(gr1, gr2, ignore.strand = TRUE)
-            
+
             # Define and return distance d as
             #   d > 0 : if pos(gr1) > pos(gr2)
             #   d < 0 : if pos(gr1) < pos(gr2)
@@ -458,10 +458,10 @@ GetRelDistNearest <- function(lst1, lst2) {
                 -mcols(hits)$distance)
         },
         lst1, lst2)
-    
+
     # Return lst
     lst
-    
+
 }
 
 
@@ -470,7 +470,7 @@ GetRelDistNearest <- function(lst1, lst2) {
 #'
 #' Calculate 95% confidence interval from data using empirical
 #' bootstrap.
-#' 
+#'
 #' @param x A data vector.
 #' @param breaks Vector of integer breaks for binning x.
 #' @param nBS Number of boostrap samples. Default is 5000.
@@ -482,7 +482,7 @@ GetRelDistNearest <- function(lst1, lst2) {
 #' @keywords internal
 #'
 #' @importFrom graphics hist
-#' 
+#'
 #' @export
 EstimateCIFromBS <- function(x, breaks, nBS = 5000) {
     # Estimate 95% CI from empirical bootstrap
@@ -525,7 +525,7 @@ EstimateCIFromBS <- function(x, breaks, nBS = 5000) {
 #' @keywords internal
 #'
 #' @importFrom grDevices col2rgb rgb
-#' 
+#'
 #' @export
 AddAlpha <- function(hexList, alpha = 0.5) {
     mat <- sapply(hexList, col2rgb, alpha = TRUE) / 255.0
@@ -544,7 +544,7 @@ AddAlpha <- function(hexList, alpha = 0.5) {
 #' Check if all entries in a character vector are empty.
 #'
 #' Check if all entries in a character vector are empty.
-#' 
+#'
 #' @param v A character vector.
 #'
 #' @return A logical scalar.
