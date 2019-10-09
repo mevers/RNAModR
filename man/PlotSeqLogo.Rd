@@ -4,30 +4,23 @@
 \alias{PlotSeqLogo}
 \title{Plot sequence logo.}
 \usage{
-PlotSeqLogo(locus, flank = 5, filter = NULL, ylim = c(0, 2))
+PlotSeqLogo(txLoc, flank = 5, ylim = c(0, 2))
 }
 \arguments{
-\item{locus}{A \code{txLoc} object.}
+\item{txLoc}{A \code{txLoc} object.}
 
-\item{flank}{An integer scalar; see 'Details'.}
+\item{flank}{An \code{integer} scalar; see 'Details'.}
 
-\item{filter}{A character vector; only plot sequence logos
-of sections specified in \code{filter}; if \code{NULL} plot
-all sections; default is NULL.}
-
-\item{ylim}{An integer vector; specifies limits for the
-y-axis; automatically determined if \code{ymin = NULL};
-default is \code{c(0, 2)}.}
+\item{ylim}{An \code{integer} vector; specifies limits for the y-axis; 
+automatically determined if \code{ymin = NULL}; default is \code{c(0, 2)}.}
 }
 \description{
 Plot sequence logo.
 }
 \details{
-The function determines the sequence logo within a window
-defined by extending sites from \code{locus} upstream and
-downstream by \code{flank} nucleotides. By default logos
-are shown for every transcript section from \code{locus}.
-Use \code{filter} to specify specific transcript sections.
+The function determines the sequence logo within a window defined by 
+extending sites from \code{txLoc} upstream and downstream by \code{flank} 
+nucleotides.
 }
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}

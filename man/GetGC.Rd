@@ -5,22 +5,34 @@
 \title{Calculate GC content within window around loci from a \code{txLoc}
 object.}
 \usage{
-GetGC(locus, flank = 10)
+GetGC(txLoc, flank = 10)
 }
 \arguments{
-\item{locus}{A \code{txLoc} object.}
+\item{txLoc}{A \code{txLoc} object.}
 
-\item{flank}{An integer scalar; see 'Details'.}
+\item{flank}{An \code{integer} scalar; see 'Details'.}
+}
+\value{
+A \code{list} of \code{DataFrame} objects, each with the following
+columns:
+\enumerate{
+    \item \code{id}: A \code{character} vector
+    \item \code{GC_tx_region}: A \code{numeric} vector
+    \item \code{GC_window}: A \code{numeric} vector
+    \item \code{sequence_window}: A \code{DNAStringSet} object
+}
 }
 \description{
 Calculate GC content within window around loci from a \code{txLoc}
 object. See 'Details'.
 }
 \details{
-The function calculates the GC content within a region around every
-transcript locus from a \code{txLoc} object. The window is defined
-by extending the position of every transcript locus upstream and
-downstream by \code{flank} nucleotides (if possible).
+The function calculates the GC content within a window around every locus
+from a \code{txLoc} object. The window is defined by extending the position
+of every \code{txLoc} site upstream and downstream by \code{flank}
+nucleotides (if possible). This is the low-level function that gets called
+from within \code{PlotGC}. There is no guarantee that this function will
+be exported in future versions of RNAModR.
 }
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}

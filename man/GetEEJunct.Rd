@@ -12,7 +12,7 @@ reference genome assembly version based on which the matching
 transcriptome is loaded; default is \code{"hg38"}.}
 
 \item{filter}{A character vector; only consider transcript
-sections specified in \code{filter}; default is 
+sections specified in \code{filter}; default is
 \code{c("CDS", "5'UTR")}.}
 }
 \value{
@@ -22,10 +22,10 @@ A \code{GRanges} object. See 'Details'.
 Get exon-exon boundary sites from transcriptome. See 'Details'.
 }
 \details{
-The function extracts exon-exon boundary sites (EEBS) from a 
-reference trancriptome specified by \code{refGenome}, and returns 
-a \code{GRanges} object. Boundary sites are defined as the 
-location of those exonic single nucleotides that are closest 
+The function extracts exon-exon boundary sites (EEBS) from a
+reference trancriptome specified by \code{refGenome}, and returns
+a \code{GRanges} object. Boundary sites are defined as the
+location of those exonic single nucleotides that are closest
 upstream to the intronic donor site.
 }
 \author{

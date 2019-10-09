@@ -2,36 +2,75 @@
 
 ## Version 0.2.0
 
-### Major
-
-- Major changes to functions in BuildTx.R to reflect critical changes in
+- RNAModR now requires R >= 3.5.0
+- Major changes to functions in buildTxMethods.R to reflect critical changes in
   `GenomicRanges_1.32.0` and `RMariaDB` that completely broke functionality
   of `BuildTx`
 - Major changes to structure of `txLoc` objects; `txLoc` is now a dressed
   `list` of `DataFrame`s (instead of a dressed `list` of `data.frame`s). This
   has the advantage that we can now store arbitrary R objects in columns, such
   as `GRanges`, `DNAStringSet` etc.
-- In `classes.R`: Added `show` method; this means that we can simply type the
-  name of the `txLoc` object into an R terminal, hit <Enter> and get a summary.
+
+- In `classes.R`: Added `txLoc` S4 class method `show`; this means that we can
+  simply type the name of the `txLoc` object into an R terminal, hit <Enter>
+  and get a summary
 - In `classes.R`: Removed `info` method
+- In `classes.R`: Added `txLoc` S4 class method `GetRegions`
+- In `classes.R`: Tidied roxygen2 documentation; all `txLoc` accessors are now
+  document under `txLoc-accessors` in the reference manual
+
 - In `IO.R`: Renamed `WriteTxLocToBED` to `WriteBED`; chromosome names are
   now always formatted in UCSC style (i.e. chr1, chr2, chrM, ...)
 - In `IO.R`: Renamed `WriteTxLocToCSV` to `WriteCSV`
-- In `IO.R`: Removed `WriteFeatToBED`
-- In `IO.R`: Removed export of `ReadDBN` (which is needed by `GetMFE`, which
-  in turn is also not exported)
+- In `IO.R`: Removed `WriteFeatToBED` and removed `rtracklayer` dependecy
+- In `IO.R`: Removed `ReadDBN` (which was needed by `GetMFE`, which in turn
+  has also been removed)
+
 - In `methods.R`: Removed `method = "perm"` from `GenerateNull`
+- In `methods.R`: Removed `GetMFE`, because such functions should be managed
+  and defined on a per-use and per-user basis
+- In `methods.R`: Removed `filter` argument from `GetMotifLoc`; this is
+  because filtering should be done through `FilterTxLoc`
+- In `methods.R`: Removed `GenerateNull.new`, as it was a function for testing
+  purposes and served no real purpose
+- In `methods.R`: Removed `GetLocus.MapFromTranscripts`, as it served no
+  purpose
+- In `methods.R`: Refactored and tidied `GetGC`
+
 - In `plot.R`: Removed `filter` argument from `PlotSectionDistribution`,
-  `PlotSpatialDistribution`, `PlotSectionEnrichment`, `PlotSpatialEnrichment`;
-  this is because filtering should be done through `FilterTxLoc`
-- In `plot.R`: Removed `PlotTxSecLength` and `PlotTxSecLength.bean`, because
-  such functions should be managed and defined on a per-use and per-user basis.
+  `PlotSpatialDistribution`, `PlotSectionEnrichment`, `PlotSpatialEnrichment`,
+  `PlotGC`; this is because filtering should be done through `FilterTxLoc`
+- In `plot.R`: Removed `PlotTxSecLength`, `PlotTxSecLength.bean` and
+  `PlotOverlap`, because such functions should be managed and defined on a
+  per-use and per-user basis
+- In `plot.R`: Refactored and tidied `PlotSectionDistribution`
+- In `plot.R`: Refactored and tidied `PlotSectionEnrichment`
+- In `plot.R`: Refactored and tidied `PlotSpatialEnrichment`
 
-### Minor
+- In `helper.R`: Added `DownsampleTxLoc`; `DownsampleTxLoc` is a function that
+  downsamples the number of sites from on `txLoc` object to the number of sites
+  from a second `txLoc` object; downsampling is transcript region specific
+- In `helper.R`: Tidied and refactored `SubsampleTxLoc`; `SubsampleTxLoc`
+  generates a subsample of sites per transcript region, based on a vector of
+  fractions
+- In `helper.R`: Removed `internal` keyword from `FilterTxLoc`,
+  `SubsampleTxLoc`
+- In `helper.R`: Refactored and tidied `FilterTxLoc`
+- In `helper.R`: Fixed bug in `CheckClassTxLocConsistency` that prevented the
+  function from producing an error when regions did not match
+- In `helper.R`: Removed `filter` argument from `TxLoc2GRangesList`; this is
+  because filtering should be done through `FilterTxLoc`
+- In `helper.R`: `GetRelDistNearest` and `TxLoc2GRangesList` are now no
+  longer exported; this is because these functions should really never be
+  called directly by user.
 
-- In `plot.R`: Tidied `PlotSectionDistribution`
-- In `plot.R`: Tidied `PlotSectionEnrichment`
 - Renamed "transcript sections" to "transcript regions" in all documentation
+- Fixed "no visible binding for global variable <xyz>" issues that derive from
+  `with(..., x = xyz)` statements by setting `xyz <- NULL` (this is the
+  recommended `data.table` way)
+- DESCRIPTION: Added `Encoding: UTF-8` to silence R CMD check and roxygen2 from
+  complaining about encoding
+
 
 ## Version 0.1.0
 

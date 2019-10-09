@@ -2,32 +2,29 @@
 % Please edit documentation in R/helper.R
 \name{GetRelDistNearest}
 \alias{GetRelDistNearest}
-\title{Return list of nearest distances between entries from two
-\code{GRangesList} objects.}
+\title{Return list of nearest distances between entries from two \code{list}s of
+\code{GRanges} objects.}
 \usage{
-GetRelDistNearest(gr1, gr2)
+GetRelDistNearest(lst1, lst2)
 }
 \arguments{
-\item{gr1}{A \code{GRangesList} object.}
+\item{lst1}{A \code{list} of \code{GRanges} object.}
 
-\item{gr2}{A \code{GRangesList} object.}
+\item{lst2}{A \code{list} of \code{GRanges} object.}
 }
 \value{
-A list of integer vectors. See 'Details'.
+A list of \code{integer} vectors. See 'Details'.
 }
 \description{
-Return list of nearest distances between entries from two
-\code{GRangesList} objects. See 'Details'.
+Return list of nearest distances between entries from two \code{list}s of
+\code{GRanges} objects. See 'Details'.
 }
 \details{
-The function uses \code{GenomicRanges::distanceToNearest}
-to return the nearest distances between the start positions
-of a features from \code{gr1} and any feature from \code{gr2}
-with the same name (based on field \code{seqnames}). The
-return object is a list of distances, where every list
-element corresponds to a list element from \code{gr1} and
-\code{gr2}.
-Note that distances are given as signed integers: Negative
+The function uses \code{GenomicRanges::distanceToNearest} to return the
+nearest distances between the start positions of a \code{GRanges} object 
+from \code{lst1} and the corresponding \code{GRanges} object from 
+\code{lst2} with the same name (based on field \code{seqnames}).
+Note that distances are given as signed \code{integer}s: Negative
 distances correspond to pos(gr1) < pos(gr2), positive
 distances correspond to pos(gr1) > pos(gr2).
 }

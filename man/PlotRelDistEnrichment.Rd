@@ -4,41 +4,42 @@
 \alias{PlotRelDistEnrichment}
 \title{Perform enrichment analysis of relative distances.}
 \usage{
-PlotRelDistEnrichment(locPos, locNeg, locRef, flank = 1000,
+PlotRelDistEnrichment(txLoc1, txLoc2, txLocRef, flank = 1000,
   binWidth = 20)
 }
 \arguments{
-\item{locPos}{A \code{txLoc} object.}
+\item{txLoc1}{A \code{txLoc} object.}
 
-\item{locNeg}{A \code{txLoc} object.}
+\item{txLoc2}{A \code{txLoc} object.}
 
-\item{locRef}{A \code{txLoc} object.}
+\item{txLocRef}{A \code{txLoc} object.}
 
-\item{flank}{An integer scalar; specifies the absolute maximum
-relative distance used as a cutoff; default is 1000.}
+\item{flank}{An \code{integer} scalar; specifies the absolute maximum 
+relative distance used as a cutoff; default is \code{1000}.}
 
-\item{binWidth}{An integer scalar; specifies the spatial width
-by which distances will be binned; default is 20.}
+\item{binWidth}{An \code{integer} scalar; specifies the spatial width by 
+which distances will be binned; default is \code{20}.}
+}
+\value{
+\code{NULL}.
 }
 \description{
 Perform enrichment analysis and plot results of two relative
 distance distributions. See 'Details'.
 }
 \details{
-The function calculates minimum distances between entries from
-\code{locPos} relative to \code{locRef}, and \code{locNeg}
-relative to \code{locRef}. Enrichment/depletion is assessed
-using multiple Fisher's exact tests on the counts per distance
-bin relative to the counts in all other bins within the window
-defined by (-\code{flank}, \code{flank}). Resulting enrichment
-plots show odds-ratios (including 95\% confidence intervals) and
-associated p-values as a function of relative distance bins.
-Negative distances correspond to an enrichment/depletion of
-sites from \code{locPos} relative to sites from \code{locNeg}
-upstream of the closest site from \code{locRef}. Positive
-distances correspond to a downstream enrichment/depletion
-relative to sites from \code{locRef}.
-The bin width and window size can be adjusted with
+The function calculates minimum distances per transcript region, between 
+entries from \code{txLoc1} relative to \code{txLocRef}, and \code{txLoc2} 
+relative to \code{txLocRef}. 
+Enrichment/depletion is assessed using multiple Fisher's exact tests on the 
+counts per distance bin relative to the counts in all other bins within the 
+window defined by (-\code{flank}, \code{flank}). Resulting enrichment plots 
+show odds-ratios (including 95\% confidence intervals) and associated 
+p-values as a function of relative distance bins. Negative distances 
+indicate sites from \code{txLoc1} and \code{txLoc2} that are \emph{upstream} 
+of sites from \code{txLocRef}; positive distances correspond to sites from 
+\code{txLoc1} and \code{txLoc2} that are \emph{downstream} of 
+\code{txLocRef}. The bin width and window size can be adjusted with 
 \code{flank} and \code{binWidth}.
 }
 \author{

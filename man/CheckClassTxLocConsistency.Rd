@@ -19,9 +19,8 @@ Check if entries of two \code{txLoc} objects are consistent.
 See 'Details'.
 }
 \details{
-The function checks if entries from two \code{txLoc} objects
-are based on the same reference genome _and_ contain entries
-for the same transcript regions
+The function checks if the reference genome and transcript regions from 
+two \code{txLoc} objects match.
 }
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}

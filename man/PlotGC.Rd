@@ -4,44 +4,51 @@
 \alias{PlotGC}
 \title{Plot GC content.}
 \usage{
-PlotGC(loc1, loc2, flank = 10, filter = NULL, geneNorm = FALSE,
-  subsample = TRUE)
+PlotGC(txLoc1, txLoc2, flank = 10, norm_region = FALSE,
+  downsample = TRUE, seed = NULL)
 }
 \arguments{
-\item{loc1}{A \code{txLoc} object.}
+\item{txLoc1}{A \code{txLoc} object.}
 
-\item{loc2}{A \code{txLoc} object.}
+\item{txLoc2}{A \code{txLoc} object.}
 
-\item{flank}{An integer scalar; see 'Details'.}
+\item{flank}{An \code{integer} scalar; see 'Details'.}
 
-\item{filter}{A logical scalar; only consider loci in transcript
-regions specified in filter; Default is \code{NULL}.}
+\item{norm_region}{A \code{logical} scalar; if \code{TRUE} normalise the GC
+content in the window to the GC content of the corresponding transcript 
+region; default is \code{FALSE}.}
 
-\item{geneNorm}{A logical scalar; if \code{TRUE} normalise GC
-content in window to GC content of transcript section; default
-is \code{FALSE}.}
+\item{downsample}{A \code{logical} scalar; if \code{TRUE}, subsample sites
+from \code{txLoc2} to match the number of sites per transcript region from
+\code{txLoc1}; default is \code{TRUE}.}
 
-\item{subsample}{A logical scalar; if \code{TRUE} a subsample
-of \code{loc2} is used instead of the full set; the subsample 
-size is dynamically determined based on the total number of sites
-in \code{loc1}; default is \code{TRUE}.}
+\item{seed}{A single value, interpreted as an \code{integer}, or \code{NULL};
+this is to ensure reproducibility when subsampling \code{txLoc2} sites;
+ignored when \code{downsample == FALSE}; default is \code{NULL}.}
+}
+\value{
+\code{NULL}.
 }
 \description{
-Plot and assess GC content distributions from two site lists.
-See 'Details'.
+Plot and assess the difference in the distributions of GC content within 
+a window around sites from two \code{txLoc} objects. See 'Details'.
 }
 \details{
-The function calculates the GC content within a region around every
-site from two \code{txLoc} objects. The window is defined
-by extending the position of every transcript locus upstream and
-downstream by \code{flank} nucleotides (if possible).
-The means of the resulting GC content distributions are assessed
-using a two-tailed t-test. If \code{geneNorm = TRUE}, the site GC
-content is normalised to the GC content of the entire transcript
-section. If \code{subsample = TRUE}, only a subsample of entries
-from the \emph{second} \code{txLoc} object will be used. This is
-useful (and therefore the default), as \code{loc2} usually
-refers to the much larger list of null sites.
+The function calculates the GC content within a window around every site 
+from two \code{txLoc} objects. The window is defined by extending the 
+position of every \code{txLoc} site upstream and downstream by \code{flank} 
+nucleotides (if possible).
+The means of the resulting GC content distributions are assessed using a 
+two-sample two-tailed t-test. If \code{norm_region = TRUE}, the GC content 
+in the window is normalised to the GC content of the entire transcript
+region. If \code{downsample = TRUE}, the number of windows/sites from the
+\emph{second} \code{txLoc2} object is downsampled to match the number of
+windows/sites from the \code{txLoc1} object. This is useful (and therefore
+the default setting) when comparing the GC distribution around positive
+and null sites, as the list of null sites is often significantly larger than
+that of the positive sites. 
+Note that this function calls \code{GetGC}, which performs the sequence
+extraction and GC calculation. See \code{?GetGC} for details.
 }
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}

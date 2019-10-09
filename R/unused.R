@@ -1,3 +1,130 @@
+##' Plot overlap of sites.
+##'
+##' Plot overlap of sites from two \code{txLoc} object.
+##' See 'Details'.
+##'
+##' The function plots one or multiple Venn diagrams denoting the
+##' spatial overlap between entries from two \code{txLoc} objects.
+##' Two features are defined as overlapping, if they overlap by
+##' at least one nucleotide. Overlaps are determined using the
+##' function \code{GenomicRanges::countOverlaps}.
+##'
+##'
+##' @param txLoc1 A \code{txLoc} object.
+##' @param txLoc2 A \code{txLoc} object.
+##'
+##' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+##'
+##' @import GenomicRanges IRanges
+##' @importFrom gplots venn
+#PlotOverlap <- function(loc1, loc2) {
+#    CheckClassTxLocConsistency(loc1, loc2)
+#    id1 <- GetId(loc1)
+#    id2 <- GetId(loc2)
+#    gr1 <- TxLoc2GRangesList(loc1)
+#    gr2 <- TxLoc2GRangesList(loc2)
+#    if (length(gr1) < 4) {
+#        par(mfrow = c(1, length(gr1)))
+#    } else {
+#        par(mfrow = c(ceiling(length(gr1) / 2), 2))
+#    }
+#    for (i in 1:length(gr1)) {
+#        # Supress warnings of sequences in gr1 not being in gr2
+#        m <- suppressWarnings(countOverlaps(gr1[[i]], gr2[[i]]))
+#        overlap <- length(m[m > 0])
+#        grps <- list(
+#            seq(1, length(gr1[[i]])),
+#            seq(length(gr1[[i]]) - overlap + 1, length.out = length(gr2[[i]])))
+#        names(grps) <- c(sprintf("%s (%3.2f%%)",
+#                                 id1, overlap / length(gr1[[i]]) * 100),
+#                         sprintf("%s (%3.2f%%)",
+#                                 id2, overlap / length(gr2[[i]]) * 100))
+#        venn(grps)
+#        mtext(names(gr1)[i])
+#    }
+#}
+#
+
+##' Read a DBN file.
+##'
+##' Read a DBN file. See 'Details'.
+##'
+##' The function reads in a DBN (dot-bracket) structure file, and
+##' returns a \code{dataframe} with the following data columns:
+##' \enumerate{
+##' \item Column 1: Sequence ID
+##' \item Column 2: Length of the sequence (in nt)
+##' \item Column 3: Mean free energy (MFE)
+##' }
+##' 
+##' @param file A character string; specifies the input DBN file.
+##'
+##' @return A \code{dataframe} object. See 'Details'.
+##'
+##' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#ReadDBN <- function(file) {
+#    if (!file.exists(file)) {
+#        ss <- sprintf("Could not open %s.", file)
+#        stop(ss)
+#    }
+#    d <- as.data.frame(matrix(readLines(file), ncol = 3, byrow = TRUE),
+#                       stringsAsFactors = FALSE)
+#    d[, 1] <- gsub("^>", "", d[, 1])
+#    d[, 2] <- nchar(d[, 2])
+#    d[, 3] <- gsub("^[\\(\\.\\)]+\\s", "", d[, 3])
+#    d[ ,3] <- as.numeric(gsub("[\\(\\)]", "", d[, 3]))
+#    colnames(d) <- c("id", "siteSeqLength", "siteMFE")
+#    return(d)
+#}
+
+
+
+##' Fold sequences.
+##'
+##' Fold sequences. See 'Details'.
+##'
+##' The function takes a \code{dataframe}, extracts sequences from a
+##' column specified by \code{colSeq}, and predicts secondary structures
+##' using RNAfold \url{http://rna.tbi.univie.ac.at/}.
+##' An optional column containing sequence IDs may be specified by
+##' \code{colId}.
+##' The function returns a \code{dataframe} with three columns:
+##' \enumerate{
+##' \item Column 1: Sequence ID
+##' \item Column 2: Length of the sequence (in nt)
+##' \item Column 3: Mean free energy (MFE)
+##' }
+##'
+##' @param data A \code{dataframe} object. See 'Details'.
+##' @param colSeq An integer scalar; specifies the column in
+##' \code{data} containing the sequences.
+##' @param colId An integer scalar; specifies the column in
+##' \code{data} containing sequence IDs; if \code{NULL} IDs
+##' are generated automatically; default is \code{NULL}.
+##' 
+##' @return A \code{dataframe} object. See 'Details'.
+##'
+##' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+##'
+##' @import Biostrings GenomicRanges IRanges
+#GetMFE <- function(data, colSeq, colId = NULL) {
+#    sq <- DNAStringSet(data[, colSeq])
+#    if (is.null(colId) || length(data[, colId]) != length(sq)) {
+#        id <- sprintf("seq%i", seq(1, length(sq)))
+#    } else {
+#        id <- data[, colId]
+#    }
+#    names(sq) <- id
+#    writeXStringSet(sq, filepath = "tmp.fa", format = "fasta")
+#    cmd <- sprintf("RNAfold --noPS < tmp.fa > tmp.dbn")
+#    system(sprintf(cmd))
+#    str <- ReadDBN("tmp.dbn")
+#    file.remove(c("tmp.fa", "tmp.dbn"))
+#    return(str)
+#}
+#
+
+
 ##  #' Plot relative distance distribution of loci from \code{txLoc}
 ##  #' object to splice sites.
 ##  #'

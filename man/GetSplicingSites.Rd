@@ -12,7 +12,7 @@ reference genome assembly version based on which the matching
 transcriptome is loaded; default is \code{"hg38"}.}
 
 \item{filter}{A character vector; only consider transcript
-sections specified in \code{filter}; default is 
+sections specified in \code{filter}; default is
 \code{c("CDS", "5'UTR")}.}
 }
 \value{
@@ -24,7 +24,7 @@ Get splicing sites from transcriptome. See 'Details'.
 \details{
 The function extracts splicing sites from a reference
 trancriptome specified by \code{refGenome}, and returns a
-\code{GRanges} object. Splicing sites are identified as 
+\code{GRanges} object. Splicing sites are identified as
 either donor (splicing site at the 5' end of the intron)
 or acceptor (splicing site at the 3' end of the intron)
 site.
