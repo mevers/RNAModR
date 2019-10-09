@@ -280,7 +280,7 @@ DownsampleTxLoc <- function(txLoc1, txLoc2, seed = NULL) {
     if (!is.null(seed)) set.seed(seed)
 
     # Subsample
-    loci <- mapply(
+    loci <- Map(
         function(loci1, loci2) loci1[sample.int(nrow(loci1), nrow(loci2)), ],
         GetLoci(txLoc1),
         GetLoci(txLoc2))
@@ -342,7 +342,7 @@ SubsampleTxLoc <- function(txLoc, fractions, seed = NULL) {
     if (!is.null(seed)) set.seed(seed)
     
     # Subsample
-    loci <- mapply(
+    loci <- Map(
         function(loci, frac) {
             idx <- sample.int(nrow(loci), round(frac * nrow(loci)))
             loci[idx, ]
@@ -437,7 +437,7 @@ GetRelDistNearest <- function(lst1, lst2) {
     stopifnot(identical(names(lst1), names(lst2)))
 
     # Calculate nearest distances from start
-    lst <- mapply(
+    lst <- Map(
         function(gr1, gr2) {
             
             # Collapse range of gr1 and gr2 to the start coordinate

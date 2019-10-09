@@ -517,7 +517,7 @@ PlotSpatialEnrichment <- function(txLoc.pos,
     breaks <- seq(0, posMax, by = binWidth)
 
     # Plot
-    invisible(mapply(
+    invisible(Map(
         function(loci.pos, loci.neg, region) {
 
             # Store site positions
@@ -546,7 +546,7 @@ PlotSpatialEnrichment <- function(txLoc.pos,
                 ctsMat <- as.matrix(rbind(ctsPos, ctsNeg))
                 rownames(ctsMat) <- c(GetId(txLoc.pos), GetId(txLoc.neg))
                 title <- sprintf(
-                    "%s\nN(%s) = %i, N(%s) = %i, bw = %i nt, window = %i nt",
+                    "%s\nN(%s) = %i, N(%s) = %i\nbw = %i nt, window = %i nt",
                     region,
                     GetId(txLoc.pos),
                     sum(ctsPos),
@@ -1147,7 +1147,7 @@ PlotSeqLogo <- function(txLoc, flank = 5, ylim = c(0, 2)) {
         par(mfrow = c(ceiling(length(GetRegions(txLoc)) / 2), 2))
     }
 
-    mapply(
+    invisible(Map(
         function(locus, region) {
             
             # Define window coordinates
@@ -1202,6 +1202,6 @@ PlotSeqLogo <- function(txLoc, flank = 5, ylim = c(0, 2)) {
                    bty = "n")
             
         },
-        GetLoci(txLoc), GetRegions(txLoc))
+        GetLoci(txLoc), GetRegions(txLoc)))
     
 }
