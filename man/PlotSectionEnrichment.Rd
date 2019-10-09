@@ -7,7 +7,7 @@
 PlotSectionEnrichment(txLoc.pos, txLoc.neg, xAxisLblFmt = 2)
 }
 \arguments{
-\item{txLoc.pos}{A \code{txLoc} object. These correspond to the positive 
+\item{txLoc.pos}{A \code{txLoc} object. These correspond to the positive
 sites.}
 
 \item{txLoc.neg}{A \code{txLoc} object. These correspond to the negative
@@ -19,7 +19,7 @@ sites.}
 \code{NULL}.
 }
 \description{
-Perform enrichment analysis of the number of positive sites in 
+Perform enrichment analysis of the number of positive sites in
 \code{txLoc.pos} relative to the number of null sites in \code{txLoc.neg}
 per transript region and plot results.
 Enrichment/depletion is evaluated using (multiple) Fisher's exact test(s).

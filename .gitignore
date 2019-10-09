@@ -3,3 +3,5 @@ data/tx_hg38.RData
 .Rproj.user
 *.RData
 *.Rproj
+
+.DS_Store

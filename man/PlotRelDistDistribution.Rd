@@ -4,13 +4,13 @@
 \alias{PlotRelDistDistribution}
 \title{Plot distribution of relative distances.}
 \usage{
-PlotRelDistDistribution(loc1, loc2, flank = 1000, binWidth = 20,
+PlotRelDistDistribution(txLoc, txLocRef, flank = 1000, binWidth = 20,
   doBootstrap = TRUE)
 }
 \arguments{
-\item{loc1}{A \code{txLoc} object.}
+\item{txLoc}{A \code{txLoc} object.}
 
-\item{loc2}{A \code{txLoc} object.}
+\item{txLocRef}{A \code{txLoc} object.}
 
 \item{flank}{An integer scalar; specifies the absolute maximum
 relative distance used as a cutoff; default is 1000.}
@@ -22,23 +22,24 @@ by which distances will be binned; default is 20.}
 95% CI based on empirical bootstrap of relative distances within
 transcript region; default is \code{TRUE}.}
 }
+\value{
+\code{NULL}.
+}
 \description{
 Plot distribution of relative distances between sites
 from two \code{txLoc} objects. See 'Details'.
 }
 \details{
-The function calculates the minimum distance between entries
-from two \code{txLoc} objects located within the same
-transcript section. Relative distances are shown within a
-window (-\code{flank}, \code{flank}), where negative
-distances correspond to an upstream feature from \code{loc1}
-relative to \code{loc2}, and positive distances to a
-downstream feature from \code{loc1} relative to \code{loc2}.
-Relative distances are binned in bins of \code{binWidth} nt,
-and shown as an abundance histogram.
-If \code{doBootstrap = TRUE}, 95% confidence intervals are
-calculated and shown, based on an empirical bootstrap of
-relative distances.
+The function calculates minimum distances per transcript region, between 
+entries from \code{txLoc} relative to \code{txLocRef}. Relative distances 
+are shown within a window (-\code{flank}, \code{flank}), where negative 
+distances correspond to a feature from \code{txLoc} that is upstream of a 
+site from \code{txLocRef}, and positive distances indicate a feature from
+\code{txLoc} that is downstream of a site from \code{txLocRef}. Relative
+distances are binned in bins of \code{binWidth} nt, and shown as an 
+abundance histogram. If \code{doBootstrap = TRUE}, 95% confidence intervals 
+are calculated and shown, based on an empirical bootstrap of relative 
+distances.
 }
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}

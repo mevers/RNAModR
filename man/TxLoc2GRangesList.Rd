@@ -4,20 +4,17 @@
 \alias{TxLoc2GRangesList}
 \title{Convert a \code{txLoc} object to a \code{GRangesList} object.}
 \usage{
-TxLoc2GRangesList(locus, filter = NULL, method = c("tPos", "gPos"))
+TxLoc2GRangesList(txLoc, method = c("tx_region", "genome"))
 }
 \arguments{
-\item{locus}{A \code{txLoc} object.}
-
-\item{filter}{A character vector; only keep transcript sections
-specified in \code{filter}; if \code{NULL} consider all sections.}
+\item{txLoc}{A \code{txLoc} object.}
 
 \item{method}{A character string; specifies whether coordinates
-are genome (\code{method = "gPos"}) or transcriptome coordinates
-(\code{method = "tPos"}).}
+are genome (\code{method = "genome"}) or transcriptome coordinates
+(\code{method = "tx_region"}).}
 }
 \value{
-A \code{GRangesList} object. See 'Details'.
+A \code{list} of \code{GRanges} objects. See 'Details'.
 }
 \description{
 Convert a \code{txLoc} object to a \code{GRangesList} object.
@@ -26,8 +23,8 @@ See 'Details'.
 \details{
 The function converts a \code{txLoc} to a \code{GRangesList}
 object. Coordinates can be either genomic coordinates
-(\code{method = "gPos"}) or transcript section coordinates
-(\code{method = "tPos"}).
+(\code{method = "genome"}) or transcript region coordinates
+(\code{method = "tx_region"}).
 }
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}

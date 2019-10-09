@@ -8,6 +8,8 @@ PlotSpatialDistribution(txLoc, nbreaks = 100, absolute = FALSE,
   binWidth = NULL, posMax = 1000, doBootstrap = TRUE, ...)
 }
 \arguments{
+\item{txLoc}{A \code{txLoc} object.}
+
 \item{nbreaks}{Number of spatial bins. Default is 100.}
 
 \item{absolute}{Plot spatial distribution in absolute coordinates.
@@ -24,8 +26,6 @@ the transcript feature. Default is 1000 nt.}
 sites within transcript region. Default is \code{TRUE}.}
 
 \item{...}{Additional parameters passed to plot.}
-
-\item{locus}{A \code{txLoc} object.}
 }
 \value{
 \code{NULL}.

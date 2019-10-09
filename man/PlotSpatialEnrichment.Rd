@@ -8,7 +8,7 @@ PlotSpatialEnrichment(txLoc.pos, txLoc.neg, binWidth = 20,
   posMax = 1000)
 }
 \arguments{
-\item{txLoc.pos}{A \code{txLoc} object. These correspond to the positive 
+\item{txLoc.pos}{A \code{txLoc} object. These correspond to the positive
 sites.}
 
 \item{txLoc.neg}{A \code{txLoc} object. These correspond to the negative
@@ -23,8 +23,8 @@ Default is 1000 nt.}
 \code{NULL}.
 }
 \description{
-Perform enrichment analysis of the spatial distribution of positive sites in 
-\code{txLoc.pos} relative to the distribution of null sites in 
+Perform enrichment analysis of the spatial distribution of positive sites in
+\code{txLoc.pos} relative to the distribution of null sites in
 \code{txLoc.neg} per transcript region and plot results.
 Enrichment/depletion is evaluated using (multiple) Fisher's exact test(s).
 Multiple hypothesis testing correction is applied following the method of

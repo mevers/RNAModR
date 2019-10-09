@@ -2,22 +2,29 @@
 % Please edit documentation in R/helper.R
 \name{SubsampleTxLoc}
 \alias{SubsampleTxLoc}
-\title{Subsample from a \code{txLoc} object.}
+\title{Subsample a \code{txLoc} object.}
 \usage{
-SubsampleTxLoc(locus, fraction = 0)
+SubsampleTxLoc(txLoc, fractions, seed = NULL)
 }
 \arguments{
-\item{locus}{A \code{txLoc} object.}
+\item{txLoc}{A \code{txLoc} object; this is the \code{txLoc} object from
+which the subsampled \code{txLoc} will be created.}
 
-\item{fraction}{A float scalar;}
+\item{fractions}{A \code{numeric} vector, specifying the fraction of sites
+that will be sampled from every transcript region. Note that the length
+of \code{fractions} has to match the length of \code{GetRegions(txLoc)}.}
+
+\item{seed}{A single value, interpreted as an \code{integer}, or \code{NULL};
+this is to ensure reproducibility when subsampling \code{txLoc2} sites; 
+default is \code{NULL}.}
 }
 \value{
 A \code{txLoc} object.
 }
 \description{
-Subsample from a \code{txLoc} object.
+Subsample a \code{txLoc1} object based on a vector of fractions for every
+transcript region.
 }
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
-\keyword{internal}

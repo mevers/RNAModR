@@ -203,36 +203,3 @@ WriteCSV <- function(txLoc,
     cat(sprintf("Output in file %s.\n", file))
     
 }
-
-
-#' Read a DBN file.
-#'
-#' Read a DBN file. See 'Details'.
-#'
-#' The function reads in a DBN (dot-bracket) structure file, and
-#' returns a \code{dataframe} with the following data columns:
-#' \enumerate{
-#' \item Column 1: Sequence ID
-#' \item Column 2: Length of the sequence (in nt)
-#' \item Column 3: Mean free energy (MFE)
-#' }
-#' 
-#' @param file A character string; specifies the input DBN file.
-#'
-#' @return A \code{dataframe} object. See 'Details'.
-#'
-#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
-ReadDBN <- function(file) {
-    if (!file.exists(file)) {
-        ss <- sprintf("Could not open %s.", file)
-        stop(ss)
-    }
-    d <- as.data.frame(matrix(readLines(file), ncol = 3, byrow = TRUE),
-                       stringsAsFactors = FALSE)
-    d[, 1] <- gsub("^>", "", d[, 1])
-    d[, 2] <- nchar(d[, 2])
-    d[, 3] <- gsub("^[\\(\\.\\)]+\\s", "", d[, 3])
-    d[ ,3] <- as.numeric(gsub("[\\(\\)]", "", d[, 3]))
-    colnames(d) <- c("id", "siteSeqLength", "siteMFE")
-    return(d)
-}

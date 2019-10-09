@@ -4,13 +4,14 @@
 \alias{FilterTxLoc}
 \title{Filter sections of a \code{txLoc} object.}
 \usage{
-FilterTxLoc(locus, filter = NULL)
+FilterTxLoc(txLoc, filter = NULL)
 }
 \arguments{
-\item{locus}{A \code{txLoc} object.}
+\item{txLoc}{A \code{txLoc} object.}
 
-\item{filter}{A character vector; only keep transcript sections
-specified in \code{filter}; if \code{NULL} consider all sections.}
+\item{filter}{A \code{character} vector; only keep transcript regions
+that match entries from \code{filter}; if \code{NULL}, return the original
+\code{txLoc} object.}
 }
 \value{
 A \code{txLoc} object.
@@ -21,4 +22,3 @@ Filter sections of a \code{txLoc} object.
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}
 }
-\keyword{internal}

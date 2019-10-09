@@ -3,30 +3,51 @@
 \docType{class}
 \name{txLoc-class}
 \alias{txLoc-class}
-\title{txLoc object.
-The S4 object stores information about mapped loci per transcript
-section. Meta-data such as an identifier and the reference genome
-are stored in separate slots.}
+\title{\code{txLoc} object.}
 \description{
-txLoc object.
-The S4 object stores information about mapped loci per transcript
-section. Meta-data such as an identifier and the reference genome
-are stored in separate slots.
+The S4 object stores information about mapped loci per transcript region.
+}
+\details{
+The \code{txLoc} S4 object contains the following four slots:
+\enumerate{
+    \item \code{loci}: A \code{list} of \code{DataFrame} objects, each with 
+    the following columns:
+    \itemize{
+        \item \code{locus_in_txx_region}: A \code{GRanges} object
+        \item \code{locus_in_genome}: A \code{GRanges} object
+        \item \code{score}: A \code{numeric} vector
+        \item \code{id}: A \code{character} vector
+        \item \code{tx_region}: A \code{character} vector
+        \item \code{tx_region_width}: An \code{integer} vector
+        \item \code{tx_region_sequence}: A \code{DNAStringSet} object
+        \item \code{tx_refseq}: A \code{character} vector
+        \item \code{gene_entrez}: A \code{character} vector
+        \item \code{gene_symbol}: A \code{character} vector
+        \item \code{gene_ensembl}: A \code{character} vector
+        \item \code{gene_name}: A \code{character} vector
+    }
+    The \code{loci} slot can be accessed using \code{GetLoci(txLoc)}. 
+    \item \code{id}: An identifier specified by the user. The \code{id} slot
+    can be accessed using \code{GetId(txLoc)}.
+    \item \code{refGenome}: The reference genome version (e.g. 
+    \code{"hg38"}), which determines the mapping between genomic and 
+    transcriptomic coordinates. The \code{refGenome} slot can be accessed 
+    using \code{GetRef(txLoc)}.
+    \item `version`: A version identifier; currently this slot is used to
+    to store the current system time & date. The \code{version} slot can be
+    accessed using \code{GetVersion(txLoc)}.
+}
 }
 \section{Slots}{
 
 \describe{
-\item{\code{loci}}{A \code{list} of \code{dataframe} objects; specifies
-the list of loci per transcript section.}
+\item{\code{loci}}{A \code{list} of \code{DataFrame} objects; see 'Details'.}
 
-\item{\code{id}}{A character string; identifier for loci in \code{txLoc}
-object.}
+\item{\code{id}}{A \code{character} string; see 'Details.}
 
-\item{\code{refGenome}}{A character string; gives the reference genome
-upon which transcriptome-derived positions are based.}
+\item{\code{refGenome}}{A \code{character} string; see 'Details'.}
 
-\item{\code{version}}{A character string; can be used to flag specific
-version, e.g. using the current system time & date.}
+\item{\code{version}}{A \code{character} string; see 'Details'.}
 }}
 
 \author{

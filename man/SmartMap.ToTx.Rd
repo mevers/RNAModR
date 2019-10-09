@@ -8,22 +8,22 @@ SmartMap.ToTx(gr, txBySec, seqBySec, geneXID, ignore.strand = FALSE,
   showPb = FALSE)
 }
 \arguments{
-\item{gr}{A \code{GRanges} object; specifies the list of genomic features to 
+\item{gr}{A \code{GRanges} object; specifies the list of genomic features to
 be mapped.}
 
-\item{txBySec}{A \code{list} of \code{GRangesList} objects; specifies the 
-reference transcriptome; the object is usually a result of running 
+\item{txBySec}{A \code{list} of \code{GRangesList} objects; specifies the
+reference transcriptome; the object is usually a result of running
 \code{BuildTx}.}
 
-\item{seqBySec}{A \code{list} of \code{DNAStringSet} objects; sequences of 
-(some or all) segments from \code{txBySec}; the object is usually a result 
+\item{seqBySec}{A \code{list} of \code{DNAStringSet} objects; sequences of
+(some or all) segments from \code{txBySec}; the object is usually a result
 of running \code{BuildTx}.}
 
-\item{geneXID}{A \code{DataFrame}; specifies different gene IDs; the object 
+\item{geneXID}{A \code{DataFrame}; specifies different gene IDs; the object
 is usually a result of running \code{BuildTx}.}
 
-\item{ignore.strand}{A logical scalar; if \code{TRUE} strand information is 
-ignored when mapping genome coordinates to transcript coordinates; default 
+\item{ignore.strand}{A logical scalar; if \code{TRUE} strand information is
+ignored when mapping genome coordinates to transcript coordinates; default
 is \code{FALSE}.}
 
 \item{showPb}{A logical scalar; if \code{TRUE} show a progress
@@ -34,7 +34,7 @@ A \code{list} of \code{data.frame} objects. See 'Details'.
 }
 \description{
 Map genome coordinates to transcript coordinates. See 'Details'.
-This is a low-level function that is being called from \code{SmartMap}. 
+This is a low-level function that is being called from \code{SmartMap}.
 There is no guarantee that this function will get exported in future
 releases of RNAModR. Use at your own risk.
 }

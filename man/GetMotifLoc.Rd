@@ -4,40 +4,45 @@
 \alias{GetMotifLoc}
 \title{Get loci of motif(s).}
 \usage{
-GetMotifLoc(motif, refGenome = "hg38", filter = c("5'UTR", "CDS",
-  "3'UTR"), maxMM = 0, showPb = TRUE)
+GetMotifLoc(motif = NULL, refGenome = "hg38", id = NULL, maxMM = 0,
+  showPb = TRUE)
 }
 \arguments{
-\item{motif}{A character vector; specifies the motif(s)
-that will be matched against the transcriptome.}
+\item{motif}{A \code{character} vector; specifies the query sequences that
+will be matched against the reference transcriptome.}
 
-\item{refGenome}{A character string; specifies the reference
-genome version; default is \code{"hg38"}.}
+\item{refGenome}{A character string; specifies the reference genome version;
+default is \code{"hg38"}.}
 
-\item{filter}{A character vector; only consider transcript
-sections specified in \code{filter}; default is 
-\code{c("5'UTR", "CDS", "3'UTR")}.}
+\item{id}{A character string; specifies an identifier for \code{motif};
+default is \code{NULL}}
 
-\item{maxMM}{An integer scalar; specifies the maximum number
-of mismatches that are allowed during the motif matching;
-default is 0.}
+\item{maxMM}{An integer scalar; specifies the maximum number of mismatches
+that are allowed during the motif matching; default is 0.}
 
-\item{showPb}{A logical scalar; if \code{TRUE} show a progress
-bar; default is \code{TRUE}.}
+\item{showPb}{A logical scalar; if \code{TRUE} show a progress bar; default
+is \code{TRUE}.}
 }
 \description{
 Get loci of motif(s) from transcriptome. See 'Details'.
 }
 \details{
-The function searches for one or multiple motifs within
-sequences of a reference transcriptome specified by 
-\code{refGenome}, and returns a \code{txLoc} object of the 
-motif loci within different transcript sections. 
-The maximum number of mismatches allowed in the motif search 
-can be adjusted through \code{maxMM}. By default a text 
-progressbar is shown \code{showPb = TRUE}.
-Note that the motif search may take a few minutes, depending
-on the size of the transcriptome and number of motifs.
+Based on a set of query sequences \code{motif}, extract the loci of matching
+sequences within different regions of a reference transcriptome
+\code{refGenome}. The function returns a \code{txLoc} object including
+transcriptomic and genomic loci of the query motif(s). The maximum number
+of mismatches allowed in the motif search can be adjusted through
+\code{maxMM}.
+Note that the motif search may take a few minutes, depending on the number
+of motif(s), hardware, and size of the transcriptome.
+}
+\examples{
+\dontrun{
+PAS <- GetMotifLoc(id = "PAS")
+PAS <- FilterTxLoc(PAS, c("3'UTR", "CDS", "5'UTR"))
+PlotSpatialDistribution(PAS, absolute = FALSE)
+}
+
 }
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}

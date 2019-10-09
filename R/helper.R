@@ -84,8 +84,12 @@ CheckClass <- function(object, classType = NULL, classType2 = NULL) {
 #' 
 #' @export
 CheckClassTxLocRef <- function(obj1, obj2) {
+
+    # Sanity checks
     CheckClass(obj1, "txLoc")
     CheckClass(obj2, "txLoc")
+    
+    # Check that reference genome versions match
     obj1Name <- deparse(substitute(obj1))
     obj2Name <- deparse(substitute(obj2))
     ref1 <- GetRef(obj1)
@@ -96,8 +100,8 @@ CheckClassTxLocRef <- function(obj1, obj2) {
         ss <- sprintf("%s\n  %s: %s", ss, obj1Name, ref1)
         ss <- sprintf("%s\n  %s: %s", ss, obj2Name, ref2)
         stop(ss)
-    }
-    return(TRUE)
+    } else TRUE
+
 }
 
 
@@ -106,9 +110,8 @@ CheckClassTxLocRef <- function(obj1, obj2) {
 #' Check if entries of two \code{txLoc} objects are consistent.
 #' See 'Details'.
 #'
-#' The function checks if entries from two \code{txLoc} objects
-#' are based on the same reference genome _and_ contain entries
-#' for the same transcript regions
+#' The function checks if the reference genome and transcript regions from 
+#' two \code{txLoc} objects match.
 #' 
 #' @param obj1 A \code{txLoc} object.
 #' @param obj2 A \code{txLoc} object.
@@ -120,31 +123,27 @@ CheckClassTxLocRef <- function(obj1, obj2) {
 #' 
 #' @export
 CheckClassTxLocConsistency <- function(obj1, obj2) {
-    # Check that the underlying properties of txloc
-    # objects obj1 and obj2 are consistent.
-    #
-    # Args:
-    #   obj1: txLoc object.
-    #   obj2: txLoc object
-    #
-    # Returns:
-    #   TRUE
+
+    # Check that `obj1` and `obj2` are based on the same reference genome
     CheckClassTxLocRef(obj1, obj2)
+
+    # Check that transcript regions match
     obj1Name <- deparse(substitute(obj1))
     obj2Name <- deparse(substitute(obj2))
-    sec1 <- names(GetLoci(obj1))
-    sec2 <- names(GetLoci(obj2))
-    matchSec <- intersect(sec1, sec2)
-    if (!identical(sec1, sec2)) {
-        ss <- sprintf("Transcript sections in %s and %s do not match.",
-             obj1Name, obj2Name)
-        ss <- sprintf("%s\n  %s: %s",
-                      ss, obj1Name, paste(sec1, collapse = ", "))
-        ss <- sprintf("%s\n  %s: %s",
-                      ss, obj2Name, paste(sec2, collapse = ", "))
+    if (!identical(GetRegions(obj1), GetRegions(obj2))) {
+        ss <- sprintf(
+            "Regions of %s and %s do not match:",
+            obj1Name,
+            obj2Name)
+        ss <- sprintf(
+            "%s\n  Regions in %s: %s",
+            ss, obj1Name, paste(GetRegions(obj1), collapse = ", ")) 
+        ss <- sprintf(
+            "%s\n  Regions in %s: %s",
+            ss, obj2Name, paste(GetRegions(obj2), collapse = ", "))
         stop(ss)
-    }
-    return(TRUE)
+    } else TRUE
+
 }
 
 
@@ -196,67 +195,168 @@ LoadRefTx <- function(refGenome = "hg38", env = .GlobalEnv) {
 #'
 #' Filter sections of a \code{txLoc} object.
 #'
-#' @param locus A \code{txLoc} object.
-#' @param filter A character vector; only keep transcript sections
-#' specified in \code{filter}; if \code{NULL} consider all sections.
+#' @param txLoc A \code{txLoc} object.
+#' @param filter A \code{character} vector; only keep transcript regions
+#' that match entries from \code{filter}; if \code{NULL}, return the original
+#' \code{txLoc} object.
 #'
 #' @return A \code{txLoc} object.
 #' 
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
-#' @keywords internal
 #' 
 #' @export
-FilterTxLoc <- function(locus, filter = NULL) {
-    CheckClass(locus, "txLoc")
-    id <- GetId(locus)
-    refGenome <- GetRef(locus)
-    version <- GetVersion(locus)
-    locus <- GetLoci(locus)
-    if (!is.null(filter)) {
-        locus <- locus[which(names(locus) %in% filter)]
-    }
-    obj <- new("txLoc",
-               loci = locus,
-               id = id,
-               refGenome = refGenome,
-               version = version)
-    return(obj)
+FilterTxLoc <- function(txLoc, filter = NULL) {
+
+    # Sanity check
+    CheckClass(txLoc, "txLoc")
+    
+    # Get all slots from the `txLoc` object
+    id <- GetId(txLoc)
+    refGenome <- GetRef(txLoc)
+    version <- GetVersion(txLoc)
+    loci <- GetLoci(txLoc)
+
+    # Filter regions
+    if (!is.null(filter)) loci <- loci[which(names(loci) %in% filter)]
+    
+    # Return `txLoc` object
+    new("txLoc",
+        loci = loci,
+        id = id,
+        refGenome = refGenome,
+        version = version)
+
 }
 
 
-#' Subsample from a \code{txLoc} object.
+#' Downsample a \code{txLoc} object.
 #'
-#' Subsample from a \code{txLoc} object.
+#' Downsample a \code{txLoc1} object based on the number of sites per region 
+#' from a \code{txLoc2} object. 
 #'
-#' @param locus A \code{txLoc} object.
-#' @param fraction A float scalar;
+#' @param txLoc1 A \code{txLoc} object; this is the \code{txLoc} object that
+#' will be downsampled.
+#' @param txLoc2 A \code{txLoc} object; this is the \code{txLoc} object that
+#' will be used as a target for the downsampling.
+#' @param seed A single value, interpreted as an \code{integer}, or \code{NULL};
+#' this is to ensure reproducibility when subsampling \code{txLoc2} sites; 
+#' default is \code{NULL}.
 #'
 #' @return A \code{txLoc} object.
 #' 
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
-#' @keywords internal
 #' 
 #' @export
-SubsampleTxLoc <- function(locus, fraction = 0) {
-    CheckClass(locus, "txLoc")
-    id <- GetId(locus)
-    id <- sprintf("%s_subsampled", id)
-    refGenome <- GetRef(locus)
-    version <- GetVersion(locus)
-    size <- lapply(GetNumberOfLoci(locus), 
-                   function(x) sample(x, fraction * x))
-    locus <- GetLoci(locus)
-    if (fraction > 0) {
-        for (i in 1:length(locus)) {
-            locus[[i]] <- locus[[i]][size[[i]], ]
-        }
+DownsampleTxLoc <- function(txLoc1, txLoc2, seed = NULL) {
+    
+    # Sanity check
+    CheckClassTxLocConsistency(txLoc1, txLoc2)
+    objname1 <- deparse(substitute(txLoc1))
+    objname2 <- deparse(substitute(txLoc2))
+    if (any(GetNumberOfLoci(txLoc1) <= GetNumberOfLoci(txLoc2))) {
+        ss <- sprintf(
+            "Cannot downsample %s to %s",
+            objname1,
+            objname2)
+        ss <- sprintf(
+            "%s: %s", 
+            ss,
+            sprintf(
+                "There are more sites in %s than in %s!",
+                objname2,
+                objname1))
+        stop(ss)
     }
-    obj <- new("txLoc",
-               loci = locus,
-               id = id,
-               refGenome = refGenome,
-               version = version)
-    return(obj)
+        
+    # Add "_downsampled" to id slot of `txLoc1`
+    id <- GetId(txLoc1)
+    id <- sprintf("%s_downsampled", id)
+    
+    # Get reference genome and version slots from `txLoc1`
+    refGenome <- GetRef(txLoc1)
+    version <- GetVersion(txLoc1)
+
+    # If required, set fixed random seed
+    if (!is.null(seed)) set.seed(seed)
+
+    # Subsample
+    loci <- mapply(
+        function(loci1, loci2) loci1[sample.int(nrow(loci1), nrow(loci2)), ],
+        GetLoci(txLoc1),
+        GetLoci(txLoc2))
+    
+    # Return `txLoc` object
+    new("txLoc",
+        loci = loci,
+        id = id,
+        refGenome = refGenome,
+        version = version)
+
+}
+
+
+#' Subsample a \code{txLoc} object.
+#'
+#' Subsample a \code{txLoc1} object based on a vector of fractions for every
+#' transcript region. 
+#'
+#' @param txLoc A \code{txLoc} object; this is the \code{txLoc} object from
+#' which the subsampled \code{txLoc} will be created.
+#' @param fractions A \code{numeric} vector, specifying the fraction of sites
+#' that will be sampled from every transcript region. Note that the length
+#' of \code{fractions} has to match the length of \code{GetRegions(txLoc)}.
+#' @param seed A single value, interpreted as an \code{integer}, or \code{NULL};
+#' this is to ensure reproducibility when subsampling \code{txLoc2} sites; 
+#' default is \code{NULL}.
+#'
+#' @return A \code{txLoc} object.
+#' 
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' 
+#' @export
+SubsampleTxLoc <- function(txLoc, fractions, seed = NULL) {
+    
+    # Sanity check
+    CheckClass(txLoc, "txLoc")
+    objname <- deparse(substitute(txLoc))
+    if (length(fractions) != length(GetRegions(txLoc))) {
+        ss <- sprintf(
+            "Need as many entries in `fractions` as there are regions in `%s`!",
+            objname)
+        stop(ss)
+    }
+    if (any(fractions > 1)) {
+        ss <- "Entries in `fractions` need to be numbers from [0, 1]!" 
+        stop(ss)
+    }
+
+    # Add "_subsampled" to id slot of `txLoc`
+    id <- GetId(txLoc)
+    id <- sprintf("%s_subsampled", id)
+    
+    # Get reference genome and version slots from `txLoc`
+    refGenome <- GetRef(txLoc)
+    version <- GetVersion(txLoc)
+    
+    # If required, set fixed random seed
+    if (!is.null(seed)) set.seed(seed)
+    
+    # Subsample
+    loci <- mapply(
+        function(loci, frac) {
+            idx <- sample.int(nrow(loci), round(frac * nrow(loci)))
+            loci[idx, ]
+        },
+        GetLoci(txLoc),
+        fractions)
+    
+    # Return `txLoc` object
+    new("txLoc",
+        loci = loci,
+        id = id,
+        refGenome = refGenome,
+        version = version)
+    
 }
 
 
@@ -267,132 +367,101 @@ SubsampleTxLoc <- function(locus, fraction = 0) {
 #'
 #' The function converts a \code{txLoc} to a \code{GRangesList}
 #' object. Coordinates can be either genomic coordinates
-#' (\code{method = "gPos"}) or transcript section coordinates
-#' (\code{method = "tPos"}).
+#' (\code{method = "genome"}) or transcript region coordinates
+#' (\code{method = "tx_region"}).
 #' 
-#' @param locus A \code{txLoc} object.
-#' @param filter A character vector; only keep transcript sections
-#' specified in \code{filter}; if \code{NULL} consider all sections.
+#' @param txLoc A \code{txLoc} object.
 #' @param method A character string; specifies whether coordinates
-#' are genome (\code{method = "gPos"}) or transcriptome coordinates
-#' (\code{method = "tPos"}).
+#' are genome (\code{method = "genome"}) or transcriptome coordinates
+#' (\code{method = "tx_region"}).
 #'
-#' @return A \code{GRangesList} object. See 'Details'.
+#' @return A \code{list} of \code{GRanges} objects. See 'Details'.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #' 
-#' @import GenomicRanges IRanges
-#'
-#' @export
-TxLoc2GRangesList <- function(locus,
-                              filter = NULL,
-                              method = c("tPos", "gPos")) {
-    CheckClass(locus, "txLoc")
+#' @importFrom S4Vectors DataFrame
+TxLoc2GRangesList <- function(txLoc, method = c("tx_region", "genome")) {
+
+    # Sanity checks
+    CheckClass(txLoc, "txLoc")
     method <- match.arg(method)
-    id <- GetId(locus)
-    locus <- GetLoci(locus)
-    if (!is.null(filter)) {
-        locus <- locus[which(names(locus) %in% filter)]
-    }
-    gr <- GRangesList()
-    options(warn = -1)
-    for (i in 1:length(locus)) {
-        gr[[length(gr) + 1]] <- switch(
+
+    # Return a `list` of `GRanges`
+    lapply(GetLoci(txLoc), function(locus) {
+        gr <- switch(
             method,
-            "gPos" = GRanges(
-                locus[[i]]$CHR,
-                IRanges(locus[[i]]$START, locus[[i]]$STOP),
-                locus[[i]]$STRAND,
-                type = id,
-                gene = locus[[i]]$REFSEQ,
-                section = locus[[i]]$GENE_REGION,
-                names = locus[[i]]$ID),
-            "tPos" = GRanges(
-                locus[[i]]$REFSEQ,
-                IRanges(locus[[i]]$TXSTART, locus[[i]]$TXEND),
-                "*",
-                type = id,
-                gene = locus[[i]]$REFSEQ,
-                section = locus[[i]]$GENE_REGION,
-                names = locus[[i]]$ID))
-    }
-    options(warn = 0)
-    names(gr) <- names(locus)
-    return(gr)
+            "genome" = locus$locus_in_genome,
+            "tx_region" = locus$locus_in_tx_region)
+        mcols(gr) <- DataFrame(
+            source = GetId(txLoc),
+            tx_refseq = locus$tx_refseq,
+            tx_region = locus$tx_region,
+            id = locus$id)
+        gr
+    })
+    
 }
 
 
-#' Return list of nearest distances between entries from two
-#' \code{GRangesList} objects.
+#' Return list of nearest distances between entries from two \code{list}s of
+#' \code{GRanges} objects.
 #'
-#' Return list of nearest distances between entries from two
-#' \code{GRangesList} objects. See 'Details'.
+#' Return list of nearest distances between entries from two \code{list}s of
+#' \code{GRanges} objects. See 'Details'.
 #'
-#' The function uses \code{GenomicRanges::distanceToNearest}
-#' to return the nearest distances between the start positions
-#' of a features from \code{gr1} and any feature from \code{gr2}
-#' with the same name (based on field \code{seqnames}). The
-#' return object is a list of distances, where every list
-#' element corresponds to a list element from \code{gr1} and
-#' \code{gr2}.
-#' Note that distances are given as signed integers: Negative
+#' The function uses \code{GenomicRanges::distanceToNearest} to return the
+#' nearest distances between the start positions of a \code{GRanges} object 
+#' from \code{lst1} and the corresponding \code{GRanges} object from 
+#' \code{lst2} with the same name (based on field \code{seqnames}).
+#' Note that distances are given as signed \code{integer}s: Negative
 #' distances correspond to pos(gr1) < pos(gr2), positive
 #' distances correspond to pos(gr1) > pos(gr2).
 #' 
 #'
-#' @param gr1 A \code{GRangesList} object.
-#' @param gr2 A \code{GRangesList} object.
+#' @param lst1 A \code{list} of \code{GRanges} object.
+#' @param lst2 A \code{list} of \code{GRanges} object.
 #'
-#' @return A list of integer vectors. See 'Details'.
+#' @return A list of \code{integer} vectors. See 'Details'.
 #' 
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
 #' 
 #' @import GenomicRanges
-#'
-#' @export
-GetRelDistNearest <- function(gr1,
-                              gr2) {
-    CheckClass(gr1, "CompressedGRangesList")
-    CheckClass(gr2, "CompressedGRangesList")
-    filter <- intersect(names(gr1), names(gr2))
-    gr1 <- gr1[which(names(gr1) %in% filter)]
-    gr2 <- gr2[which(names(gr2) %in% filter)]
-    if (!identical(names(gr1), names(gr2))) {
-        ss <- sprintf("Transcript sections do not match:\n")
-        ss <- sprintf(" %s != %s\n",
-                      paste(names(gr1), collapse = " "),
-                      paste(names(gr2), collapse = " "))
-        stop(ss)
-    }
-    dist.list <- list()
-    for (i in 1:length(gr1)) {
-        # Collapse range of gr1 and gr2
-        end(gr1[[i]]) <- start(gr1[[i]])
-        end(gr2[[i]]) <- start(gr2[[i]])
-        # Disable warnings to get rid of messages "Each of the
-        # 2 combined objects has sequence levels not in the other".
-        # As this is expected to happen, we can safely ignore.
-        options(warn = -1)
-        # Get the nearest distance between entries from gr1[[i]]
-        # and gr2[[i]] with the same seqnames (i.e. transcript ID).
-        d <- as.data.frame(distanceToNearest(gr1[[i]], gr2[[i]]))
-        options(warn = 0)
-        idx1 <- d$queryHits
-        idx2 <- d$subjectHits
-        # Set d > 0 if pos(gr1[[i]]) > pos(gr2[[i]])
-        #     d < 0 if pos(gr1[[i]]) < pos(gr2[[i]])
-        # In words: Negative distances => gr1 is upstream of gr2
-        #           Positive distances => gr1 is downstream of gr2
-        dist <- ifelse(end(gr1[[i]][idx1]) > start(gr2[[i]][idx2]),
-                       d$distance,
-                       -d$distance)
-        names(dist) <- (gr1[[i]][idx1])$names
-        dist.list[[length(dist.list) + 1]] <- dist
-    }
-    names(dist.list) <- names(gr1)
-    return(dist.list)
+#' @importFrom S4Vectors queryHits subjectHits
+GetRelDistNearest <- function(lst1, lst2) {
+
+    # Sanity checks
+    all(sapply(lst1, CheckClass, "GRanges"))
+    all(sapply(lst2, CheckClass, "GRanges"))
+    stopifnot(identical(names(lst1), names(lst2)))
+
+    # Calculate nearest distances from start
+    lst <- mapply(
+        function(gr1, gr2) {
+            
+            # Collapse range of gr1 and gr2 to the start coordinate
+            end(gr1) <- start(gr1)
+            end(gr2) <- start(gr2)
+            
+            # Calculate distance to nearest
+            hits <- distanceToNearest(gr1, gr2, ignore.strand = TRUE)
+            
+            # Define and return distance d as
+            #   d > 0 : if pos(gr1) > pos(gr2)
+            #   d < 0 : if pos(gr1) < pos(gr2)
+            # In words: Negative distances => gr1 is upstream of gr2
+            #           Positive distances => gr1 is downstream of gr2
+            ifelse(
+                end(gr1)[queryHits(hits)] > start(gr2)[subjectHits(hits)],
+                mcols(hits)$distance,
+                -mcols(hits)$distance)
+        },
+        lst1, lst2)
+    
+    # Return lst
+    lst
+    
 }
 
 
