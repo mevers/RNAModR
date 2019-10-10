@@ -181,26 +181,7 @@ SmartMap <- function(gr,
     CheckClass(gr, "GRanges")
 
     # Load transcriptome data
-    refTx <- sprintf("tx_%s.RData", refGenome)
-    if (!file.exists(refTx)) {
-        ss <- sprintf("Reference transcriptome for %s not found.", refGenome)
-        ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
-                      ss, refGenome)
-        stop(ss)
-    }
-    load(refTx)
-    requiredObj <- c("geneXID", "seqBySec", "txBySec")
-    if (!all(requiredObj %in% ls())) {
-        ss <- sprintf("Mandatory transcript objects not found.")
-        ss <- sprintf("%s\nNeed all of the following: %s",
-                      ss, paste0(requiredObj, collapse = ", "))
-        ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
-                      ss, refGenome)
-        stop(ss)
-    }
-    geneXID <- get("geneXID")
-    seqBySec <- get("seqBySec")
-    txBySec <- get("txBySec")
+    LoadRefTx(refGenome)
 
     # Map coordinates to transcript
     loci <- SmartMap.ToTx(
@@ -308,32 +289,8 @@ GenerateNull <- function(txLoc,
     # variable ..."
     tx_region_sequence <- tx_refseq <- NULL
 
-    # Load transcriptome data for `method == "ntAbund"`
-    if (method == "ntAbund") {
-
-        # Load transcriptome data
-        refTx <- sprintf("tx_%s.RData", refGenome)
-        if (!file.exists(refTx)) {
-            ss <- sprintf("Reference transcriptome for %s not found.", refGenome)
-            ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
-                          ss, refGenome)
-            stop(ss)
-        }
-        load(refTx)
-        requiredObj <- c("geneXID", "seqBySec", "txBySec")
-        if (!all(requiredObj %in% ls())) {
-            ss <- sprintf("Mandatory transcript objects not found.")
-            ss <- sprintf("%s\nNeed all of the following: %s",
-                          ss, paste0(requiredObj, collapse = ", "))
-            ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
-                          ss, refGenome)
-            stop(ss)
-        }
-        geneXID <- get("geneXID")
-        seqBySec <- get("seqBySec")
-        txBySec <- get("txBySec")
-
-    }
+    # Load transcriptome data
+    if (method == "ntAbund") LoadRefTx(refGenome)
 
     # Activate progressbar if `showPb == TRUE`
     if (showPb == TRUE)
@@ -518,27 +475,8 @@ GetGC <- function(txLoc, flank = 10) {
 #' @export
 GetEEJunct <- function(refGenome = "hg38", filter = c("CDS", "5'UTR")) {
 
-  # Read transcriptome data
-  refTx <- sprintf("tx_%s.RData", refGenome)
-  if (!file.exists(refTx)) {
-    ss <- sprintf("Reference transcriptome for %s not found.", refGenome)
-    ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
-                  ss, refGenome)
-    stop(ss)
-  }
-  load(refTx)
-  requiredObj <- c("geneXID", "seqBySec", "txBySec")
-  if (!all(requiredObj %in% ls())) {
-    ss <- sprintf("Mandatory transcript objects not found.")
-    ss <- sprintf("%s\nNeed all of the following: %s",
-                  ss, paste0(requiredObj, collapse = ", "))
-    ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
-                  ss, refGenome)
-    stop(ss)
-  }
-  geneXID <- get("geneXID")
-  seqBySec <- get("seqBySec")
-  txBySec <- get("txBySec")
+    # Load transcriptome data
+    LoadRefTx(refGenome)
 
   # Filter regions
   if (is.null(filter)) {
@@ -607,26 +545,7 @@ GetEEJunct <- function(refGenome = "hg38", filter = c("CDS", "5'UTR")) {
 GetSplicingSites <- function(refGenome = "hg38", filter = c("CDS", "5'UTR")) {
 
     # Read transcriptome data
-    refTx <- sprintf("tx_%s.RData", refGenome)
-    if (!file.exists(refTx)) {
-        ss <- sprintf("Reference transcriptome for %s not found.", refGenome)
-        ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
-                      ss, refGenome)
-        stop(ss)
-    }
-    load(refTx)
-    requiredObj <- c("geneXID", "seqBySec", "txBySec")
-    if (!all(requiredObj %in% ls())) {
-        ss <- sprintf("Mandatory transcript objects not found.")
-        ss <- sprintf("%s\nNeed all of the following: %s",
-                      ss, paste0(requiredObj, collapse = ", "))
-        ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
-                      ss, refGenome)
-        stop(ss)
-    }
-    geneXID <- get("geneXID")
-    seqBySec <- get("seqBySec")
-    txBySec <- get("txBySec")
+    LoadRefTx(refGenome)
 
     # Filter regions
     if (is.null(filter)) {
@@ -693,27 +612,8 @@ GetSplicingSites <- function(refGenome = "hg38", filter = c("CDS", "5'UTR")) {
 GetDistanceStartStop <- function(txLoc, refGenome = "hg38") {
 
     # Read transcriptome data
-    refTx <- sprintf("tx_%s.RData", refGenome)
-    if (!file.exists(refTx)) {
-        ss <- sprintf("Reference transcriptome for %s not found.", refGenome)
-        ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
-                      ss, refGenome)
-        stop(ss)
-    }
-    load(refTx)
-    requiredObj <- c("geneXID", "seqBySec", "txBySec")
-    if (!all(requiredObj %in% ls())) {
-        ss <- sprintf("Mandatory transcript objects not found.")
-        ss <- sprintf("%s\nNeed all of the following: %s",
-                      ss, paste0(requiredObj, collapse = ", "))
-        ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
-                      ss, refGenome)
-        stop(ss)
-    }
-    geneXID <- get("geneXID")
-    seqBySec <- get("seqBySec")
-    txBySec <- get("txBySec")
-#
+    LoadRefTx(refGenome)
+
 #    # Sanity check
 #    regions <- c("5'UTR", "CDS", "3'UTR")
 #    if (any(!regions %in% names(txBySec))) {
@@ -933,34 +833,13 @@ GetMotifLoc <- function(motif = NULL,
     # If id == NULL, id = ""
     if (is.null(id)) id <- "motif"
 
-    # Load reference transcriptome
-    refTx <- sprintf("tx_%s.RData", refGenome)
-    if (!file.exists(refTx)) {
-        ss <- sprintf("Reference transcriptome for %s not found.", refGenome)
-        ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
-                      ss, refGenome)
-        stop(ss)
-    }
-    load(refTx)
-    requiredObj <- c("geneXID", "seqBySec", "txBySec")
-    if (!all(requiredObj %in% ls())) {
-        ss <- sprintf("Mandatory transcript objects not found.")
-        ss <- sprintf("%s\nNeed all of the following: %s",
-                      ss, paste0(requiredObj, collapse = ", "))
-        ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
-                      ss, refGenome)
-        stop(ss)
-    }
-    geneXID <- get("geneXID")
-    seqBySec <- get("seqBySec")
-    txBySec <- get("txBySec")
-
-
-    lst <- list()
-
+    # Load transcriptome data
+    LoadRefTx(refGenome)
+    
     if (showPb == TRUE)
         pb <- txtProgressBar(max = length(seqBySec), style = 3, width = 60)
 
+    lst <- list()
     for (i in 1:length(seqBySec)) {
 
         if (showPb) setTxtProgressBar(pb, i)

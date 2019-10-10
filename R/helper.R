@@ -151,43 +151,96 @@ CheckClassTxLocConsistency <- function(obj1, obj2) {
 #'
 #' Load reference transcriptome. See 'Details'.
 #'
-#' The function loads transcriptome data stored in a \code{.RData}
-#' file, and makes the objects assessible in the user's workspace.
+#' The function loads transcriptome data generated from \code{BuildTx()} and
+#' stored in a \code{.RData} file, and makes the objects assessible in the
+#' parent enviroment. There should not be any need to call this function
+#' directly.
+#' Reference transcriptome data includes the following objects:
+#' \enumerate{
+#'     \item \code{txBySec}: A \code{list} of \code{GRangesList} objects
+#'     \item \code{seqBySec}: A \code{list} of \code{DNAStringSet} objects
+#'     \item \code{geneXID}: A \code{DataFrame} with transcript and gene IDs
+#' }
 #'
-#' @param refGenome A character string; specifies a specific
-#' reference genome assembly version based on which a transcriptome
-#' is loaded; default is \code{"hg38"}.
-#' @param env An \code{environment} object; default is the user's
-#' workspace, i.e. \code{env = .GlobalEnv}.
+#' @param refGenome A \code{character} string; specifies a specific reference
+#' genome assembly and gene annotation version.
+#' @param verbose A \code{logical} scalar; determines the amount of output;
+#' default is \code{FALSE}.
+#'
+#' @return \code{NULL}.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #' @keywords internal
+#' 
+#' @importFrom utils packageVersion
 #'
 #' @export
-LoadRefTx <- function(refGenome = "hg38", env = .GlobalEnv) {
+LoadRefTx <- function(refGenome, verbose = FALSE) {
+
+    # Check that RData file exists
     refTx <- sprintf("tx_%s.RData", refGenome)
     if (!file.exists(refTx)) {
-        ss <- sprintf("Reference transcriptome for %s not found.", refGenome)
+        ss <- sprintf(
+            "Reference transcriptome data for %s not found.",
+            refGenome)
         ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
                       ss, refGenome)
         stop(ss)
     }
+
+    # Load and check objects
     load(refTx)
     requiredObj <- c("geneXID", "seqBySec", "txBySec")
     if (!all(requiredObj %in% ls())) {
-        ss <- sprintf("Mandatory transcript objects not found.")
+        ss <- sprintf("Mandatory transcript data objects not found.")
         ss <- sprintf("%s\nNeed all of the following: %s",
                       ss, paste0(requiredObj, collapse = ", "))
         ss <- sprintf("%s\nRunning BuildTx(\"%s\") might fix that.",
                       ss, refGenome)
         stop(ss)
     }
-    geneXID <- base::get("geneXID")
-    seqBySec <- base::get("seqBySec")
-    txBySec <- base::get("txBySec")
-    assign("geneXID", geneXID, envir = env)
-    assign("seqBySec", seqBySec, envir = env)
-    assign("txBySec", txBySec, envir = env)
+
+    # Get objets and check versions
+    txBySec <- get("txBySec")
+    seqBySec <- get("seqBySec")
+    geneXID <- get("geneXID")
+    if (is.null(attr(txBySec, "package_version"))) {
+        ss <- "Transcriptome data are based on an unknown version of RNAModR:"
+        ss <- sprintf(
+            "%s\n    RNAModR version: %s, transcriptome data version: <NULL>", 
+            ss, packageVersion("RNAModR"))
+        ss <- sprintf(
+            "%s\n  %s",
+            ss,
+            "There is not guarantee that RNAModR functions will work.")
+        ss <- sprintf(
+            "%s %s",
+            ss,
+            sprintf(
+                "Consider re-running `BuildTx(\"%s\")`.",
+                refGenome))
+        warning(ss)
+    } else if (attr(txBySec, "package_version") != packageVersion("RNAModR")) {
+        ss <- "Transcriptome data are based on an older version of RNAModR:"
+        ss <- sprintf(
+            "%s\n    RNAModR version: %s, transcriptome data version: %s", 
+            ss, packageVersion("RNAModR"), attr(txBySec, "package_version"))
+        ss <- sprintf(
+            "%s\n  %s",
+            ss,
+            sprintf(
+                "Consider re-running `BuildTx(\"%s\")`.",
+                refGenome))
+        warning(ss)
+    }
+    
+    # Assign objects to parent environment
+    assign("txBySec", txBySec, envir = parent.frame(1L))
+    assign("seqBySec", seqBySec, envir = parent.frame(1L))
+    assign("geneXID", geneXID, envir = parent.frame(1L))
+
+    if (verbose) cat("Loaded reference transcriptome data.\n")
+
 }
 
 
