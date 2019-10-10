@@ -4,22 +4,32 @@
 \alias{LoadRefTx}
 \title{Load reference transcriptome.}
 \usage{
-LoadRefTx(refGenome = "hg38", env = .GlobalEnv)
+LoadRefTx(refGenome, verbose = FALSE)
 }
 \arguments{
-\item{refGenome}{A character string; specifies a specific
-reference genome assembly version based on which a transcriptome
-is loaded; default is \code{"hg38"}.}
+\item{refGenome}{A \code{character} string; specifies a specific reference
+genome assembly and gene annotation version.}
 
-\item{env}{An \code{environment} object; default is the user's
-workspace, i.e. \code{env = .GlobalEnv}.}
+\item{verbose}{A \code{logical} scalar; determines the amount of output;
+default is \code{FALSE}.}
+}
+\value{
+\code{NULL}.
 }
 \description{
 Load reference transcriptome. See 'Details'.
 }
 \details{
-The function loads transcriptome data stored in a \code{.RData}
-file, and makes the objects assessible in the user's workspace.
+The function loads transcriptome data generated from \code{BuildTx()} and
+stored in a \code{.RData} file, and makes the objects assessible in the
+parent enviroment. There should not be any need to call this function
+directly.
+Reference transcriptome data includes the following objects:
+\enumerate{
+    \item \code{txBySec}: A \code{list} of \code{GRangesList} objects
+    \item \code{seqBySec}: A \code{list} of \code{DNAStringSet} objects
+    \item \code{geneXID}: A \code{DataFrame} with transcript and gene IDs
+}
 }
 \author{
 Maurits Evers, \email{maurits.evers@anu.edu.au}

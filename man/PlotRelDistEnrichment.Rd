@@ -14,10 +14,10 @@ PlotRelDistEnrichment(txLoc1, txLoc2, txLocRef, flank = 1000,
 
 \item{txLocRef}{A \code{txLoc} object.}
 
-\item{flank}{An \code{integer} scalar; specifies the absolute maximum 
+\item{flank}{An \code{integer} scalar; specifies the absolute maximum
 relative distance used as a cutoff; default is \code{1000}.}
 
-\item{binWidth}{An \code{integer} scalar; specifies the spatial width by 
+\item{binWidth}{An \code{integer} scalar; specifies the spatial width by
 which distances will be binned; default is \code{20}.}
 }
 \value{
@@ -28,18 +28,18 @@ Perform enrichment analysis and plot results of two relative
 distance distributions. See 'Details'.
 }
 \details{
-The function calculates minimum distances per transcript region, between 
-entries from \code{txLoc1} relative to \code{txLocRef}, and \code{txLoc2} 
-relative to \code{txLocRef}. 
-Enrichment/depletion is assessed using multiple Fisher's exact tests on the 
-counts per distance bin relative to the counts in all other bins within the 
-window defined by (-\code{flank}, \code{flank}). Resulting enrichment plots 
-show odds-ratios (including 95\% confidence intervals) and associated 
-p-values as a function of relative distance bins. Negative distances 
-indicate sites from \code{txLoc1} and \code{txLoc2} that are \emph{upstream} 
-of sites from \code{txLocRef}; positive distances correspond to sites from 
-\code{txLoc1} and \code{txLoc2} that are \emph{downstream} of 
-\code{txLocRef}. The bin width and window size can be adjusted with 
+The function calculates minimum distances per transcript region, between
+entries from \code{txLoc1} relative to \code{txLocRef}, and \code{txLoc2}
+relative to \code{txLocRef}.
+Enrichment/depletion is assessed using multiple Fisher's exact tests on the
+counts per distance bin relative to the counts in all other bins within the
+window defined by (-\code{flank}, \code{flank}). Resulting enrichment plots
+show odds-ratios (including 95\% confidence intervals) and associated
+p-values as a function of relative distance bins. Negative distances
+indicate sites from \code{txLoc1} and \code{txLoc2} that are \emph{upstream}
+of sites from \code{txLocRef}; positive distances correspond to sites from
+\code{txLoc1} and \code{txLoc2} that are \emph{downstream} of
+\code{txLocRef}. The bin width and window size can be adjusted with
 \code{flank} and \code{binWidth}.
 }
 \author{

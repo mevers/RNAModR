@@ -15,7 +15,7 @@ PlotGC(txLoc1, txLoc2, flank = 10, norm_region = FALSE,
 \item{flank}{An \code{integer} scalar; see 'Details'.}
 
 \item{norm_region}{A \code{logical} scalar; if \code{TRUE} normalise the GC
-content in the window to the GC content of the corresponding transcript 
+content in the window to the GC content of the corresponding transcript
 region; default is \code{FALSE}.}
 
 \item{downsample}{A \code{logical} scalar; if \code{TRUE}, subsample sites
@@ -30,23 +30,23 @@ ignored when \code{downsample == FALSE}; default is \code{NULL}.}
 \code{NULL}.
 }
 \description{
-Plot and assess the difference in the distributions of GC content within 
+Plot and assess the difference in the distributions of GC content within
 a window around sites from two \code{txLoc} objects. See 'Details'.
 }
 \details{
-The function calculates the GC content within a window around every site 
-from two \code{txLoc} objects. The window is defined by extending the 
-position of every \code{txLoc} site upstream and downstream by \code{flank} 
+The function calculates the GC content within a window around every site
+from two \code{txLoc} objects. The window is defined by extending the
+position of every \code{txLoc} site upstream and downstream by \code{flank}
 nucleotides (if possible).
-The means of the resulting GC content distributions are assessed using a 
-two-sample two-tailed t-test. If \code{norm_region = TRUE}, the GC content 
+The means of the resulting GC content distributions are assessed using a
+two-sample two-tailed t-test. If \code{norm_region = TRUE}, the GC content
 in the window is normalised to the GC content of the entire transcript
 region. If \code{downsample = TRUE}, the number of windows/sites from the
 \emph{second} \code{txLoc2} object is downsampled to match the number of
 windows/sites from the \code{txLoc1} object. This is useful (and therefore
 the default setting) when comparing the GC distribution around positive
 and null sites, as the list of null sites is often significantly larger than
-that of the positive sites. 
+that of the positive sites.
 Note that this function calls \code{GetGC}, which performs the sequence
 extraction and GC calculation. See \code{?GetGC} for details.
 }

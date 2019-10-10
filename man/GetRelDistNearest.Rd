@@ -21,8 +21,8 @@ Return list of nearest distances between entries from two \code{list}s of
 }
 \details{
 The function uses \code{GenomicRanges::distanceToNearest} to return the
-nearest distances between the start positions of a \code{GRanges} object 
-from \code{lst1} and the corresponding \code{GRanges} object from 
+nearest distances between the start positions of a \code{GRanges} object
+from \code{lst1} and the corresponding \code{GRanges} object from
 \code{lst2} with the same name (based on field \code{seqnames}).
 Note that distances are given as signed \code{integer}s: Negative
 distances correspond to pos(gr1) < pos(gr2), positive
