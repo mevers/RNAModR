@@ -19,7 +19,7 @@ Check if entries of two \code{txLoc} objects are consistent.
 See 'Details'.
 }
 \details{
-The function checks if the reference genome and transcript regions from 
+The function checks if the reference genome and transcript regions from
 two \code{txLoc} objects match.
 }
 \author{

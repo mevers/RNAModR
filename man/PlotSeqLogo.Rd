@@ -11,15 +11,15 @@ PlotSeqLogo(txLoc, flank = 5, ylim = c(0, 2))
 
 \item{flank}{An \code{integer} scalar; see 'Details'.}
 
-\item{ylim}{An \code{integer} vector; specifies limits for the y-axis; 
+\item{ylim}{An \code{integer} vector; specifies limits for the y-axis;
 automatically determined if \code{ymin = NULL}; default is \code{c(0, 2)}.}
 }
 \description{
 Plot sequence logo.
 }
 \details{
-The function determines the sequence logo within a window defined by 
-extending sites from \code{txLoc} upstream and downstream by \code{flank} 
+The function determines the sequence logo within a window defined by
+extending sites from \code{txLoc} upstream and downstream by \code{flank}
 nucleotides.
 }
 \author{

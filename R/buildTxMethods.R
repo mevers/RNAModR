@@ -816,6 +816,10 @@ BuildTx <- function(genomeVersion = c(
         # Stage 6 - Save objects
         cat(sprintf("%s Stage 6/6: Storing results in file.\n",
                     format(Sys.time(), "[%a %b %d %Y %H:%M:%S]")))
+        # Add package_verion attribute (NEW in 0.2.1)
+        attr(geneXID, "package_version") <- packageVersion("RNAModR")
+        attr(txBySec, "package_version") <- packageVersion("RNAModR")
+        attr(seqBySec, "package_version") <- packageVersion("RNAModR")
         save(geneXID, txBySec, seqBySec,
              file = fn,
              compress = "gzip")

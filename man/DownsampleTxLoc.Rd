@@ -14,14 +14,14 @@ will be downsampled.}
 will be used as a target for the downsampling.}
 
 \item{seed}{A single value, interpreted as an \code{integer}, or \code{NULL};
-this is to ensure reproducibility when subsampling \code{txLoc2} sites; 
+this is to ensure reproducibility when subsampling \code{txLoc2} sites;
 default is \code{NULL}.}
 }
 \value{
 A \code{txLoc} object.
 }
 \description{
-Downsample a \code{txLoc1} object based on the number of sites per region 
+Downsample a \code{txLoc1} object based on the number of sites per region
 from a \code{txLoc2} object.
 }
 \author{

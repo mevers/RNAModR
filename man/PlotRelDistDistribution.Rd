@@ -30,15 +30,15 @@ Plot distribution of relative distances between sites
 from two \code{txLoc} objects. See 'Details'.
 }
 \details{
-The function calculates minimum distances per transcript region, between 
-entries from \code{txLoc} relative to \code{txLocRef}. Relative distances 
-are shown within a window (-\code{flank}, \code{flank}), where negative 
-distances correspond to a feature from \code{txLoc} that is upstream of a 
+The function calculates minimum distances per transcript region, between
+entries from \code{txLoc} relative to \code{txLocRef}. Relative distances
+are shown within a window (-\code{flank}, \code{flank}), where negative
+distances correspond to a feature from \code{txLoc} that is upstream of a
 site from \code{txLocRef}, and positive distances indicate a feature from
 \code{txLoc} that is downstream of a site from \code{txLocRef}. Relative
-distances are binned in bins of \code{binWidth} nt, and shown as an 
-abundance histogram. If \code{doBootstrap = TRUE}, 95% confidence intervals 
-are calculated and shown, based on an empirical bootstrap of relative 
+distances are binned in bins of \code{binWidth} nt, and shown as an
+abundance histogram. If \code{doBootstrap = TRUE}, 95% confidence intervals
+are calculated and shown, based on an empirical bootstrap of relative
 distances.
 }
 \author{
