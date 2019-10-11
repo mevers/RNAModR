@@ -181,6 +181,7 @@ SmartMap <- function(gr,
     CheckClass(gr, "GRanges")
 
     # Load transcriptome data
+    seqBySec <- txBySec <- geneXID <- NULL
     LoadRefTx(refGenome)
 
     # Map coordinates to transcript
@@ -290,6 +291,7 @@ GenerateNull <- function(txLoc,
     tx_region_sequence <- tx_refseq <- NULL
 
     # Load transcriptome data
+    seqBySec <- txBySec <- geneXID <- NULL
     if (method == "ntAbund") LoadRefTx(refGenome)
 
     # Activate progressbar if `showPb == TRUE`
@@ -476,6 +478,7 @@ GetGC <- function(txLoc, flank = 10) {
 GetEEJunct <- function(refGenome = "hg38", filter = c("CDS", "5'UTR")) {
 
     # Load transcriptome data
+    seqBySec <- txBySec <- geneXID <- NULL
     LoadRefTx(refGenome)
 
   # Filter regions
@@ -545,6 +548,7 @@ GetEEJunct <- function(refGenome = "hg38", filter = c("CDS", "5'UTR")) {
 GetSplicingSites <- function(refGenome = "hg38", filter = c("CDS", "5'UTR")) {
 
     # Read transcriptome data
+    seqBySec <- txBySec <- geneXID <- NULL
     LoadRefTx(refGenome)
 
     # Filter regions
@@ -586,192 +590,6 @@ GetSplicingSites <- function(refGenome = "hg38", filter = c("CDS", "5'UTR")) {
     names(gr) <- NULL
     gr
 
-}
-
-
-#' Get relative distance of sites to start/stop codon. [NOT WORKING]
-#'
-#' Get relative distances of sites from a \code{txLoc} object to the start/stop
-#' codons from a reference transcriptome. See 'Details'.
-#'
-#' The function calculates relative distances of sites from a \code{txLoc}
-#' object to the corresponding transcripts start and stop codons.
-#'
-#' @param txLoc A \code{txLoc} object.
-#' @param refGenome A character string; specifies a specific
-#' reference genome assembly version based on which the matching
-#' transcriptome is loaded; default is \code{"hg38"}.
-#'
-#' @return A \code{GRanges} object. See 'Details'.
-#'
-#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
-#'
-#' @keywords internal
-#'
-#' @import GenomicRanges IRanges
-GetDistanceStartStop <- function(txLoc, refGenome = "hg38") {
-
-    # Read transcriptome data
-    LoadRefTx(refGenome)
-
-#    # Sanity check
-#    regions <- c("5'UTR", "CDS", "3'UTR")
-#    if (any(!regions %in% names(txBySec))) {
-#        ss <- sprintf(
-#            "Missing reference transcriptome data: Need data for %s!",
-#            paste(regions, collapse = ", "))
-#        stop(ss)
-#    }
-#    CheckClass(txLoc, "txLoc")
-#    objName <- deparse(substitute(txLoc))
-#    if (any(!regions %in% GetRegions(txLoc))) {
-#        ss <- sprintf(
-#            "Missing transcript region: %s must contain data for %s!",
-#            objName,
-#            paste(regions, collapse = ", "))
-#        stop(ss)
-#    }
-#
-#    # Get transcript region widths
-#    df.regions_width <- Reduce(
-#        function(x, y) merge(x, y, by = "seqnames"),
-#        Map(
-#            function(seq, reg) setNames(
-#                data.frame(names(seq), width(seq)),
-#                c("seqnames", reg)),
-#            seqBySec[regions],
-#            regions)
-#    )
-#
-#    # Get transcript region coordinates of loci
-#    df.loci <- do.call(
-#        rbind, c(Map(
-#            function(locus, reg)
-#                setNames(cbind(
-#                    as.data.frame(locus$locus_in_tx_region)[, 1:3],
-#                    reg),
-#                    c("seqnames", "start", "end", "region")),
-#            GetLoci(txLoc),
-#            regions),
-#            make.row.names = FALSE)
-#    )
-#
-#    # Merge transcript region coordinates and widths
-#    df.loci <- merge(df.loci, df.regions_width, by = "seqnames", all.x = T)
-#
-#    # Get transcriptome coordinates of start/stop codons and order entries
-#    # by transcript ID
-#    region_seq <- seqBySec[["CDS"]]
-#    region <- txBySec[["CDS"]]
-#    grl <- as(lapply(
-#        setNames(c("start", "stop"), c("start", "stop")),
-#        function(codon) {
-#            start <- if (codon == "start") 1 else width(region_seq) - 2
-#            GRanges(
-#                seqnames = names(region_seq),
-#                IRanges(start = start, width = 3),
-#                id = paste(
-#                    "CDS",
-#                    codon,
-#                    subseq(region_seq, start = start, width = 3),
-#                    sep = "|"))
-#        }),
-#        "GRangesList")
-#
-#    lapply(
-#        GetLoci(txLoc),
-#        function(x)
-#            x)
-#
-#
-#        loci[["5'UTR"]]$locus_in_region
-#    loci[["CDS"]]
-#
-#
-#    # Return DataFrame with columns
-#    #   locus_in_tx_region: <GRanges>
-#    #   locus_in_genome:    <GRanges>
-#    #   score:              <numeric>
-#    #   id:                 <character>
-#    #   tx_region:          <character>
-#    #   tx_region_width:    <integer>
-#    #   tx_region_sequence: <DNAStringSet>
-#    #   tx_refseq:          <character>
-#    #   gene_entrez:        <character>
-#    #   gene_symbol:        <character>
-#    #   gene_ensembl:       <character>
-#    #   gene_name:          <character>
-#    cbind(
-#        setNames(
-#            DataFrame(granges(gr, use.names = FALSE, use.mcols = FALSE)),
-#            "locus_in_tx_region"),
-#        setNames(
-#            DataFrame(granges(hits, use.names = FALSE, use.mcols = FALSE)),
-#            "locus_in_genome"),
-#        setNames(DataFrame(
-#            rep(0, length(gr)),
-#            mcols(gr)$id),
-#            c("score", "id")))
-#
-#
-#
-#        locus.pos[match(
-#            seqnames(gr), locus.pos$tx_refseq), -(1:4)])
-#
-#
-#                GRanges(
-#                seqnames = names(region_seq),
-#                IRanges(start = 1, width = 3),
-#                id = paste(
-#                    "start",
-#                    subseq(region_seq, start = 1, width = 3),
-#                    sep = "|"))
-#            GRanges(
-#                seqnames = names(region_seq),
-#                IRanges(start = width(region_seq) - 2, width = 3),
-#                id = paste(
-#                    "stop",
-#                    subseq(region_seq, start = width(region_seq) - 2, width = 3),
-#                    sep = "|"))
-#        }
-#
-#
-#
-#                        lapply(
-#                setNames(c(1, width(region_seq) - 2), c("start", "stop")),
-#                function(x)
-#                    GRanges(
-#                        seqnames = names(region_seq),
-#                        IRanges(start = x, end = x + 2),
-#                        id = paste0(
-#                            x,
-#                            subseq(region_seq, start = 1, end = 3),
-#                            sep = "|")
-#                        ))
-#        }
-#    )
-#
-#
-#
-#    gr.start <- GRanges(
-#        seqnames = names(seqBySec[[regions]])
-#    )
-#
-#    subseq(seqBySec[[regions]], start = 1, width = 3)
-#
-#
-#    gr <- unlist(range(txBySec[[regions]]))
-#
-#    gr.start <- gr
-#    end(gr.start) <- start(gr.start) + 2
-#
-#    gr.stop <- gr
-#    start(gr.stop) <- end(gr.stop) - 2
-#
-#
-#    tmp2 <- unlist(tmp)
-#    window(tmp2, start = 1, width = 3)
-#
 }
 
 
@@ -834,6 +652,7 @@ GetMotifLoc <- function(motif = NULL,
     if (is.null(id)) id <- "motif"
 
     # Load transcriptome data
+    seqBySec <- txBySec <- geneXID <- NULL
     LoadRefTx(refGenome)
     
     if (showPb == TRUE)
