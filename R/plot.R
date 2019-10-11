@@ -1205,3 +1205,92 @@ PlotSeqLogo <- function(txLoc, flank = 5, ylim = c(0, 2)) {
         GetLoci(txLoc), GetRegions(txLoc)))
 
 }
+
+
+#' Enrichment analysis of sites relative to start/stop codon.
+#'
+#' Perform and visualise the enrichment analysis of sites from a \code{txLoc} 
+#' object relative to the start/stop codons from a reference transcriptome. 
+#' See 'Details'.
+#'
+#' The function calculates relative distances of sites from a \code{txLoc}
+#' object to the corresponding transcript's start and stop codons.
+#' Enrichment/depletion is assessed using multiple Fisher's exact tests on the
+#' counts per distance bin relative to the counts in all other bins within the
+#' window defined by (-\code{flank}, \code{flank}). Resulting enrichment plots
+#' show odds-ratios (including 95\% confidence intervals) and associated
+#' p-values as a function of relative distance bins. Negative distances
+#' indicate sites from \code{txLoc} that are \emph{upstream} of the start/stop
+#' codon; positive distances correspond to sites from \code{txLoc} that are 
+#' \emph{downstream} of \code{txLocRef}. The bin width and window size can be 
+#' adjusted with \code{flank} and \code{binWidth}.
+#' Note that this function can be quite slow if \code{txLoc2} is based on all 
+#' null sites. If this is the case, consider downsampling \code{txLoc2} using
+#' \code{DownsampleTxLoc}.
+#'
+#' @param txLoc1 A \code{txLoc} object.
+#' @param txLoc2 A \code{txLoc} object.
+#' @param flank An integer scalar; specifies the absolute maximum
+#' relative distance used as a cutoff; default is 1000.
+#' @param binWidth An integer scalar; specifies the spatial width
+#' by which distances will be binned; default is 20.
+#'
+#' @return \code{NULL}.
+#'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#'
+#' @keywords internal
+#'
+#' @export
+PlotRelStartStopEnrichment <- function(txLoc1, 
+                                       txLoc2,
+                                       flank = 550, 
+                                       binWidth = 20) {
+    
+    # Get distance of sites to start/stop codon
+    lstDist1 <- GetDistNearestStartStop(txLoc1)
+    lstDist2 <- GetDistNearestStartStop(txLoc2)
+    
+    # Determine figure panel layout
+    par(mfrow = c(1, 2))
+
+    # Set breaks & binwidth
+    breaks <- seq(-flank, flank, by = binWidth)
+    bwString <- sprintf("bw = %3.2f", binWidth)
+    
+    invisible(Map(
+        function(dist1, dist2, region) {
+            
+            # Filter distances that are within window [-flank, flank]
+            if (flank > 0) {
+                dist1 <- dist1[abs(dist1) <= flank]
+                dist2 <- dist2[abs(dist2) <= flank]
+            }
+            
+            # Bin distances and count matrix
+            cts1 <- table(cut(dist1, breaks = breaks))
+            cts2 <- table(cut(dist2, breaks = breaks))
+            ctsMat <- as.matrix(rbind(cts1, cts2))
+            rownames(ctsMat) <- c("pos", "neg")
+            
+            # Plot
+            title <- sprintf(
+                "Relative to %s\nN(%s) = %i, N(%s) = %i\nbw = %i nt, flank = %i nt",
+                region, 
+                GetId(txLoc1), sum(cts1),
+                GetId(txLoc2), sum(cts2),
+                binWidth,
+                flank)
+            PlotEnrichment.Generic(
+                ctsMat,
+                title = title,
+                xlab = sprintf("Distance relative to %s [nt]", region),
+                x.las = 1, x.cex = 0.8, x.padj = 0,
+                xAxisLblFmt = 3)
+            
+        },
+        lstDist1, lstDist2, names(lstDist1)))
+
+}
+
+
