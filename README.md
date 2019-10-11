@@ -34,7 +34,7 @@ I appreciate any and all testing; for issues, please open an official [Issue](ht
 
 [Update October 2019]
 
-Functionality of most (all?) functions has been restored in a series of major code revisions. This has led to a new development version 0.2.0, which should become stable soon. Due to substantial changes in R/Bioconductor packages that `RNAModR` depends on and in the code base of `RNAModR` itself, reference transcriptomes from older `RNAModR` versions will not work with the current development version 0.2.0 of `RNAModR`. A full list of changes can be found in [NEWS](NEWS).
+Functionality of most (all?) functions has been restored in a series of major code revisions. This has led to a new stable version 0.2.1. Due to substantial changes in R/Bioconductor packages that `RNAModR` depends on and in the code base of `RNAModR` itself, reference transcriptomes from older `RNAModR` versions will not work with the current stable version 0.2.1 of `RNAModR`. A full list of changes can be found in [NEWS](NEWS).
 
 I appreciate and encourage any and all testing; for issues, please open an official [Issue](https://github.com/mevers/RNAModR/issues/new) on the GitHub project site.
 
@@ -57,20 +57,18 @@ I appreciate and encourage any and all testing; for issues, please open an offic
     * RSQLite
     * rtracklayer
 
-    You can install additional R/Bioconductor packages in the usual way:
+    The [recommended way to install R/Bioconductor packages](https://www.bioconductor.org/install/) is to use `BiocManager::install`:
 
     ```{r}
-    source("http://www.bioconductor.org/biocLite.R")
-    biocLite(c("AnnotationDbi", "beanplot", "Biostrings", "GenomeInfoDb", "GenomicFeatures", "GenomicRanges", "gplots", "RSQLite",    "rtracklayer"))
+    BiocManager::install(c("AnnotationDbi", "beanplot", "Biostrings", "GenomeInfoDb", "GenomicFeatures", "GenomicRanges", "gplots", "RSQLite", "rtracklayer"))
     ```
 
-    Additionally, RNAModR requires two _organism-specific_ R packages to contruct a custom transcriptome. Currently, RNAModR    supports human and mouse data, based on the following reference genome versions
+    Additionally, RNAModR requires two _organism-specific_ R packages to contruct a custom transcriptome. Currently, RNAModR supports human and mouse data, based on the following reference genome versions
 
      * Human: hg38, hg19
      * Mouse: mm10, mm9.
 
-    Please install the corresponding organism- and version-matching R/Bioconductor packages. For example, if genomic loci of RNA modification are based on the human GRCh38/hg38 reference genome,
-    RNAModR requires the following R/Bioconductor packages:
+    Please install the corresponding organism- and version-matching R/Bioconductor packages. For example, if genomic loci of RNA modification are based on the human GRCh38/hg38 reference genome, RNAModR requires the following R/Bioconductor packages:
 
      * BSgenome.Hsapiens.UCSC.hg38
      * org.Hs.eg.db
@@ -78,7 +76,7 @@ I appreciate and encourage any and all testing; for issues, please open an offic
     which you can install in the usual way
 
     ```{r}
-    biocLite(c("BSgenome.Hsapiens.UCSC.hg38", "org.Hs.eg.db"))
+    BiocManager::install(c("BSgenome.Hsapiens.UCSC.hg38", "org.Hs.eg.db"))
     ```
 
     We also offer the possibility to download pre-constructed transcriptome data, see section [Downloadable transcriptome data](#downloadTx).
@@ -104,55 +102,45 @@ Note: You can also download pre-constructed transcriptome data, see the [next se
 
 ```{r}
 # Load the library.
-library(RNAModR);
+library(RNAModR)
+library(magrittr)
 
 # Build reference transcriptome.
 # This might take a few minutes.
-BuildTx("hg38");
+BuildTx("hg38")
 
 # Load and map m6A sites to reference transcriptome.
-posSites <- ReadBED(system.file("extdata", "miCLIP_m6A_Linder2015_hg38.bed", package = "RNAModR"));
-posSites <- SmartMap(posSites, "m6A_Linder");
+posSites <- system.file("extdata", "miCLIP_m6A_Linder2015_hg38.bed", package = "RNAModR") %>%
+    ReadBED() %>%
+    SmartMap("m6A_Linder")
 
 # Keep sites located in the 5'UTR, CDS and 3'UTR
-posSites <- FilterTxLoc(posSites, filter = c("5'UTR", "CDS", "3'UTR"));
+posSites <- posSites %>%
+    FilterTxLoc(c("5'UTR", "CDS", "3'UTR"))
 
 # Plot distribution across transcript sections
-PlotSectionDistribution(posSites);
+PlotSectionDistribution(posSites)
 ```
 
 ## Downloadable transcriptome data<a name="downloadTx"></a>
-You can download pre-constructed transcriptome data files for the following reference genome versions
 
+**It is recommended to always custom-build transcriptome data using `BuildTx()`.**
 
-*Homo sapiens*
+|   Version    | Organism     | Assembly link |
+| -------------|--------------|---------------|
+| 0.2.2        | Homo sapiens | [hg38](https://drive.google.com/open?id=1fMhubzDyuz52Zh27cuds4QPiKfHUjB8O) |
+| 0.2.2        | Homo sapiens | [hg19](https://drive.google.com/open?id=14gHDxM8y9rZLM07l3ExtbKKdtNUNlnsy) |
+| 0.2.2        | Homo sapiens | [hg18](https://drive.google.com/open?id=1oE2kFvqE6JO1QEQ7yQpDYCGvvHxgrUER) |
+| 0.2.2        | Mus musculus | [mm10](https://drive.google.com/open?id=1NBoctUxhGqpwEMxLEJVMQjuWfIj5kwlm) |
+| 0.2.2        | Mus musculus | [mm9](https://drive.google.com/open?id=1n7DVfCzTIp5HmuqytynWwgZTgPyY9O6t) |
+| 0.2.2        | Mus musculus | [mm8](https://drive.google.com/open?id=1lqD_8QJYJPfoXDlJYTtHdCBpfTbQ3jSN) |
+| <=0.1.1      | Homo sapiens | [hg38](https://drive.google.com/open?id=1nBRsUWEq5FvoZmdYtGJWZhQCi2izajCr)
+| <=0.1.1      | Homo sapiens | [hg19](https://drive.google.com/open?id=1OQnsmuieQw7KUXKPy6C5UnZGuavooW06)
+| <=0.1.1      | Homo sapiens | [hg18](https://drive.google.com/open?id=18xufP2MQn39gTgkHob8dvOPXiPhKg_wc)
+| <=0.1.1      | Mus musculus | [mm10](https://drive.google.com/open?id=17i3yHBjkL50K-o60mMFiP2SzhuW6v9nP)
+| <=0.1.1      | Mus musculus | [mm9](https://drive.google.com/open?id=1fO3BSojCb_BIE8DzmEKHw1miJOJZt0Zr)
+| <=0.1.1      | Mus musculus | [mm8](https://drive.google.com/open?id=1SqJEX0O6HL1baW8XHWkOMJr37AfAZ4q2)
 
-1. [hg38](https://drive.google.com/open?id=1nBRsUWEq5FvoZmdYtGJWZhQCi2izajCr)
-2. [hg19](https://drive.google.com/open?id=1OQnsmuieQw7KUXKPy6C5UnZGuavooW06)
-3. [hg18](https://drive.google.com/open?id=18xufP2MQn39gTgkHob8dvOPXiPhKg_wc)
-
-*Mus musculus*
-
-1. [mm10](https://drive.google.com/open?id=17i3yHBjkL50K-o60mMFiP2SzhuW6v9nP)
-2. [mm9](https://drive.google.com/open?id=1fO3BSojCb_BIE8DzmEKHw1miJOJZt0Zr)
-3. [mm8](https://drive.google.com/open?id=1SqJEX0O6HL1baW8XHWkOMJr37AfAZ4q2)
-
-
-----
-
-Above files will work with the RNAModR version 0.1.1; for version 0.1.0 you may want to try the older transcriptome files. There's no guarantee that they will still work; major changes in `GenomicRanges` and other Bioconductor libraries may cause unpredictable behaviour and errors.
-
-*Homo sapiens*
-
-1. [hg38](https://drive.google.com/open?id=0B5_hfxBdKWHRVlBCTUlSazJfaWs)
-2. [hg19](https://drive.google.com/open?id=0B5_hfxBdKWHRemRwMUtoa1ZnNVE)
-3. [hg18](https://drive.google.com/open?id=0B5_hfxBdKWHRZ3ZqdXpVN0VmWlU)
-
-*Mus musculus*
-
-1. [mm10](https://drive.google.com/open?id=0B5_hfxBdKWHRYzliNkotN1NwSTQ)
-2. [mm9](https://drive.google.com/open?id=0B5_hfxBdKWHRdkNSMmNleVJUSm8)
-3. [mm8](https://drive.google.com/open?id=0B5_hfxBdKWHRMmN5WGRsRkpWcWc)
 
 ----
 
@@ -160,7 +148,7 @@ In order to use the transcriptome data you need to copy the RData file into your
 You can check that RNAModR correctly finds the transcriptome data by running e.g.
 
 ```{r}
-BuildTx("hg38");
+BuildTx("hg38")
 ```
 
 Provided you have copied the file tx_hg38.RData into the working directory, this should produce the following message
@@ -172,7 +160,7 @@ To rebuild run with force = TRUE.
 
 ## Documentation
 
-The RNAModR manual can be downloaded [here](doc/RNAModR-manual.pdf).
+The most current RNAModR manual can be downloaded [here](doc/RNAModR-manual.pdf).
 
 
 ## Contributors

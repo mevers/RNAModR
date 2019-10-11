@@ -11,18 +11,18 @@ SmartMap(gr, id = NULL, refGenome = "hg38", ignore.strand = FALSE,
 \item{gr}{A \code{GRanges} object; specifies the list of of genomic features
 to be mapped.}
 
-\item{id}{A \code{character} string; specifies a name for loci from 
+\item{id}{A \code{character} string; specifies a name for loci from
 \code{gr}; if \code{NULL} then \code{id = ""}; default is \code{NULL}.}
 
-\item{refGenome}{A \code{character} string; specifies a specific reference 
+\item{refGenome}{A \code{character} string; specifies a specific reference
 genome assembly version based on which the matching transcriptome is loaded;
 default is \code{"hg38"}.}
 
-\item{ignore.strand}{A \code{logical} scalar; if \code{TRUE} strand 
-information is ignored when mapping genome coordinates to transcript 
+\item{ignore.strand}{A \code{logical} scalar; if \code{TRUE} strand
+information is ignored when mapping genome coordinates to transcript
 coordinates; default is \code{FALSE}.}
 
-\item{showPb}{A \code{logical} scalar; if \code{TRUE} show a progress bar; 
+\item{showPb}{A \code{logical} scalar; if \code{TRUE} show a progress bar;
 default is \code{TRUE}.}
 }
 \value{

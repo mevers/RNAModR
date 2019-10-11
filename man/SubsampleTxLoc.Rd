@@ -15,7 +15,7 @@ that will be sampled from every transcript region. Note that the length
 of \code{fractions} has to match the length of \code{GetRegions(txLoc)}.}
 
 \item{seed}{A single value, interpreted as an \code{integer}, or \code{NULL};
-this is to ensure reproducibility when subsampling \code{txLoc2} sites; 
+this is to ensure reproducibility when subsampling \code{txLoc2} sites;
 default is \code{NULL}.}
 }
 \value{

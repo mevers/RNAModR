@@ -1,5 +1,23 @@
 # All changes to RNAModR are documented here
 
+
+## Version 0.2.2
+
+- In `plot.R`: Added `PlotRelStartStopEnrichment`
+- In `helper.R`: Added `GetTxRegionCoordinates` and `GetDistNearestStartStop`;
+  these functions are needed by `PlotRelStartStopEnrichment`
+
+
+## Version 0.2.1
+
+- `BuildTx` now adds a `package_version` attribute to every transcriptome data
+  object
+- Transcriptome data is now consistently loaded and verified using function
+  `LoadRefTx`; verification includes comparing the `package_version` attribute
+  and the current RNAModR package version. If there is a mismatch, a warning
+  is produced
+
+
 ## Version 0.2.0
 
 - RNAModR now requires R >= 3.5.0
