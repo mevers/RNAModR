@@ -457,6 +457,144 @@ TxLoc2GRangesList <- function(txLoc, method = c("tx_region", "genome")) {
 }
 
 
+#' Calculate transcript region starting coordinates.
+#'
+#' Calculate transcript region starting coordinates along full transcript from
+#' a reference transcriptome. See 'Details'.
+#'
+#' The function loads transcriptome data generated from \code{BuildTx()} and
+#' stored in a \code{.RData} file, and calculates starting coordinates of the
+#' transcript regions 5'UTR, CDS, 3'UTR along the full transcript. There should 
+#' not be any need to call this function directly. The function returns a 
+#' \code{list} with the following elements:
+#' \enumerate{
+#'     \item \code{start_region}: A \code{data.frame} of transcript region 
+#'     start coordinates
+#'     \item \code{gr.start}: A \code{GRanges} object of start codon transcript
+#'     coordinates
+#'     \item \code{gr.stop}: A \code{GRanges} object of stop codon transcript
+#'     coordinates
+#' } 
+#'
+#' @param refGenome A \code{character} string.
+#'
+#' @return A \code{list}. See 'Details'.
+#'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' @keywords internal
+GetTxRegionCoordinates <- function(refGenome) {
+    
+    # Read transcriptome data
+    seqBySec <- txBySec <- geneXID <- NULL
+    LoadRefTx(refGenome)
+    
+    # Get transcript region starting coordinates
+    regions <- c("5'UTR", "CDS", "3'UTR")
+    df <- Reduce(
+        function(x, y) merge(x, y, by = "seqnames"),
+        Map(
+            function(seq, reg) setNames(
+                data.frame(names(seq), width(seq)),
+                c("seqnames", reg)),
+            seqBySec[regions],
+            regions)
+    )
+    df[, regions] <- Reduce(`+`, df[, regions], accumulate = TRUE)
+    
+    # Return `list` consisting of the following elements
+    #   - A `data.frame` of transcript region start coordinates
+    #   - A `GRanges` object of start codon transcript coordinates
+    #   - A `GRanges` object of stop codon transcript coordinates
+    list(
+        start_region = df,
+        gr.start = GRanges(
+            seqnames = df[, "seqnames"],
+            IRanges(df[, "CDS"], df[, "CDS"] + 3),
+            strand = "*"),
+        gr.stop = GRanges(
+            seqnames = df[, "seqnames"],
+            IRanges(df[, "3'UTR"] - 4, df[, "3'UTR"] - 1),
+            strand = "*"))
+
+}
+    
+
+#' Get distance of sites to the nearest start/stop codon.
+#'
+#' Get distance of sites from a \code{txLoc} to the nearest start/stop codon.
+#'
+#' The function converts transcript region coordinates from a \code{txLoc} to 
+#' transcript coordinates, and returns distances of sites to the nearest 
+#' start/stop codon. A transcript is defined as the concatenation of
+#' the following transcript regions: 5'UTR, CDS, 3'UTR. The return object is
+#' a \code{list} of distances of sites from \code{txLoc} to the nearest start 
+#' and stop codons.
+#'
+#' @param txLoc A \code{txLoc} object.
+#'
+#' @return A \code{list}. See 'Details'.
+#'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#' 
+#' @import GenomicRanges IRanges
+#'
+#' @keywords internal
+GetDistNearestStartStop <- function(txLoc) {
+    
+    # Sanity checks
+    CheckClass(txLoc, "txLoc")
+    regions <- c("5'UTR", "CDS", "3'UTR")
+    objName <- deparse(substitute(txLoc))
+    if (!identical(GetRegions(txLoc), regions)) stop(sprintf(
+        "%s must contain the regions %s!", 
+        objName,
+        paste(regions, collapse = ", ")))
+
+    # Get transcript region start coordinates along transcript and
+    # coordinates of start/stop codons
+    lst <- GetTxRegionCoordinates(GetRef(txLoc))
+    
+    # Get transcript region coordinates of loci
+    df.loci <- do.call(
+        rbind, c(Map(
+            function(locus, reg)
+                setNames(cbind(
+                    as.data.frame(locus$locus_in_tx_region)[, 1:3],
+                    reg),
+                    c("seqnames", "start", "end", "region")),
+            GetLoci(txLoc),
+            regions),
+            make.row.names = FALSE)
+    )
+
+    # Merge transcript region coordinates and widths
+    df.loci <- merge(
+        df.loci, 
+        setNames(
+            cbind(
+                lst[["start_region"]][, "seqnames"], 
+                stack(lst[["start_region"]], select = -seqnames)),
+            c("seqnames", "start_region", "region")),
+        by = c("seqnames", "region"))
+    
+    # Convert transcript region to transcript coordinates
+    df.loci[, "start"] <- df.loci[, "start"] + df.loci[, "start_region"]
+    df.loci[, "end"] <- df.loci[, "end"] + df.loci[, "start_region"]
+
+    # Store loci as `GRanges`
+    gr.loci <- GRanges(
+        seqnames = df.loci[, "seqnames"],
+        IRanges(df.loci[, "start"], df.loci[, "end"]),
+        strand = "*")
+    
+    # Calculate distances to nearest start/stop codons
+    GetRelDistNearest(
+        list(start = gr.loci, stop = gr.loci), 
+        list(start = lst[["gr.start"]], stop = lst[["gr.stop"]]))
+    
+}
+
+
 #' Return list of nearest distances between entries from two \code{list}s of
 #' \code{GRanges} objects.
 #'
@@ -492,6 +630,11 @@ GetRelDistNearest <- function(lst1, lst2) {
     # Calculate nearest distances from start
     lst <- Map(
         function(gr1, gr2) {
+            
+            # Make sure that seqlevels match
+            lvls <- intersect(seqlevels(gr1), seqlevels(gr2))
+            seqlevels(gr1, pruning.mode = "coarse") <- lvls
+            seqlevels(gr2, pruning.mode = "coarse") <- lvls
 
             # Collapse range of gr1 and gr2 to the start coordinate
             end(gr1) <- start(gr1)
