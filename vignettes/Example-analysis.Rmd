@@ -1,0 +1,88 @@
+---
+title: "Example analysis of m¹A sites"
+author: "Maurits Evers"
+output: 
+    rmarkdown::html_vignette:
+        fig_width: 10
+        fig_height: 8
+vignette: >
+  %\VignetteIndexEntry{Example-analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+## Load the libraries
+
+We start by loading the `RNAModR` library, along with the convenience library `magrittr`.
+
+```{r setup, warning=FALSE, message=FALSE}
+library(RNAModR)
+library(magrittr)
+```
+
+We read in data for the mRNA modification N1-methyladenosine (m¹A) from [Dominissini et al.](https://www.nature.com/articles/nature16998), which is included in the `RNAModR` package. Data is provided in the [BED6 format](http://genome.ucsc.edu/FAQ/FAQformat#format1), which we can map to transcriptome coordinates using `SmartMap` and select those sites that lie within the CDS and 3'UTR. Note that if we have data in a different format (e.g. GTF), we first need to convert from GTF to BED6.
+
+
+## Load data and show summary
+
+```{r read-data}
+m1A <- system.file(
+    "extdata", "MeRIPseq_m1A_Dominissini2016_hg38.bed", package = "RNAModR") %>%
+    ReadBED() %>%
+    SmartMap(id = "m1A", refGenome = "hg38", showPb = FALSE) %>%
+    FilterTxLoc(filter = c("CDS", "3'UTR"))
+```
+
+We can get a quick summary overview of the number of sites per transcript region with
+
+```{r data-overview}
+m1A
+```
+
+
+## Generate null sites
+
+We now generate a distribution of null sites
+
+```{r generate-null}
+null <- GenerateNull(m1A, nt = "A", showPb = FALSE)
+null
+```
+
+The null sites are all nucleotides `nt` in all transcript regions that contain at least one m¹A site. Consequently, the number of null sites is signficantly larger than the number of m¹A sites. It may make sense to downsample the number of null sites to match the number of m¹A sites in every transcript region, see `?DownsampleTxLoc`.
+
+
+## Enrichment/depletion of m¹A sites within different transcript regions
+
+We explore the spatial distribution of m¹A sites relative to the null sites within the CDS and 3'UTR and perform an enrichment analysis to characterise enrichment/depletion of m¹A sites within bins along the transcript regions.
+
+```{r region-enrichment, out.width = "100%"}
+PlotSpatialEnrichment(m1A, null)
+```
+
+
+## Enrichment/depletion of m¹A sites near YTH
+
+We read in eIF4AIII HITSCLIP data from [Saulière et al.](https://www.nature.com/articles/nsmb.2420), which is included in the `RNAModR` package.
+
+```{r }
+eif4 <- system.file("extdata", "HITSCLIP_eIF4A3_Sauliere2012_hg38.bed", package = "RNAModR") %>%
+    ReadBED() %>%
+    SmartMap(id = "eif4", refGenome = "hg38", showPb = FALSE) %>%
+    FilterTxLoc(filter = c("CDS", "3'UTR"))
+eif4
+```
+
+We can now calculate relative distances between the m¹A and null sites to the nearest eIF4AIII target site; we then perform an enrichment analysis of the two binned distance distributions to characterise enrichment/depletion of m¹A sites relative to null sites as a function of the distance to the nearest eIF4AIII site. Negative distances correspond to an m¹A/null site *upstream* of the eIF4AIII site; positive distances correspond to m¹A/null sites *downstream* of the eIF4AIII site. 
+
+```{r eif4-enrichment, out.width="100%", out.height="60%"}
+PlotRelDistEnrichment(m1A, null, eif4, flank = 155, binWidth = 10)
+```
