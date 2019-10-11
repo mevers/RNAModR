@@ -126,43 +126,21 @@ PlotSectionDistribution(posSites)
 
 **It is recommended to always custom-build transcriptome data using `BuildTx()`.**
 
-### RNAModR v0.2.x
+|   Version    | Organism     | Assembly link |
+| -------------|--------------|---------------|
+| 0.2.2        | Homo sapiens | [hg38](https://drive.google.com/open?id=1fMhubzDyuz52Zh27cuds4QPiKfHUjB8O) |
+| 0.2.2        | Homo sapiens | [hg19](https://drive.google.com/open?id=14gHDxM8y9rZLM07l3ExtbKKdtNUNlnsy) |
+| 0.2.2        | Homo sapiens | [hg18](https://drive.google.com/open?id=1oE2kFvqE6JO1QEQ7yQpDYCGvvHxgrUER) |
+| 0.2.2        | Mus musculus | [mm10](https://drive.google.com/open?id=1NBoctUxhGqpwEMxLEJVMQjuWfIj5kwlm) |
+| 0.2.2        | Mus musculus | [mm9](https://drive.google.com/open?id=1n7DVfCzTIp5HmuqytynWwgZTgPyY9O6t) |
+| 0.2.2        | Mus musculus | [mm8](https://drive.google.com/open?id=1lqD_8QJYJPfoXDlJYTtHdCBpfTbQ3jSN) |
+| <=0.1.1      | Homo sapiens | [hg38](https://drive.google.com/open?id=1nBRsUWEq5FvoZmdYtGJWZhQCi2izajCr)
+| <=0.1.1      | Homo sapiens | [hg19](https://drive.google.com/open?id=1OQnsmuieQw7KUXKPy6C5UnZGuavooW06)
+| <=0.1.1      | Homo sapiens | [hg18](https://drive.google.com/open?id=18xufP2MQn39gTgkHob8dvOPXiPhKg_wc)
+| <=0.1.1      | Mus musculus | [mm10](https://drive.google.com/open?id=17i3yHBjkL50K-o60mMFiP2SzhuW6v9nP)
+| <=0.1.1      | Mus musculus | [mm9](https://drive.google.com/open?id=1fO3BSojCb_BIE8DzmEKHw1miJOJZt0Zr)
+| <=0.1.1      | Mus musculus | [mm8](https://drive.google.com/open?id=1SqJEX0O6HL1baW8XHWkOMJr37AfAZ4q2)
 
-To be added.
-
-### RNAModR version 0.1.1
-
-You may download pre-constructed transcriptome data files for the following reference genome versions
-
-
-*Homo sapiens*
-
-1. [hg38](https://drive.google.com/open?id=1nBRsUWEq5FvoZmdYtGJWZhQCi2izajCr)
-2. [hg19](https://drive.google.com/open?id=1OQnsmuieQw7KUXKPy6C5UnZGuavooW06)
-3. [hg18](https://drive.google.com/open?id=18xufP2MQn39gTgkHob8dvOPXiPhKg_wc)
-
-*Mus musculus*
-
-1. [mm10](https://drive.google.com/open?id=17i3yHBjkL50K-o60mMFiP2SzhuW6v9nP)
-2. [mm9](https://drive.google.com/open?id=1fO3BSojCb_BIE8DzmEKHw1miJOJZt0Zr)
-3. [mm8](https://drive.google.com/open?id=1SqJEX0O6HL1baW8XHWkOMJr37AfAZ4q2)
-
-
-### RNAModR version <=0.1.0
-
-There's no guarantee that older transcriptome data will still work; major changes in `GenomicRanges` and other Bioconductor libraries may cause unpredictable behaviour and errors.
-
-*Homo sapiens*
-
-1. [hg38](https://drive.google.com/open?id=0B5_hfxBdKWHRVlBCTUlSazJfaWs)
-2. [hg19](https://drive.google.com/open?id=0B5_hfxBdKWHRemRwMUtoa1ZnNVE)
-3. [hg18](https://drive.google.com/open?id=0B5_hfxBdKWHRZ3ZqdXpVN0VmWlU)
-
-*Mus musculus*
-
-1. [mm10](https://drive.google.com/open?id=0B5_hfxBdKWHRYzliNkotN1NwSTQ)
-2. [mm9](https://drive.google.com/open?id=0B5_hfxBdKWHRdkNSMmNleVJUSm8)
-3. [mm8](https://drive.google.com/open?id=0B5_hfxBdKWHRMmN5WGRsRkpWcWc)
 
 ----
 
