@@ -1308,11 +1308,12 @@ PlotRelStartStopEnrichment <- function(txLoc1,
 #' @param txLoc2 A \code{txLoc} object.
 #'
 #' @return \code{NULL}.
-'
+#'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #'
 #' @import GenomicRanges IRanges
 #' @importFrom gplots venn
+#' @importFrom graphics title
 PlotOverlap <- function(txLoc1, txLoc2) {
     
     # Sanity check
