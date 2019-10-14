@@ -1294,3 +1294,74 @@ PlotRelStartStopEnrichment <- function(txLoc1,
 }
 
 
+#' Plot overlap of sites.
+#'
+#' Plot overlap of sites from two \code{txLoc} objects. See 'Details'.
+#'
+#' The function plots one or multiple Venn diagrams showing the spatial 
+#' overlap between entries from two \code{txLoc} objects. Two features are 
+#' defined as overlapping, if they overlap by at least one nucleotide. 
+#' Overlaps are determined using the function 
+#' \code{GenomicRanges::countOverlaps}.
+#'
+#' @param txLoc1 A \code{txLoc} object.
+#' @param txLoc2 A \code{txLoc} object.
+#'
+#' @return \code{NULL}.
+#'
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+#'
+#' @import GenomicRanges IRanges
+#' @importFrom gplots venn
+#' @importFrom graphics title
+PlotOverlap <- function(txLoc1, txLoc2) {
+    
+    # Sanity check
+    CheckClassTxLocConsistency(txLoc1, txLoc2)
+    
+    # Determine figure panel layout
+    if (length(GetRegions(txLoc1)) < 4) {
+        par(mfrow = c(1, length(GetRegions(txLoc1))))
+    } else {
+        par(mfrow = c(ceiling(length(GetRegions(txLoc1)) / 2), 2))
+    }
+    
+    invisible(Map(
+        function(loci1, loci2, region) {
+            
+            # Get transcriptome coordinates
+            gr1 <- loci1$locus_in_tx_region
+            gr2 <- loci2$locus_in_tx_region
+            
+            # Make sure that seqlevels match
+            lvls <- intersect(seqlevels(gr1), seqlevels(gr2))
+            seqlevels(gr1, pruning.mode = "coarse") <- lvls
+            seqlevels(gr2, pruning.mode = "coarse") <- lvls
+            
+            # Count overlap
+            m <- countOverlaps(gr1, gr2)
+            overlap <- sum(m > 0)
+            
+            # Plot
+            grps <- list(
+                seq(1, length(gr1)),
+                seq(length(gr1) - overlap + 1, length.out = length(gr2)))
+            names(grps) <- c(
+                sprintf(
+                    "%s (%3.2f%%)",
+                    GetId(txLoc1), overlap / length(gr1) * 100),
+                sprintf(
+                    "%s (%3.2f%%)",
+                    GetId(txLoc2), overlap / length(gr2) * 100))
+            venn(grps)
+            title(region)
+            mtext(names(gr1))
+            
+        },
+        GetLoci(txLoc1),
+        GetLoci(txLoc2),
+        GetRegions(txLoc1)))
+    
+}
+
+

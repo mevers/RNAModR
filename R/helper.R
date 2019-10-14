@@ -220,18 +220,62 @@ LoadRefTx <- function(refGenome, verbose = FALSE) {
                 "Consider re-running `BuildTx(\"%s\")`.",
                 refGenome))
         warning(ss)
-    } else if (attr(txBySec, "package_version") != packageVersion("RNAModR")) {
-        ss <- "Transcriptome data are based on an older version of RNAModR:"
-        ss <- sprintf(
-            "%s\n    RNAModR version: %s, transcriptome data version: %s", 
-            ss, packageVersion("RNAModR"), attr(txBySec, "package_version"))
-        ss <- sprintf(
-            "%s\n  %s",
-            ss,
-            sprintf(
-                "Consider re-running `BuildTx(\"%s\")`.",
-                refGenome))
-        warning(ss)
+    } else {
+        version <- attr(txBySec, "package_version")
+        if (version$major != packageVersion("RNAModR")$major) {
+            ss <- "Transcriptome data are based on an older version of RNAModR:"
+            ss <- sprintf(
+                "%s\n    RNAModR version: %s, transcriptome data version: %s", 
+                ss, packageVersion("RNAModR"), version)
+            ss <- sprintf(
+                "%s\n  %s",
+                ss,
+                "Difference in major version. RNAModR may not work!")
+            ss <- sprintf(
+                "%s\n  %s",
+                ss,
+                sprintf(
+                    "Consider re-running `BuildTx(\"%s\")`.",
+                    refGenome))
+            warning(ss)
+            
+        } else if (version$major == packageVersion("RNAModR")$major & 
+                   version$minor != packageVersion("RNAModR")$minor) {
+            ss <- "Transcriptome data are based on an older version of RNAModR:"
+            ss <- sprintf(
+                "%s\n    RNAModR version: %s, transcriptome data version: %s", 
+                ss, packageVersion("RNAModR"), attr(txBySec, "package_version"))
+            ss <- sprintf(
+                "%s\n  %s",
+                ss,
+                "Difference in minor version. RNAModR might not work!")
+            ss <- sprintf(
+                "%s\n  %s",
+                ss,
+                sprintf(
+                    "Consider re-running `BuildTx(\"%s\")`.",
+                    refGenome))
+            warning(ss)
+        } else if (version$major == packageVersion("RNAModR")$major & 
+                   version$minor == packageVersion("RNAModR")$minor & 
+                   version$patchlevel != packageVersion("RNAModR")$patchlevel &
+                   verbose == TRUE) {
+            ss <- "Transcriptome data are based on an older version of RNAModR:"
+            ss <- sprintf(
+                "%s\n    RNAModR version: %s, transcriptome data version: %s", 
+                ss, packageVersion("RNAModR"), attr(txBySec, "package_version"))
+            ss <- sprintf(
+                "%s\n  %s",
+                ss,
+                "Difference in patchlevel.")
+            ss <- sprintf(
+                "%s\n  %s",
+                ss,
+                sprintf(
+                    "Consider re-running `BuildTx(\"%s\")`.",
+                    refGenome))
+            warning(ss)
+        }
     }
     
     # Assign objects to parent environment
