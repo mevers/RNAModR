@@ -1,6 +1,14 @@
 # All changes to RNAModR are documented here
 
 
+## Version 0.2.3
+
+- In `plot.R`: Added `plotOverlap`
+- In `helper.R`: `LoadRefTx` now performs version checks on the major, minor
+  and patch version level
+- Added `extdata.R` with details on and references to all internal raw datasets
+
+
 ## Version 0.2.2
 
 - In `plot.R`: Added `PlotRelStartStopEnrichment`
