@@ -965,13 +965,7 @@ PlotRelDistDistribution <- function(txLoc,
     CheckClassTxLocConsistency(txLoc, txLocRef)
     
     # Allow for variable window sizes
-    if (length(flank) == 1) {
-        flank <- c(-abs(flank), abs(flank))
-    } else if (length(flank) == 2) {
-        flank <- c(-abs(flank[1]), abs(flank[2]))
-    } else {
-        stop("`flank` needs to be a scalar or vector of length 2!")
-    }
+    flank <- MatchFlank(flank)
 
     # Get ids
     id <- GetId(txLoc)
@@ -1073,14 +1067,8 @@ PlotRelDistEnrichment <- function(txLoc1,
     CheckClassTxLocConsistency(txLoc2, txLocRef)
 
     # Allow for variable window sizes
-    if (length(flank) == 1) {
-        flank <- c(-abs(flank), abs(flank))
-    } else if (length(flank) == 2) {
-        flank <- c(-abs(flank[1]), abs(flank[2]))
-    } else {
-        stop("`flank` needs to be a scalar or vector of length 2!")
-    }
-
+    flank <- MatchFlank(flank)
+    
     # Get ids
     id1 <- GetId(txLoc1)
     id2 <- GetId(txLoc2)
@@ -1277,13 +1265,7 @@ PlotRelStartStopEnrichment <- function(txLoc1,
     lstDist2 <- GetDistNearestStartStop(txLoc2)
     
     # Allow for variable window sizes
-    if (length(flank) == 1) {
-        flank <- c(-abs(flank), abs(flank))
-    } else if (length(flank) == 2) {
-        flank <- c(-abs(flank[1]), abs(flank[2]))
-    } else {
-        stop("`flank` needs to be a scalar or vector of length 2!")
-    }
+    flank <- MatchFlank(flank)
     
     # Determine figure panel layout
     par(mfrow = c(1, 2))
