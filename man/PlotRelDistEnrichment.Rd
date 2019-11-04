@@ -14,11 +14,14 @@ PlotRelDistEnrichment(txLoc1, txLoc2, txLocRef, flank = 1000,
 
 \item{txLocRef}{A \code{txLoc} object.}
 
-\item{flank}{An \code{integer} scalar; specifies the absolute maximum
-relative distance used as a cutoff; default is \code{1000}.}
+\item{flank}{An integer scalar or an integer vector of length 2; specifies 
+the absolute maximum relative distance(s) used as a cutoff; by specifying 
+\code{flank} as a vector, a non-symmetric window can be  defined; e.g. 
+`flank = c(1000, 2000)` corresponds to a window defined by 1000 nt 
+downstream and 2000 nt upstream of the reference site. Default is 1000.}
 
-\item{binWidth}{An \code{integer} scalar; specifies the spatial width by
-which distances will be binned; default is \code{20}.}
+\item{binWidth}{An \code{integer} scalar; specifies the spatial width in nt 
+by which distances will be binned; default is \code{20}.}
 }
 \value{
 \code{NULL}.
