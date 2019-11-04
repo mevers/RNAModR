@@ -937,11 +937,14 @@ PlotAbundance.generic <- function(data,
 #'
 #' @param txLoc A \code{txLoc} object.
 #' @param txLocRef A \code{txLoc} object.
-#' @param flank An integer scalar; specifies the absolute maximum
-#' relative distance used as a cutoff; default is 1000.
-#' @param binWidth An integer scalar; specifies the spatial width
+#' @param flank An integer scalar or an integer vector of length 2; specifies 
+#' the absolute maximum relative distance(s) used as a cutoff; by specifying 
+#' \code{flank} as a vector, a non-symmetric window can be  defined; e.g. 
+#' `flank = c(1000, 2000)` corresponds to a window defined by 1000 nt 
+#' downstream and 2000 nt upstream of the reference site. Default is 1000.
+#' @param binWidth An \code{integer} scalar; specifies the spatial width in nt
 #' by which distances will be binned; default is 20.
-#' @param doBootstrap A logical scalar; if \code{YES} calculate
+#' @param doBootstrap A \code{logical} scalar; if \code{YES} calculate
 #' 95% CI based on empirical bootstrap of relative distances within
 #' transcript region; default is \code{TRUE}.
 #'
@@ -960,6 +963,15 @@ PlotRelDistDistribution <- function(txLoc,
     CheckClass(txLoc, "txLoc")
     CheckClass(txLocRef, "txLoc")
     CheckClassTxLocConsistency(txLoc, txLocRef)
+    
+    # Allow for variable window sizes
+    if (length(flank) == 1) {
+        flank <- c(-abs(flank), abs(flank))
+    } else if (length(flank) == 2) {
+        flank <- c(-abs(flank[1]), abs(flank[2]))
+    } else {
+        stop("`flank` needs to be a scalar or vector of length 2!")
+    }
 
     # Get ids
     id <- GetId(txLoc)
@@ -980,27 +992,28 @@ PlotRelDistDistribution <- function(txLoc,
     }
 
     # Set breaks & binwidth
-    breaks <- seq(-flank, flank, by = binWidth)
+    breaks <- seq(flank[1], flank[2], by = binWidth)
     bwString <- sprintf("bw = %3.2f", binWidth)
 
 
     invisible(Map(
         function(dist, region) {
 
-            # Filter distances that are within window [-flank, flank]
-            if (flank > 0) dist <- dist[abs(dist) <= flank]
+            # Filter distances that are within window [flank[1], flank[2]]
+            dist <- dist[dist >= flank[1] & dist <= flank[2]]
 
             # Plot
             title <- sprintf(
-                "d(%s,%s) in %s (N=%i)",
+                "d(%s,%s) in %s (N=%i)\nbw = %i nt",
                 id,
                 idRef,
                 region,
-                length(dist))
+                length(dist),
+                binWidth)
             xlab <- sprintf("Relative distance to %s [nt]", idRef)
             PlotAbundance.generic(
                 dist,
-                xmin = -flank, xmax = flank,
+                xmin = flank[1], xmax = flank[2],
                 binWidth = binWidth,
                 title = title,
                 xlab = xlab,
@@ -1034,10 +1047,13 @@ PlotRelDistDistribution <- function(txLoc,
 #' @param txLoc1 A \code{txLoc} object.
 #' @param txLoc2 A \code{txLoc} object.
 #' @param txLocRef A \code{txLoc} object.
-#' @param flank An \code{integer} scalar; specifies the absolute maximum
-#' relative distance used as a cutoff; default is \code{1000}.
-#' @param binWidth An \code{integer} scalar; specifies the spatial width by
-#' which distances will be binned; default is \code{20}.
+#' @param flank An integer scalar or an integer vector of length 2; specifies 
+#' the absolute maximum relative distance(s) used as a cutoff; by specifying 
+#' \code{flank} as a vector, a non-symmetric window can be  defined; e.g. 
+#' `flank = c(1000, 2000)` corresponds to a window defined by 1000 nt 
+#' downstream and 2000 nt upstream of the reference site. Default is 1000.
+#' @param binWidth An \code{integer} scalar; specifies the spatial width in nt 
+#' by which distances will be binned; default is \code{20}.
 #'
 #' @return \code{NULL}.
 #'
@@ -1055,6 +1071,15 @@ PlotRelDistEnrichment <- function(txLoc1,
     CheckClass(txLocRef, "txLoc")
     CheckClassTxLocConsistency(txLoc1, txLocRef)
     CheckClassTxLocConsistency(txLoc2, txLocRef)
+
+    # Allow for variable window sizes
+    if (length(flank) == 1) {
+        flank <- c(-abs(flank), abs(flank))
+    } else if (length(flank) == 2) {
+        flank <- c(-abs(flank[1]), abs(flank[2]))
+    } else {
+        stop("`flank` needs to be a scalar or vector of length 2!")
+    }
 
     # Get ids
     id1 <- GetId(txLoc1)
@@ -1078,17 +1103,15 @@ PlotRelDistEnrichment <- function(txLoc1,
     }
 
     # Set breaks & binwidth
-    breaks <- seq(-flank, flank, by = binWidth)
+    breaks <- seq(flank[1], flank[2], by = binWidth)
     bwString <- sprintf("bw = %3.2f", binWidth)
 
     invisible(Map(
         function(dist1, dist2, region) {
 
-            # Filter distances that are within window [-flank, flank]
-            if (flank > 0) {
-                dist1 <- dist1[abs(dist1) <= flank]
-                dist2 <- dist2[abs(dist2) <= flank]
-            }
+            # Filter distances that are within window [flank[1], flank[2]]
+            dist1 <- dist1[dist1 >= flank[1] & dist1 <= flank[2]]
+            dist2 <- dist2[dist2 >= flank[1] & dist2 <= flank[2]]
 
             # Bin distances and count matrix
             cts1 <- table(cut(dist1, breaks = breaks))
@@ -1098,12 +1121,11 @@ PlotRelDistEnrichment <- function(txLoc1,
 
             # Plot
             title <- sprintf(
-                "%s\nN(d(%s,%s)) = %i, N(d(%s,%s)) = %i\nbw = %i nt, flank = %i nt",
+                "%s\nN(d(%s,%s)) = %i, N(d(%s,%s)) = %i\nbw = %i nt",
                 region,
                 id1, idRef, sum(cts1),
                 id2, idRef, sum(cts2),
-                binWidth,
-                flank)
+                binWidth)
             PlotEnrichment.Generic(
                 ctsMat,
                 title = title,
@@ -1230,9 +1252,12 @@ PlotSeqLogo <- function(txLoc, flank = 5, ylim = c(0, 2)) {
 #'
 #' @param txLoc1 A \code{txLoc} object.
 #' @param txLoc2 A \code{txLoc} object.
-#' @param flank An integer scalar; specifies the absolute maximum
-#' relative distance used as a cutoff; default is 1000.
-#' @param binWidth An integer scalar; specifies the spatial width
+#' @param flank An integer scalar or an integer vector of length 2; specifies 
+#' the absolute maximum relative distance(s) used as a cutoff; by specifying 
+#' \code{flank} as a vector, a non-symmetric window can be  defined; e.g. 
+#' `flank = c(1000, 2000)` corresponds to a window defined by 1000 nt 
+#' downstream and 2000 nt upstream of the reference site. Default is 1000.
+#' @param binWidth An \code{integer} scalar; specifies the spatial width in nt
 #' by which distances will be binned; default is 20.
 #'
 #' @return \code{NULL}.
@@ -1251,22 +1276,29 @@ PlotRelStartStopEnrichment <- function(txLoc1,
     lstDist1 <- GetDistNearestStartStop(txLoc1)
     lstDist2 <- GetDistNearestStartStop(txLoc2)
     
+    # Allow for variable window sizes
+    if (length(flank) == 1) {
+        flank <- c(-abs(flank), abs(flank))
+    } else if (length(flank) == 2) {
+        flank <- c(-abs(flank[1]), abs(flank[2]))
+    } else {
+        stop("`flank` needs to be a scalar or vector of length 2!")
+    }
+    
     # Determine figure panel layout
     par(mfrow = c(1, 2))
 
     # Set breaks & binwidth
-    breaks <- seq(-flank, flank, by = binWidth)
+    breaks <- seq(flank[1], flank[2], by = binWidth)
     bwString <- sprintf("bw = %3.2f", binWidth)
     
     invisible(Map(
         function(dist1, dist2, region) {
             
-            # Filter distances that are within window [-flank, flank]
-            if (flank > 0) {
-                dist1 <- dist1[abs(dist1) <= flank]
-                dist2 <- dist2[abs(dist2) <= flank]
-            }
-            
+            # Filter distances that are within window [flank[1], flank[2]]
+            dist1 <- dist1[dist1 >= flank[1] & dist1 <= flank[2]]
+            dist2 <- dist2[dist2 >= flank[1] & dist2 <= flank[2]]
+
             # Bin distances and count matrix
             cts1 <- table(cut(dist1, breaks = breaks))
             cts2 <- table(cut(dist2, breaks = breaks))
@@ -1275,12 +1307,11 @@ PlotRelStartStopEnrichment <- function(txLoc1,
             
             # Plot
             title <- sprintf(
-                "Relative to %s\nN(%s) = %i, N(%s) = %i\nbw = %i nt, flank = %i nt",
+                "Relative to %s\nN(%s) = %i, N(%s) = %i\nbw = %i nt ",
                 region, 
                 GetId(txLoc1), sum(cts1),
                 GetId(txLoc2), sum(cts2),
-                binWidth,
-                flank)
+                binWidth)
             PlotEnrichment.Generic(
                 ctsMat,
                 title = title,
