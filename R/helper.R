@@ -360,13 +360,15 @@ FilterTxLoc <- function(txLoc, filter = NULL) {
 #' @param seed A single value, interpreted as an \code{integer}, or \code{NULL};
 #' this is to ensure reproducibility when subsampling \code{txLoc2} sites;
 #' default is \code{NULL}.
+#' @param replace A \code{logical} scalar; should sampling be with replacement?
+#' Default is \code{FALSE}.
 #'
 #' @return A \code{txLoc} object.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #'
 #' @export
-DownsampleTxLoc <- function(txLoc1, txLoc2, seed = NULL) {
+DownsampleTxLoc <- function(txLoc1, txLoc2, seed = NULL, replace = FALSE) {
 
     # Sanity check
     CheckClassTxLocConsistency(txLoc1, txLoc2)
@@ -427,13 +429,15 @@ DownsampleTxLoc <- function(txLoc1, txLoc2, seed = NULL) {
 #' @param seed A single value, interpreted as an \code{integer}, or \code{NULL};
 #' this is to ensure reproducibility when subsampling \code{txLoc2} sites;
 #' default is \code{NULL}.
+#' @param replace A \code{logical} scalar; should sampling be with replacement?
+#' Default is \code{FALSE}.
 #'
 #' @return A \code{txLoc} object.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #'
 #' @export
-SubsampleTxLoc <- function(txLoc, fractions, seed = NULL) {
+SubsampleTxLoc <- function(txLoc, fractions, seed = NULL, replace = FALSE) {
 
     # Sanity check
     CheckClass(txLoc, "txLoc")

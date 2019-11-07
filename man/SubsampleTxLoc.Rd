@@ -4,7 +4,7 @@
 \alias{SubsampleTxLoc}
 \title{Subsample a \code{txLoc} object.}
 \usage{
-SubsampleTxLoc(txLoc, fractions, seed = NULL)
+SubsampleTxLoc(txLoc, fractions, seed = NULL, replace = FALSE)
 }
 \arguments{
 \item{txLoc}{A \code{txLoc} object; this is the \code{txLoc} object from
@@ -17,6 +17,9 @@ of \code{fractions} has to match the length of \code{GetRegions(txLoc)}.}
 \item{seed}{A single value, interpreted as an \code{integer}, or \code{NULL};
 this is to ensure reproducibility when subsampling \code{txLoc2} sites;
 default is \code{NULL}.}
+
+\item{replace}{A \code{logical} scalar; should sampling be with replacement?
+Default is \code{FALSE}.}
 }
 \value{
 A \code{txLoc} object.
