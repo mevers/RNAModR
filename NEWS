@@ -1,8 +1,17 @@
 # All changes to RNAModR are documented here
 
+
+## Version 0.2.5
+
+- Fixed issue #8 which affected showing enrichment plots with certain
+  `binWidth` to `posMax` values
+- Changed the default multiple hypothesis testing correction to Bonferroni to
+  be more conservative
+
+
 ## Version 0.2.4
 
-- Added option to have variable windows in `PlotRelDistDistribution`, 
+- Added option to have variable windows in `PlotRelDistDistribution`,
   `PlotRelDistEnrichment`, `PlotRelStartStopEnrichment` (closes issue #6)
 
 
