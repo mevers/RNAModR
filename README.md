@@ -1,14 +1,14 @@
 # RNAModR
 
 **RNAModR** provides functions to map lists of genomic loci of RNA modifications
-to a reference mRNA transcriptome, and perform exploratory functional analyses of
-sites across the transcriptome trough visualisation and statistical analysis of
-the distribution of sites across transcriptome sections (5'UTR, CDS, 3'UTR).
+to a reference mRNA transcriptome, and perform exploratory functional analyses
+of sites across the transcriptome trough visualisation and statistical analysis
+of the distribution of sites across transcriptome regions (5'UTR, CDS, 3'UTR).
 
-**RNAModR** performs enrichment analyses to assess the statistical significance of
-the spatial and sequence-specific localisation of sites relative to null sites.
-Null sites can be generated automatically or may be supplied manually in the form
-of a list of genomic loci.
+**RNAModR** performs enrichment analyses to assess the statistical significance
+of the spatial and sequence-specific localisation of RNA modification sites
+relative to null sites. Null sites can be generated automatically or may be
+supplied manually in the form of a list of genomic loci.
 
 Note that enrichment analyses results may depend critically on the choice and validity
 of null sites. For example, in establishing a list of null sites for 5-methylcytidine
@@ -18,25 +18,15 @@ generating null sites.
 
 ---
 
-**NOTE**
+**This is production code!** Use it at your own risk. That means that
+documentation  may be incomplete and functions may return unexpected errors. It
+also means that functionality may change, and backward compatability with code
+based on older versions is not guaranteed. A full list of changes in the code
+base can be found in the [NEWS](NEWS) file.
 
-This is production code! Use it at your own risk. That means that documentation may be incomplete and functions may return unexpected errors.
-
-<strike>[Update September 2019]
-
-Due to some substantial changes in functions/methods from some R/Bioconductor packages that RNAModR depends on, RNAModR's functionality is currently limited. Specifically,
-
-1. `BuildTx` (building a custom reference transcriptome) is broken (but you can still use the pre-generated transcriptomes from the links below); this seems to be related to major [changes in `GenomicRanges` version 1.32.0](https://github.com/Bioconductor/GenomicRanges/blob/master/NEWS) and changes in `RMariaDB` that completely [break functionality of `GenomicFeatures::makeTxDbFromUCSC`](https://github.com/r-dbi/RMariaDB/issues/135) (verified on MacOS Sierra). I am unsure how badly other OS are affected. A workaround/fix for MacOS Sierra (that should also work for other flavours) has been posted as part of [Issue #5](https://github.com/mevers/RNAModR/issues/5).
-2. `plotRelDistDistribution` and `plotRelDistEnrichment()` are broken; this is related to afore-mentioned changes in `GenomicRanges`, which introduced a `CompressedGRangesList` class as a replacement for the `GRangesList` class.
-
-I appreciate any and all testing; for issues, please open an official [Issue](https://github.com/mevers/RNAModR/issues/new) on the GitHub project site.
-</strike>
-
-[Update October 2019]
-
-Functionality of most (all?) functions has been restored in a series of major code revisions. This has led to a new stable version 0.2.1. Due to substantial changes in R/Bioconductor packages that `RNAModR` depends on and in the code base of `RNAModR` itself, reference transcriptomes from older `RNAModR` versions will not work with the current stable version 0.2.1 of `RNAModR`. A full list of changes can be found in [NEWS](NEWS).
-
-I appreciate and encourage any and all testing; for issues, please open an official [Issue](https://github.com/mevers/RNAModR/issues/new) on the GitHub project site.
+I appreciate and encourage any and all testing; for issues, please open an
+official [Issue](https://github.com/mevers/RNAModR/issues/new) on the GitHub
+project site.
 
 ---
 
@@ -45,14 +35,14 @@ I appreciate and encourage any and all testing; for issues, please open an offic
 
 ### The github way (requires the [devtools](https://github.com/hadley/devtools) package)
 
-1. Make sure you have the following R/Bioconductor packages installed
+1. Make sure you the following R/Bioconductor packages are installed
 
     * AnnotationDbi
-    * beanplot
     * Biostrings
     * GenomeInfoDb
     * GenomicFeatures
     * GenomicRanges
+    * magrittr
     * gplots
     * RSQLite
     * rtracklayer
@@ -60,7 +50,7 @@ I appreciate and encourage any and all testing; for issues, please open an offic
     The [recommended way to install R/Bioconductor packages](https://www.bioconductor.org/install/) is to use `BiocManager::install`:
 
     ```{r}
-    BiocManager::install(c("AnnotationDbi", "beanplot", "Biostrings", "GenomeInfoDb", "GenomicFeatures", "GenomicRanges", "gplots", "RSQLite", "rtracklayer"))
+    BiocManager::install(c("AnnotationDbi", "Biostrings", "GenomeInfoDb", "GenomicFeatures", "GenomicRanges", "gplots", "RSQLite", "rtracklayer"))
     ```
 
     Additionally, RNAModR requires two _organism-specific_ R packages to contruct a custom transcriptome. Currently, RNAModR supports human and mouse data, based on the following reference genome versions
@@ -110,17 +100,23 @@ library(magrittr)
 BuildTx("hg38")
 
 # Load and map m6A sites to reference transcriptome.
-posSites <- system.file("extdata", "miCLIP_m6A_Linder2015_hg38.bed", package = "RNAModR") %>%
+m6A <- system.file("extdata", "miCLIP_m6A_Linder2015_hg38.bed", package = "RNAModR") %>%
     ReadBED() %>%
     SmartMap("m6A_Linder")
 
 # Keep sites located in the 5'UTR, CDS and 3'UTR
-posSites <- posSites %>%
+m6A <- m6A %>%
     FilterTxLoc(c("5'UTR", "CDS", "3'UTR"))
 
+# Generate null sites
+null <- m6A %>%
+    GenerateNull(nt = "A")
+
 # Plot distribution across transcript sections
-PlotSectionDistribution(posSites)
+PlotSpatialEnrichment(m6A, null)
 ```
+
+![image](m6A_spatial_enrichment.png)
 
 ## Downloadable transcriptome data<a name="downloadTx"></a>
 
@@ -162,6 +158,20 @@ To rebuild run with force = TRUE.
 
 The most current RNAModR manual can be downloaded [here](doc/RNAModR-manual.pdf).
 
+
+## FAQ
+
+### How do I interpret the p-values?
+
+> A man who ‘rejects’ a hypothesis provisionally, as a matter of habitual practice, when the significance is at the 1% level or higher, will certainly be mistaken in not more than 1% of such decisions. For when the hypothesis is correct he will be mistaken in just 1% of these cases, and when it is incorrect he will never be mistaken in rejection. [...] However, the calculation is absurdly academic, for in fact no scientific worker has a fixed level of significance at which from year to year, and in all circumstances, he rejects hypotheses; he rather gives his mind to each particular case in the light of his evidence and his ideas.
+>
+> -- Sir Ronald A. Fisher, from Statistical Methods and Scientific Inference (1956)
+
+Some advice concerning interpreting p-values
+
+1. Be critical and conservative when interpreting statistical significance from the enrichment/depletion analyses.
+2. Pay attention to the effect size (e.g. the odds-ratio).
+3. p-values are corrected for multiple hypothesis testing assuming individual hypothesis tests (and their associated p-values) to be independent; this may not necessarily be justified. To err on the side of caution and to be conservative, p-values are adjusted using the [Bonferroni correction](https://en.wikipedia.org/wiki/Bonferroni_correction).
 
 ## Contributors
 
