@@ -28,12 +28,27 @@ I appreciate and encourage any and all testing; for issues, please open an
 official [Issue](https://github.com/mevers/RNAModR/issues/new) on the GitHub
 project site.
 
+## Table of contents
+
+- [Installing RNAModR](#installing-rnamodr)
+    - [The GitHub way](#install-the-github-way)
+- [Getting started](#getting-started)
+- [Downloadable transcriptome data](#downloadable-transcriptome-data)
+- [Documentation](#documentation)
+- [FAQ](#faq)
+    - [How do I interpret the p-values](#faq-how-do-i-interpret-the-p-values)
+- [Contributors](#contributors)
+- [Licensing](#licensing)
+
 ---
 
+<a name="installing-rnamodr"></a>
 
 ## Installing RNAModR
 
-### The github way (requires the [devtools](https://github.com/hadley/devtools) package)
+<a name="install-the-github-way"></a>
+
+### The GitHub way (requires the [devtools](https://github.com/hadley/devtools) package)
 
 1. Make sure you the following R/Bioconductor packages are installed
 
@@ -85,6 +100,8 @@ project site.
     devtools::install_github(..., force = TRUE)
     ```
 
+<a name="getting-started"></a>
+
 ## Getting started
 The following lines of R code will load the **RNAModR** library, and plot the distribution of m6A sites [[Linder et al., Nature Methods 12, 767 (2015)](http://www.nature.com/nmeth/journal/v12/n8/abs/nmeth.3453.html)] across the 5'UTR, CDS and 3'UTR of the human hg38-based transcriptome.
 
@@ -118,7 +135,10 @@ PlotSpatialEnrichment(m6A, null)
 
 ![image](m6A_spatial_enrichment.png)
 
-## Downloadable transcriptome data<a name="downloadTx"></a>
+
+<a name="downloadable-transcriptome-data"></a>
+
+## Downloadable transcriptome data
 
 **It is recommended to always custom-build transcriptome data using `BuildTx()`.**
 
@@ -154,12 +174,18 @@ Found existing transcriptome data. Nothing to do.
 To rebuild run with force = TRUE.
 ```
 
+<a name="documentation"></a>
+
+
 ## Documentation
 
 The most current RNAModR manual can be downloaded [here](doc/RNAModR-manual.pdf).
 
+<a name="faq"></a>
 
 ## FAQ
+
+<a name="faq-how-do-i-interpret-the-p-values"></a>
 
 ### How do I interpret the p-values?
 
@@ -173,10 +199,14 @@ Some advice concerning interpreting p-values
 2. Pay attention to the effect size (e.g. the odds-ratio).
 3. p-values are corrected for multiple hypothesis testing assuming individual hypothesis tests (and their associated p-values) to be independent; this may not necessarily be justified. To err on the side of caution and to be conservative, p-values are adjusted using the [Bonferroni correction](https://en.wikipedia.org/wiki/Bonferroni_correction).
 
+<a name="contributors"></a>
+
 ## Contributors
 
 Please contact [Maurits Evers](mailto:maurits.evers@anu.edu.au "Email Maurits Evers") in case of questions/suggestions.
 In case of bugs/feature requests please open an issue on github.
+
+<a name="licensing"></a>
 
 ## Licensing
 
