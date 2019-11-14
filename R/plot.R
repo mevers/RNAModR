@@ -211,10 +211,13 @@ PlotSpatialDistribution <- function(txLoc,
 #' Generic function to perform enrichment analysis and plot results.
 #' Enrichment/depletion is evaluated using (multiple) Fisher's exact test(s).
 #' Multiple hypothesis testing correction is applied following the method of
-#' Bejamini and Hochberg.
+#' Bonferroni (default, see argument \code{padjMethod}).
 #' Note: This function should not be invoked directly by the user.
 #'
 #' @param mat A \code{dataframe}; specifies the contingency table.
+#' @param padjMethod A \code{character} string; specifies the multiple
+#' hypothesis testing correction method; see \code{?p.adjust} for details.
+#' Default is \code{"bonferroni"}.
 #' @param title A character string; specifies plot title.
 #' @param xlab A character string; specifies the x-axis label.
 #' @param x.las An integer scalar; specifies the orientation of
@@ -239,27 +242,17 @@ PlotSpatialDistribution <- function(txLoc,
 #'
 #' @return A list of \code{fisher.test} return objects and \code{mat}.
 PlotEnrichment.Generic <- function(mat,
+                                   padjMethod = "bonferroni",
                                    title = "",
                                    xlab = "",
                                    x.las = 1, x.cex = 1, x.padj = 1,
                                    plotType = "l",
                                    revXaxis = FALSE,
                                    xAxisLblFmt = 0) {
-    # Generic function to perform enrichment analysis and plot results.
-    #
-    # Args:
-    #   mat: The data matrix.
-    #   title: Plot title.
-    #   x.las: Orientation of x-axis labels. Default is 1.
-    #   x.cex: Scaling factor for x-axis labels. Default is 1.
-    #   x.padj: Vertical adjustment of x-axis labels. Default is 1.
-    #   plotType: Plot style. Default is "l".
-    #   revXaxis: Reverse the order of values from mat.
-    #   xAxisLblFmt: Print extended axis label.
-    #
-    # Returns:
-    #   A list of fisher.test return objects.
+    # Limits for p-values
     log10pval.limit <- -12
+
+    # Sliding window Fisher's exact tests
     ft <- list()
     if (ncol(mat) > 2) {
         for (i in 1:ncol(mat)) {
@@ -275,7 +268,7 @@ PlotEnrichment.Generic <- function(mat,
     OR <- sapply(ft, function(x) x$estimate)
     OR[is.infinite(OR)] <- 1
     OR <- log10(OR)
-    pval <- p.adjust(sapply(ft, function(x) x$p.value), method="BH")
+    pval <- p.adjust(sapply(ft, function(x) x$p.value), method = padjMethod)
     pval[is.na(pval)] <- 1
     pval <- log10(pval)
     pval.uncapped <- pval
@@ -316,8 +309,9 @@ PlotEnrichment.Generic <- function(mat,
                   border = NA,
                   main = title, font.main = 1)
     abline(h = -2, col = "blue", lty = 3, lwd = 2)
+
     # Draw x axis
-    idxLabels <- seq(1, length(OR))
+    idxLabels <- seq_along(OR)
     labels <- names(OR)
     if (xAxisLblFmt == 1) {
         labels = sprintf("%s\nOR=%4.3f,p=%4.3e",
@@ -346,7 +340,7 @@ PlotEnrichment.Generic <- function(mat,
                    lty = 3)
         }
         if (xAxisLblFmt == 3) {
-            deltaIdx <- floor(length(x1) / 10 + 0.5)
+            deltaIdx <- max(1, floor(length(x1) / 10 + 0.5))
             if (length(idxZero) == 0) {
                 idxLabels <- seq(1, length(x1), deltaIdx)
                 if (revXaxis == TRUE) {
@@ -515,6 +509,7 @@ PlotSpatialEnrichment <- function(txLoc.pos,
     # Determine figure panel layout and number of breaks
     par(mfrow = c(length(GetLoci(txLoc.pos)), 2))
     breaks <- seq(0, posMax, by = binWidth)
+    center <- breaks[-1] - binWidth / 2
 
     # Plot
     invisible(Map(
@@ -544,6 +539,7 @@ PlotSpatialEnrichment <- function(txLoc.pos,
                 ctsPos <- table(cut(pos.pos[[j]], breaks = breaks))
                 ctsNeg <- table(cut(pos.neg[[j]], breaks = breaks))
                 ctsMat <- as.matrix(rbind(ctsPos, ctsNeg))
+                #colnames(ctsMat) <- center
                 rownames(ctsMat) <- c(GetId(txLoc.pos), GetId(txLoc.neg))
                 title <- sprintf(
                     "%s\nN(%s) = %i, N(%s) = %i\nbw = %i nt, window = %i nt",
@@ -965,13 +961,7 @@ PlotRelDistDistribution <- function(txLoc,
     CheckClassTxLocConsistency(txLoc, txLocRef)
     
     # Allow for variable window sizes
-    if (length(flank) == 1) {
-        flank <- c(-abs(flank), abs(flank))
-    } else if (length(flank) == 2) {
-        flank <- c(-abs(flank[1]), abs(flank[2]))
-    } else {
-        stop("`flank` needs to be a scalar or vector of length 2!")
-    }
+    flank <- MatchFlank(flank)
 
     # Get ids
     id <- GetId(txLoc)
@@ -1073,14 +1063,8 @@ PlotRelDistEnrichment <- function(txLoc1,
     CheckClassTxLocConsistency(txLoc2, txLocRef)
 
     # Allow for variable window sizes
-    if (length(flank) == 1) {
-        flank <- c(-abs(flank), abs(flank))
-    } else if (length(flank) == 2) {
-        flank <- c(-abs(flank[1]), abs(flank[2]))
-    } else {
-        stop("`flank` needs to be a scalar or vector of length 2!")
-    }
-
+    flank <- MatchFlank(flank)
+    
     # Get ids
     id1 <- GetId(txLoc1)
     id2 <- GetId(txLoc2)
@@ -1277,13 +1261,7 @@ PlotRelStartStopEnrichment <- function(txLoc1,
     lstDist2 <- GetDistNearestStartStop(txLoc2)
     
     # Allow for variable window sizes
-    if (length(flank) == 1) {
-        flank <- c(-abs(flank), abs(flank))
-    } else if (length(flank) == 2) {
-        flank <- c(-abs(flank[1]), abs(flank[2]))
-    } else {
-        stop("`flank` needs to be a scalar or vector of length 2!")
-    }
+    flank <- MatchFlank(flank)
     
     # Determine figure panel layout
     par(mfrow = c(1, 2))

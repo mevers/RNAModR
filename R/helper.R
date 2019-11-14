@@ -147,6 +147,28 @@ CheckClassTxLocConsistency <- function(obj1, obj2) {
 }
 
 
+#' Match `flank` function argument
+#' 
+#' @param flank An \code{integer} scalar or an \code{nteger} vector of length 2.
+#'
+#' @return An \code{integer} vector of length 2.
+#' 
+#' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
+MatchFlank <- function(flank) {
+
+    if (length(flank) == 1) {
+        if (flank < 0) stop("`flank` cannot be negative!")
+        return(c(-abs(flank), abs(flank)))
+    } else if (length(flank) == 2) {
+        if (any(flank < 0)) stop("`flank` cannot be negative!")
+        return(c(-abs(flank[1]), abs(flank[2])))
+    } else {
+        stop("`flank` needs to be a scalar or a vector of length 2!")
+    }
+
+}
+
+
 #' Load reference transcriptome.
 #'
 #' Load reference transcriptome. See 'Details'.
@@ -338,13 +360,15 @@ FilterTxLoc <- function(txLoc, filter = NULL) {
 #' @param seed A single value, interpreted as an \code{integer}, or \code{NULL};
 #' this is to ensure reproducibility when subsampling \code{txLoc2} sites;
 #' default is \code{NULL}.
+#' @param replace A \code{logical} scalar; should sampling be with replacement?
+#' Default is \code{FALSE}.
 #'
 #' @return A \code{txLoc} object.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #'
 #' @export
-DownsampleTxLoc <- function(txLoc1, txLoc2, seed = NULL) {
+DownsampleTxLoc <- function(txLoc1, txLoc2, seed = NULL, replace = FALSE) {
 
     # Sanity check
     CheckClassTxLocConsistency(txLoc1, txLoc2)
@@ -405,13 +429,15 @@ DownsampleTxLoc <- function(txLoc1, txLoc2, seed = NULL) {
 #' @param seed A single value, interpreted as an \code{integer}, or \code{NULL};
 #' this is to ensure reproducibility when subsampling \code{txLoc2} sites;
 #' default is \code{NULL}.
+#' @param replace A \code{logical} scalar; should sampling be with replacement?
+#' Default is \code{FALSE}.
 #'
 #' @return A \code{txLoc} object.
 #'
 #' @author Maurits Evers, \email{maurits.evers@@anu.edu.au}
 #'
 #' @export
-SubsampleTxLoc <- function(txLoc, fractions, seed = NULL) {
+SubsampleTxLoc <- function(txLoc, fractions, seed = NULL, replace = FALSE) {
 
     # Sanity check
     CheckClass(txLoc, "txLoc")

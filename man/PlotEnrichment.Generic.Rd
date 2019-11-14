@@ -4,12 +4,16 @@
 \alias{PlotEnrichment.Generic}
 \title{Generic function to perform enrichment analysis and plot results.}
 \usage{
-PlotEnrichment.Generic(mat, title = "", xlab = "", x.las = 1,
-  x.cex = 1, x.padj = 1, plotType = "l", revXaxis = FALSE,
-  xAxisLblFmt = 0)
+PlotEnrichment.Generic(mat, padjMethod = "bonferroni", title = "",
+  xlab = "", x.las = 1, x.cex = 1, x.padj = 1, plotType = "l",
+  revXaxis = FALSE, xAxisLblFmt = 0)
 }
 \arguments{
 \item{mat}{A \code{dataframe}; specifies the contingency table.}
+
+\item{padjMethod}{A \code{character} string; specifies the multiple
+hypothesis testing correction method; see \code{?p.adjust} for details.
+Default is \code{"bonferroni"}.}
 
 \item{title}{A character string; specifies plot title.}
 
@@ -40,7 +44,7 @@ A list of \code{fisher.test} return objects and \code{mat}.
 Generic function to perform enrichment analysis and plot results.
 Enrichment/depletion is evaluated using (multiple) Fisher's exact test(s).
 Multiple hypothesis testing correction is applied following the method of
-Bejamini and Hochberg.
+Bonferroni (default, see argument \code{padjMethod}).
 Note: This function should not be invoked directly by the user.
 }
 \author{
